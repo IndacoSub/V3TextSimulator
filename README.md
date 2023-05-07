@@ -63,6 +63,10 @@ This tool is licensed under the GPL v3.0 License.
 	
 	The aforementioned projects have been really useful for the development of this tool.
 	
+	Thanks to Liquid S! (https://github.com/Liquid-S) for creating DRV3-STX-TOOL (https://github.com/Liquid-S/DRV3-STX-TOOL).
+	
+	Some code from DRV3-STX-TOOL can be found inside StxInternal.cs and WRDInternal.cs, so the license for DRV3-STX-TOOL, the MIT license, is also included.
+	
 	Thanks to the members of the "SPIRAL" Discord server and the Spiral Framework project (https://spiralframework.info/ -- source code here: https://github.com/SpiralFramework/Spiral).
 	
 	Thanks to all of our collaborators and reviewers.
