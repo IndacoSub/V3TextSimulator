@@ -1,0 +1,148 @@
+# V2.4 Changelog:
+- Made the tool more "game-agnostic"
+- Minor changes
+
+# V2.3 Changelog:
+- Fixed voice lines not loading properly
+- Fixed voice lines playing twice
+
+# V2.2 Changelog:
+- Update to NET 6.0
+- General code cleanup
+- Miscellaneous fixes
+- Divide the GUI in two windows, to fix a bug caused by Windows 11
+- Added easy character sprite setup
+- Added minimal support for AI: The Somnium Files
+- Added support for XLSX files
+
+# V2.1 Changelog:
+- Fixed a bug that occurred when "fast reading"
+- Add more info on the "select translation" window
+- The "select translation" window is now more concise
+- Sort variables alphabetically
+- Consider pre-existing autotranslations when autotranslating
+- Saved .po files will now contain animations and voicelines in the msgctxt
+- Removed leftover file(s) from FEITS
+- General code cleanup
+- Minor fixes
+
+# V2.0 Changelog:
+- Added sprites support (in /Graphics/Sprites/)
+- Added voicefiles support (in /Sound/Voices/)
+- Added autotranslation
+- Major refactor
+- Major cleanup
+- Added .STX file support
+
+# V1.13 Changelog:
+
+- Update to .NET Framework 4.8
+- Minor changes
+- Minor fixes
+- Removed leftovers
+
+# V1.12 Changelog:
+
+- Added more variables
+- Minor fixes
+- Minor refactor
+
+# V1.11 Changelog:
+
+- Minor refactor
+- Added more variables
+- Starting with this version, this program contains MAJOR SPOILERS
+
+# V1.10 Changelog:
+
+- Added "experimental text" option with colored text
+- Minor refactor
+
+# V1.9b Changelog:
+
+- Minor fixes
+
+# V1.9 Changelog:
+
+- Minor refactor
+- Minor changes to the GUI
+- Minor changes to the variable management
+- Minor fixes
+
+# V1.8b Changelog:
+
+- Minor refactor
+- Minor changes
+- Minor fixes
+
+# V1.8 Changelog:
+
+- General refactor
+- Remove leftovers such as unnecessary assets and debug code
+- Minor changes
+- Minor fixes
+
+# V1.7b Changelog:
+
+- Minor changes
+- Minor fixes
+
+# V1.7 Changelog:
+
+- GUI refactor
+- Minor fixes
+
+# V1.6 Changelog:
+
+- Bug fixes
+- Added "translation mode"
+- Added variable replacement
+- Added support for saving .vo files
+- Minor refactor and general enhancements to the user experience
+
+# V1.5 Changelog:
+
+- Bug fixes
+- Minor refactor
+
+# V1.4b Changelog:
+
+- Minor fixes
+
+# V1.4 Changelog:
+
+- Minor fixes
+- Added autosave
+
+# V1.3 Changelog:
+
+- Minor fixes
+
+# V1.2 Changelog:
+
+- Added AutoPlay function
+- Added support for displaying characters alongside text
+- Minor improvements to the user experience
+
+# V1.1 Changelog:
+
+- Added the ability to parse .vo file (a format similar to .po files)
+- Added many useful tools for translation
+
+# V1.0 Changelog:
+
+- This was once a text simulator for a Fire Emblem game for the Nintendo 3DS
+- Changed the purpose of this tool to simulate "Danganronpa V3: Killing Harmony" text
+- Added images from Danganronpa V3
+- Changed name and icon to reflect changes above
+- Removed any options from the GUI besides the "HalfBox Tester"
+- Added a "Simulate Dialogue" button in the main window
+- Added support to load custom font(s) as "font.ttf" or "font.otf" (.otf file has priority over .ttf)
+- Changed the name of the textboxes
+- Added an option to copy the final image to the clipboard
+- The following asset files were changed:
+-- HalfBox.png
+-- HalfBox_Nohr.png
+-- HalfBox_Hoshido.png
+-- SupportBG.png
+-- KeyPress.png
