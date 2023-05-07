@@ -28,7 +28,7 @@ All paths below are relative to the executable file.
 	(TODO) AI Sprites: Graphics\Sprites\AI
 	(TODO) AI Voicelines: Sound\Voices\AI
 
-	DR Backgrounds: Graphics\Backgrounds\DR (ex. Graphics\Backgrounds\Danganronpa\default_background.png)
+	DR Backgrounds: Graphics\Backgrounds\Danganronpa (ex. Graphics\Backgrounds\Danganronpa\default_background.png)
 	DR Sprites: Graphics\Sprites\DR (ex. Graphics\Sprites\DR\C000_Saiha\anim000.png)
 	DR Voicelines: Sound\Voices\DR (ex. Sound\Voices\DR\vic_Akama\vic_Akama_01_001.wav)
 
