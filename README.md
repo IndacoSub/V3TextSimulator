@@ -14,6 +14,8 @@ Contributions and bug/issue-reporting are welcome and appreciated.
 
 Yes, the code is *very* messy and sometimes just... confusing.
 
+More documentation coming in the near future.
+
 # Folders and files
 
 This repository does not contain any image or sound file.
