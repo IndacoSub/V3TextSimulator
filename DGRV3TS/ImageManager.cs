@@ -13,7 +13,7 @@
 		public string GetWhiteBackground()
 		{
 			// Graphics/Backgrounds/White.png
-			string cur = Directory.GetCurrentDirectory();
+			string cur = FileManager.GetCurrentDirectory();
 			string gfx = Path.Combine(cur, "Graphics");
 			string backgrounds = Path.Combine(gfx, "Backgrounds");
 			string ret = Path.Combine(backgrounds, "White.png");
@@ -28,7 +28,8 @@
 			BackgroundImagesDR = new List<string>();
 			BackgroundImagesAI = new List<string>();
 
-			string cur = Directory.GetCurrentDirectory();
+			string cur = FileManager.GetCurrentDirectory();
+
 			string gfx = Path.Combine(cur, "Graphics");
 			string backgrounds = Path.Combine(gfx, "Backgrounds");
 			string bg_final = "";
@@ -111,7 +112,7 @@
 				return (false, null);
 			}
 
-			string cur = Directory.GetCurrentDirectory();
+			string cur = FileManager.GetCurrentDirectory();
 			string gfx = Path.Combine(cur, "Graphics");
 			string sprites = Path.Combine(gfx, "Sprites");
 			string drfolder = Path.Combine(sprites, "DR");

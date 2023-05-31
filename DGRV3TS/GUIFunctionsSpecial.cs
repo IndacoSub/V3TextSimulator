@@ -181,7 +181,7 @@
 
 			// We want to copy to the /Graphics/Sprites/CHARTACTER/ folder
 
-			string copy_to_folder = Directory.GetCurrentDirectory();
+			string copy_to_folder = FileManager.GetCurrentDirectory();
 			copy_to_folder = Path.Combine(copy_to_folder, "Graphics");
 			copy_to_folder = Path.Combine(copy_to_folder, "Sprites");
 
