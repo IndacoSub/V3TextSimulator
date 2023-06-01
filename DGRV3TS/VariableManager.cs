@@ -156,16 +156,19 @@ namespace DGRV3TS
 
 			ListBoxes = new List<ListBox>();
 
+			string vars_file = FileManager.GetCurrentDirectory();
+			vars_file = Path.Combine(vars_file, "vars_bak.txt");
+
 			// The variables' file is "vars_bak.txt"
 
-			if (!File.Exists("vars_bak.txt"))
+			if (!File.Exists(vars_file))
 			{
 				return;
 			}
 
 			bool donefirst = false;
 			int catnum = -1;
-			var lines = File.ReadLines("vars_bak.txt");
+			var lines = File.ReadLines(vars_file);
 			foreach (var line in lines)
 			{
 				if (string.IsNullOrWhiteSpace(line))
