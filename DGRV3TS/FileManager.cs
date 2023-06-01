@@ -63,6 +63,21 @@ namespace DGRV3TS
 			Type = new LoadedFileType();
 		}
 
+		public static string GetCurrentDirectory()
+		{
+			string cur = Directory.GetCurrentDirectory();
+			if (cur.Contains("Windows"))
+			{
+				cur = AppDomain.CurrentDomain.BaseDirectory;
+				//cur = System.Reflection.Assembly.GetEntryAssembly().Location;
+				if (Path.GetExtension(cur).Length > 0)
+				{
+					cur = Directory.GetParent(cur).FullName;
+				}
+			}
+			return cur;
+		}
+
 		public void ReadVo(string file, bool trmode)
 		{
 			using (StreamReader reader = File.OpenText(file))
@@ -300,15 +315,23 @@ namespace DGRV3TS
 			}
 		}
 
-		public string OpenFile(bool trmode, TranslationManager trm, bool autotl)
+		public string OpenFile(bool trmode, TranslationManager trm, bool autotl, string arg_file)
 		{
-			OpenFileDialog o = new OpenFileDialog();
-			o.Filter = "All files (*.*)|*.*|" +
-					   "vo files (*.vo)|*.vo|po file (*po)|*.po|txt files|*.txt|" +
-					   "stx files (*.stx)|*.stx|" +
-					   "TrueType Font files(*.ttf)|*.ttf|OpenType Font files (*.otf)|*.otf";
-			_ = o.ShowDialog();
-			var file = o.FileName;
+			string file = "DefaultFile";
+			if (arg_file.Length <= 0)
+			{
+				OpenFileDialog o = new OpenFileDialog();
+				o.Filter = "All files (*.*)|*.*|" +
+						   "vo files (*.vo)|*.vo|po file (*po)|*.po|txt files|*.txt|" +
+						   "stx files (*.stx)|*.stx|" +
+						   "TrueType Font files(*.ttf)|*.ttf|OpenType Font files (*.otf)|*.otf";
+				_ = o.ShowDialog();
+				file = o.FileName;
+				LastOpenedFile = file;
+			} else
+			{
+				file = arg_file;
+			}
 			LastOpenedFile = file;
 
 			bool IsVo = Path.GetExtension(file).ToLowerInvariant() == ".vo";
@@ -446,7 +469,7 @@ namespace DGRV3TS
 			return file;
 		}
 
-		public string ManageFile(bool trmode, TranslationManager trm, bool autotl)
+		public string ManageFile(bool trmode, TranslationManager trm, bool autotl, string arg_file)
 		{
 			string file;
 			bool ok = true;
@@ -454,7 +477,7 @@ namespace DGRV3TS
 			do
 			{
 				ok = true;
-				file = OpenFile(trmode, trm, autotl);
+				file = OpenFile(trmode, trm, autotl, arg_file);
 
 				if (file.Length == 0)
 				{

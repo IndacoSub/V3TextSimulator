@@ -30,7 +30,7 @@ namespace DGRV3TS
 			// Sound/Voices/*.wav?
 
 			string ext = ".wav";
-			string cur = Directory.GetCurrentDirectory();
+			string cur = FileManager.GetCurrentDirectory();
 			string sound = Path.Combine(cur, "Sound");
 			string voice = Path.Combine(sound, "Voices");
 			string path = Path.Combine(voice, game);
@@ -38,7 +38,7 @@ namespace DGRV3TS
 			if (!File.Exists(ret))
 			{
 				string[] files =
-					Directory.GetFiles(Directory.GetCurrentDirectory(), "*.wav", SearchOption.AllDirectories);
+					Directory.GetFiles(FileManager.GetCurrentDirectory(), "*.wav", SearchOption.AllDirectories);
 				foreach (string file in files)
 				{
 					if (file.Contains(name))

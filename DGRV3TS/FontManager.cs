@@ -48,16 +48,21 @@ namespace DGRV3TS
 
 			FontName = DefaultFontName;
 
+			string otf_file = FileManager.GetCurrentDirectory();
+			string ttf_file = otf_file;
+			otf_file = Path.Combine(otf_file, "font.otf");
+			ttf_file = Path.Combine(ttf_file, "font.ttf");
+
 			// The ideal font for V3 would be FOT-HummingStd-D (I guess?)
-			if (File.Exists("font.otf"))
+			if (File.Exists(otf_file))
 			{
-				CustomFonts.AddFontFile("font.otf");
+				CustomFonts.AddFontFile(otf_file);
 			}
 			else
 			{
-				if (File.Exists("font.ttf"))
+				if (File.Exists(ttf_file))
 				{
-					CustomFonts.AddFontFile("font.ttf");
+					CustomFonts.AddFontFile(ttf_file);
 				}
 				else
 				{

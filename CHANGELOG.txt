@@ -1,3 +1,6 @@
+# V2.5 Changelog:
+- Added file "Open With" support
+
 # V2.4 Changelog:
 - Made the tool more "game-agnostic"
 - Minor changes

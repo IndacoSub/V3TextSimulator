@@ -608,7 +608,7 @@
 			MaximumSize = new Size(1562, 218);
 			MinimumSize = new Size(1562, 218);
 			Name = "Operations";
-			Text = "Operations";
+			Text = "Operations (v2.5)";
 			((System.ComponentModel.ISupportInitialize)NumericUpDownFontSize).EndInit();
 			ResumeLayout(false);
 			PerformLayout();
