@@ -171,7 +171,7 @@
 
 					if (CheckboxReplaceVariables.Checked && contains_clt)
 					{
-						str = vm.ReplaceCLTs(str);
+						str = VariableManager.ReplaceCLTs(str);
 					}
 
 					if (str.Length == 0)

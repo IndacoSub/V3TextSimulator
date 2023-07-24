@@ -599,8 +599,18 @@ namespace DGRV3TS
 
 							tosave = tosave.Replace("\\\"", "\"");
 
-							writetext.WriteLine(tosave);
-						}
+                            // TODO: Remove debug code below
+                            /*
+							tosave = tosave.Replace("\\n", " ");
+							tosave = tosave.Replace("  ", " ");
+                            tosave = VariableManager.ReplaceCLTs(tosave);
+							tosave = VariableManager.ReplaceSignals(tosave);
+							VariableManager vm = new VariableManager(false);
+							tosave = vm.ReplaceVars(tosave);
+							*/
+
+                            writetext.WriteLine(tosave);
+                        }
 					}
 					else
 					{

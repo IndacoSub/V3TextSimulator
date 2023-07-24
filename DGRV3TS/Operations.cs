@@ -54,5 +54,48 @@
 
 			OpenWindow();
 		}
-	}
+
+        private void DumpVoicelineOnlyButton_Click(object sender, EventArgs e)
+        {
+
+			// This *definitely* has more than one use-case
+
+            if (!LoadedFile)
+            {
+				return;
+            }
+
+			if(fi.Type != FileManager.LoadedFileType.Po)
+			{
+				return;
+			}
+
+            List<PoInternal> pos = new List<PoInternal>();
+
+			foreach(PoInternal po in fi.PoList)
+			{
+				// No voiceline = skip
+				if(po.Voiceline.Length <= 0)
+				{
+					continue;
+				}
+
+				// Filter by character?
+				// In this case:
+				// Dump all Monokuma dialogues which contain a voiceline
+				if(!po.Character.Contains("Monok"))
+				{
+					continue;
+				}
+
+				pos.Add(po);
+			}
+
+			if (pos.Count > 0)
+			{
+				fi.PoList = pos;
+				fi.SaveTxt("dump.txt", false);
+			}
+        }
+    }
 }

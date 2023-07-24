@@ -53,7 +53,7 @@ namespace DGRV3TS
 
 			if (CheckboxReplaceVariables.Checked)
 			{
-				replaced = ReplaceVars(replaced);
+				replaced = vm.ReplaceVars(replaced);
 			}
 
 			replaced = replaced.Replace("\\n", "\n");
@@ -158,7 +158,12 @@ namespace DGRV3TS
 				dialogue_window.DisplayedImage.Image = ScaledHB.Clone() as Bitmap; // ???
 			}
 
-			ScaledHB.Dispose();
+            if (LoadedFile && fi.Type == FileManager.LoadedFileType.Po && !Textbox.Text.Contains(fi.PoList[fi.StringIndex].OriginalMessage))
+            {
+                //Textbox.Text += "|" + fi.PoList[fi.StringIndex].OriginalMessage;
+            }
+
+            ScaledHB.Dispose();
 			HB.Dispose();
 			MyText.Dispose();
 
@@ -577,12 +582,12 @@ namespace DGRV3TS
 			text = text.Replace("\\\"", "\"");
 			if (CheckboxReplaceVariables.Checked)
 			{
-				text = ReplaceVars(text);
+				text = vm.ReplaceVars(text);
 			}
 
 			// Replace signals and CLTs
-			text = vm.ReplaceCLTs(text);
-			text = vm.ReplaceSignals(text);
+			text = VariableManager.ReplaceCLTs(text);
+			text = VariableManager.ReplaceSignals(text);
 			// Once again treat newlines as spaces, possibly for signals
 			text = text.Replace("\\n", " ");
 
@@ -610,33 +615,6 @@ namespace DGRV3TS
 				sm.Synthesizer = new SpeechSynthesizer();
 				sm.PlayVoice(text, language, gender, age, async);
 			}
-		}
-
-		public string ReplaceVars(string replaced)
-		{
-			// Replace variables using the VariableManager
-
-			List<string> contained = new List<string>();
-
-			foreach (Tuple<string, string> tp in vm.Variables)
-			{
-				if (replaced.Contains(tp.Item1))
-				{
-					contained.Add(tp.Item1);
-				}
-			}
-
-			foreach (string sc in contained)
-			{
-				if (sc.StartsWith("<CLT"))
-				{
-					continue;
-				}
-
-				replaced = replaced.Replace(sc, vm.SolveVar(sc));
-			}
-
-			return replaced;
 		}
 	}
 }

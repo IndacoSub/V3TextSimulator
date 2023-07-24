@@ -355,7 +355,11 @@
 			{
 				ListBoxMenuIndex.Items.Add(ms);
 			}
-		}
+
+            bool has_vars = ListBoxMenuIndex.Items.Count > 0;
+            ListBoxMenuIndex.Visible = has_vars;
+            ListBoxMenuElements.Visible = has_vars;
+        }
 
 		private void ButtonSaveAs_Click(object sender, EventArgs e)
 		{
