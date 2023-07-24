@@ -71,8 +71,12 @@ namespace DGRV3TS
 			Point point = new Point(0, 0);
 			using (Graphics g = Graphics.FromImage(dialogue_window.DisplayedImage.Image))
 			{
-				(bool ret_img, Bitmap cc) = im.V3CharacterImageFromString(ch, fi.Type, expression, DEBUG_ON);
-				if (cc == null)
+				(bool ret_img, Bitmap cc, string str) = im.V3CharacterImageFromString(ch, fi.Type, expression, DEBUG_ON);
+
+                // Set up the ToolTip text for the Button and Checkbox.
+                toolTip1.SetToolTip(this.LabelCurrentAnimation, "File red: " + str);
+
+                if (cc == null)
 				{
 					//InputManager.Print("Character image is null!");
 					return false;
@@ -204,8 +208,8 @@ namespace DGRV3TS
 				// Extensions supporting animations and voicelines
 				if (fi.Type == FileManager.LoadedFileType.Stx || fi.Type == FileManager.LoadedFileType.Po)
 				{
-					// If the image was successfully loaded
-					if (loaded_img)
+                    // If the image was successfully loaded
+                    if (loaded_img)
 					{
 						LabelCurrentAnimation.ForeColor = Color.Black;
 					}

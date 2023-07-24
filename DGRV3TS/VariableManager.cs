@@ -3,7 +3,7 @@ namespace DGRV3TS
 	internal class VariableManager
 	{
 		// Don't worry about this if you're not me
-		private bool AltConvention;
+		private bool AltNames;
 
 		public List<ListBox> ListBoxes;
 
@@ -14,15 +14,15 @@ namespace DGRV3TS
 		// Definition, Value
 		public List<Tuple<string, string>> Variables;
 
-		public VariableManager(bool ic)
+		public VariableManager(bool alt_vars)
 		{
-			Init(ic);
+			Init(alt_vars);
 		}
 
-		public void Init(bool ic)
+		public void Init(bool alt_vars)
 		{
-			AltConvention = new bool();
-			AltConvention = ic;
+			AltNames = new bool();
+			AltNames = alt_vars;
 
 			AddVariables();
 			ChangeItemNames();
@@ -123,7 +123,7 @@ namespace DGRV3TS
 		{
 			string ret = "";
 
-			if (AltConvention)
+			if (AltNames)
 			{
 				ret = alt ? str.Substring(str.IndexOf(": ") + 2) : str.Substring(str.IndexOf(", ") + 2);
 			}
@@ -156,16 +156,19 @@ namespace DGRV3TS
 
 			ListBoxes = new List<ListBox>();
 
+			string vars_file = FileManager.GetCurrentDirectory();
+			vars_file = Path.Combine(vars_file, "vars_bak.txt");	// Hardcoded
+
 			// The variables' file is "vars_bak.txt"
 
-			if (!File.Exists("vars_bak.txt"))
+			if (!File.Exists(vars_file))
 			{
 				return;
 			}
 
 			bool donefirst = false;
 			int catnum = -1;
-			var lines = File.ReadLines("vars_bak.txt");
+			var lines = File.ReadLines(vars_file);
 			foreach (var line in lines)
 			{
 				if (string.IsNullOrWhiteSpace(line))
@@ -224,7 +227,7 @@ namespace DGRV3TS
 			Menu.Items.Add(str);
 		}
 
-		public string ReplaceCLTs(string s)
+		public static string ReplaceCLTs(string s)
 		{
 			string replaced = s;
 
@@ -249,7 +252,7 @@ namespace DGRV3TS
 			return replaced;
 		}
 
-		public string ReplaceSignals(string s)
+		public static string ReplaceSignals(string s)
 		{
 			string replaced = s;
 
@@ -286,5 +289,32 @@ namespace DGRV3TS
 				Menu.Items[j] += " [" + ListBoxes[j].Items.Count + "]";
 			}
 		}
-	}
+
+        public string ReplaceVars(string replaced)
+        {
+            // Replace variables using the VariableManager
+
+            List<string> contained = new List<string>();
+
+            foreach (Tuple<string, string> tp in this.Variables)
+            {
+                if (replaced.Contains(tp.Item1))
+                {
+                    contained.Add(tp.Item1);
+                }
+            }
+
+            foreach (string sc in contained)
+            {
+                if (sc.StartsWith("<CLT"))
+                {
+                    continue;
+                }
+
+                replaced = replaced.Replace(sc, this.SolveVar(sc));
+            }
+
+            return replaced;
+        }
+    }
 }

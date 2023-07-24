@@ -29,7 +29,7 @@
 			InputManager.Print("Copied!");
 		}
 
-		private void ButtonOpenFile_Click(object sender, EventArgs e)
+		private void OpenFile(string arg_file)
 		{
 			// Try to open a file
 
@@ -42,7 +42,7 @@
 			UpdateRTB();
 			Reload();
 
-			var file = fi.ManageFile(CheckboxTranslationMode.Checked, tm, CheckboxAutoTranslation.Checked);
+			var file = fi.ManageFile(CheckboxTranslationMode.Checked, tm, CheckboxAutoTranslation.Checked, arg_file);
 
 			string ext = Path.GetExtension(fi.LastOpenedFile).ToLowerInvariant();
 			if (ext == ".ttf" || ext == ".otf")
@@ -97,6 +97,11 @@
 			UpdateTextbox();
 			UpdateLineCharacter();
 			DisplayCharacterImage();
+		}
+
+		private void ButtonOpenFile_Click(object sender, EventArgs e)
+		{
+			OpenFile("");
 		}
 
 		private void ButtonBackText_Click(object sender, EventArgs e)
@@ -350,7 +355,11 @@
 			{
 				ListBoxMenuIndex.Items.Add(ms);
 			}
-		}
+
+            bool has_vars = ListBoxMenuIndex.Items.Count > 0;
+            ListBoxMenuIndex.Visible = has_vars;
+            ListBoxMenuElements.Visible = has_vars;
+        }
 
 		private void ButtonSaveAs_Click(object sender, EventArgs e)
 		{

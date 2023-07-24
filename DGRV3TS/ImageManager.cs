@@ -1,207 +1,232 @@
-﻿namespace DGRV3TS
+﻿using OfficeOpenXml.Drawing.Chart;
+
+namespace DGRV3TS
 {
-	internal class ImageManager
-	{
-		public List<string> BackgroundImagesDR = new List<string>();
-		public List<string> BackgroundImagesAI = new List<string>();
+    internal class ImageManager
+    {
+        public List<string> BackgroundImagesDR = new List<string>();
+        public List<string> BackgroundImagesAI = new List<string>();
 
-		public ImageManager(GameIndex game)
-		{
-			Init(game);
-		}
+        public ImageManager(GameIndex game)
+        {
+            Init(game);
+        }
 
-		public string GetWhiteBackground()
-		{
-			// Graphics/Backgrounds/White.png
-			string cur = Directory.GetCurrentDirectory();
-			string gfx = Path.Combine(cur, "Graphics");
-			string backgrounds = Path.Combine(gfx, "Backgrounds");
-			string ret = Path.Combine(backgrounds, "White.png");
-			//MessageBox.Show(ret);
-			return ret;
-		}
+        public string GetWhiteBackground()
+        {
+            // Graphics/Backgrounds/White.png
+            string cur = FileManager.GetCurrentDirectory();
+            string gfx = Path.Combine(cur, "Graphics");
+            string backgrounds = Path.Combine(gfx, "Backgrounds");
+            string ret = Path.Combine(backgrounds, "White.png");
+            //MessageBox.Show(ret);
+            return ret;
+        }
 
-		public void Init(GameIndex game)
-		{
-			// Graphics/Backgrounds/GAME/*.png
+        public void Init(GameIndex game)
+        {
+            // Graphics/Backgrounds/GAME/*.png
 
-			BackgroundImagesDR = new List<string>();
-			BackgroundImagesAI = new List<string>();
+            BackgroundImagesDR = new List<string>();
+            BackgroundImagesAI = new List<string>();
 
-			string cur = Directory.GetCurrentDirectory();
-			string gfx = Path.Combine(cur, "Graphics");
-			string backgrounds = Path.Combine(gfx, "Backgrounds");
-			string bg_final = "";
-			switch (game)
-			{
-				case GameIndex.V3:
-					bg_final = Path.Combine(backgrounds, "Danganronpa");	// TODO: Rename this to DR, breaking compatibility with older versions
-					break;
-				case GameIndex.AI:
-					bg_final = Path.Combine(backgrounds, "AI");
-					break;
-				default:
-					break;
-			}
+            string cur = FileManager.GetCurrentDirectory();
 
-			if (!Directory.Exists(backgrounds))
-			{
-				InputManager.Print("Directory not found: " + backgrounds + "!\n\nThings *WILL* break!");
-				return;
-			}
+            string gfx = Path.Combine(cur, "Graphics");
+            string backgrounds = Path.Combine(gfx, "Backgrounds");
+            string bg_final = "";
+            switch (game)
+            {
+                case GameIndex.V3:
+                    bg_final = Path.Combine(backgrounds, "DR");
+                    break;
+                case GameIndex.AI:
+                    bg_final = Path.Combine(backgrounds, "AI");
+                    break;
+                default:
+                    break;
+            }
 
-			string[] files =
-				Directory.GetFiles(bg_final, "*.png", SearchOption.AllDirectories);
+            if (!Directory.Exists(bg_final))
+            {
+                InputManager.Print("Directory not found: " + bg_final + "!\n\nThings *WILL* break!");
+                return;
+            }
 
-			foreach (string file in files)
-			{
-				if (!file.Contains("Copy") && !file.Contains("Backup") && !file.Contains("Copia"))
-				{
-					switch (game)
-					{
-						case GameIndex.V3:
-							BackgroundImagesDR.Add(file);
-							break;
-						case GameIndex.AI:
-							BackgroundImagesAI.Add(file);
-							break;
-						default:
-							break;
-					}
-				}
-			}
-		}
+            string[] files =
+                Directory.GetFiles(bg_final, "*.png", SearchOption.AllDirectories);
 
-		public Image ScaleImage(Image image, int maxWidth, int maxHeight)
-		{
-			if (image == null)
-			{
-				return null;
-			}
+            if (files.Length <= 0)
+            {
+                InputManager.Print("Zero backgrounds found!");
+                return;
+            }
 
-			var ratioX = (double)maxWidth / image.Width;
-			var ratioY = (double)maxHeight / image.Height;
-			var ratio = Math.Min(ratioX, ratioY);
+            foreach (string file in files)
+            {
+                if (!file.Contains("Copy") && !file.Contains("Backup") && !file.Contains("Copia"))
+                {
+                    switch (game)
+                    {
+                        case GameIndex.V3:
+                            BackgroundImagesDR.Add(file);
+                            break;
+                        case GameIndex.AI:
+                            BackgroundImagesAI.Add(file);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
 
-			var newWidth = (int)(image.Width * ratio);
-			var newHeight = (int)(image.Height * ratio);
+        public Image ScaleImage(Image image, int maxWidth, int maxHeight)
+        {
+            if (image == null)
+            {
+                return null;
+            }
 
-			// Uncomment if somehow this works
-			/*
+            var ratioX = (double)maxWidth / image.Width;
+            var ratioY = (double)maxHeight / image.Height;
+            var ratio = Math.Min(ratioX, ratioY);
+
+            var newWidth = (int)(image.Width * ratio);
+            var newHeight = (int)(image.Height * ratio);
+
+            // Uncomment if somehow this works
+            /*
             if(newWidth == maxWidth && maxHeight == newHeight)
             {
                 return image;
             }
             */
 
-			var newImage = new Bitmap(newWidth, newHeight);
+            var newImage = new Bitmap(newWidth, newHeight);
 
-			using (var graphics = Graphics.FromImage(newImage))
-				graphics.DrawImage(image, 0, 0, newWidth, newHeight);
+            using (var graphics = Graphics.FromImage(newImage))
+                graphics.DrawImage(image, 0, 0, newWidth, newHeight);
 
-			return newImage;
-		}
+            return newImage;
+        }
 
-		public (bool, Bitmap) V3CharacterImageFromString(string ch, FileManager.LoadedFileType lft, 
-			string animation, bool dbg)
-		{
-			// No character? No image
-			if (ch.Length == 0)
-			{
-				return (false, null);
-			}
+        public (bool, Bitmap, string) V3CharacterImageFromString(string ch, FileManager.LoadedFileType lft,
+            string animation, bool dbg)
+        {
+            // No character? No image
+            if (ch.Length == 0)
+            {
+                return (false, null, "");
+            }
 
-			string cur = Directory.GetCurrentDirectory();
-			string gfx = Path.Combine(cur, "Graphics");
-			string sprites = Path.Combine(gfx, "Sprites");
-			string drfolder = Path.Combine(sprites, "DR");
-			string character = Path.Combine(drfolder, ch);
-			string animfile = animation + ".png";
-			string characterdefault = Path.Combine(character, "default.png");
-			string characterfile = Path.Combine(character, animfile);
-			string hatena = Path.Combine(sprites, "chara_Hatena");
-			string hatenafile = Path.Combine(hatena, "image.png");
-			string blank = Path.Combine(sprites, "chara_Blank");
-			string blankfile = Path.Combine(blank, "image.png");
+            string cur = FileManager.GetCurrentDirectory();
+            string gfx = Path.Combine(cur, "Graphics");
+            string sprites = Path.Combine(gfx, "Sprites");
+            string drfolder = Path.Combine(sprites, "DR");
+            string character = Path.Combine(drfolder, ch);
+            string animfile = animation + ".png";
+            string characterdefault = Path.Combine(character, "default.png");
+            string characterfile = Path.Combine(character, animfile);
+            string hatena = Path.Combine(sprites, "chara_Hatena");
+            string hatenafile = Path.Combine(hatena, "image.png");
+            string blank = Path.Combine(sprites, "chara_Blank");
+            string blankfile = Path.Combine(blank, "image.png");
 
-			Bitmap i = null;
+            Bitmap i = null;
 
-			// For now?, *.vo doesn't support animations
-			if (lft == FileManager.LoadedFileType.Txt || lft == FileManager.LoadedFileType.Xlsx || string.IsNullOrWhiteSpace(ch))
-			{
-				if (string.IsNullOrWhiteSpace(ch))
-				{
-					InputManager.Print("Character is null or whitespace!");
-				}
+            // For now?, *.vo doesn't support animations
+            if (lft == FileManager.LoadedFileType.Txt || lft == FileManager.LoadedFileType.Xlsx || string.IsNullOrWhiteSpace(ch))
+            {
+                if (string.IsNullOrWhiteSpace(ch))
+                {
+                    InputManager.Print("Character is null or whitespace!");
+                }
 
-				i = new Bitmap(hatenafile);
-				return (true, i);
-			}
+                i = new Bitmap(hatenafile);
+                return (true, i, hatenafile);
+            }
 
-			// Is the current animation valid?
-			bool animexists = animation.Length > 0;
-			// Does the default.png exist?
-			bool defaultexists = File.Exists(characterdefault);
+            // Is the current animation valid?
+            bool animexists = animation.Length > 0;
 
-			// The file that needs to be red
-			string actuallyred = "";
+            // Does the default.png exist?
+            bool defaultexists = File.Exists(characterdefault);
 
-			switch (ch)
-			{
-				case "chara_Hatena":
-					animexists = File.Exists(hatenafile);
-					if (animexists)
-					{
-						actuallyred = hatenafile;
-						i = new Bitmap(hatenafile);
-					}
+            // The file that needs to be red
+            string actuallyred = "Theorical -- " + characterfile;
 
-					break;
-				case "chara_Blank":
-					animexists = File.Exists(blankfile);
-					if (animexists)
-					{
-						actuallyred = blankfile;
-						i = new Bitmap(blankfile);
-					}
+            switch (ch)
+            {
+                case "chara_Hatena":
+                    animexists = File.Exists(hatenafile);
+                    if (animexists)
+                    {
+                        actuallyred = hatenafile;
+                        i = new Bitmap(hatenafile);
+                    }
 
-					break;
-				default:
-					animexists &= File.Exists(characterfile);
-					if (defaultexists)
-					{
-						if (animexists)
-						{
-							actuallyred = characterfile;
-							i = new Bitmap(characterfile);
-						}
-						else
-						{
-							if (File.Exists(characterdefault))
-							{
-								actuallyred = characterdefault;
-								i = new Bitmap(characterdefault);
-							}
-						}
-					}
-					else
-					{
-						if (File.Exists(hatenafile))
-						{
-							actuallyred = hatenafile;
-							i = new Bitmap(hatenafile);
-						}
-					}
+                    break;
+                case "chara_Blank":
+                    animexists = File.Exists(blankfile);
+                    if (animexists)
+                    {
+                        actuallyred = blankfile;
+                        i = new Bitmap(blankfile);
+                    }
 
-					break;
-			}
+                    break;
+                default:
+                    bool charafile_exists = File.Exists(characterfile);
+                    animexists &= charafile_exists;
 
-			if (dbg)
-			{
-				InputManager.Print("Actually red: " + actuallyred);
-			}
+                    if (animexists)
+                    {
+                        actuallyred = characterfile;
+                        i = new Bitmap(characterfile);
+                    }
+                    else
+                    {
+                        if (defaultexists)
+                        {
+                            actuallyred = characterdefault;
+                            i = new Bitmap(characterdefault);
+                        }
+                        else
+                        {
+                            //InputManager.Print("Default does not exist: " + characterdefault);
+                            if (animation.Length <= 0)
+                            {
+                                //IInputManager.Print("Invalid animation: " + animation);
+                            }
+                            else
+                            {
+                                if (!charafile_exists)
+                                {
+                                    //IInputManager.Print("Characterfile does not exist: " + characterfile);
+                                }
+                                else
+                                {
+                                    //IInputManager.Print("????: " + characterfile);
+                                }
+                            }
+                            if (File.Exists(hatenafile))
+                            {
+                                actuallyred = hatenafile;
+                                i = new Bitmap(hatenafile);
+                            }
+                        }
+                    }
 
-			return (animexists, i);
-		}
-	}
+                    break;
+            }
+
+            if (dbg)
+            {
+                InputManager.Print("Actually red: " + actuallyred);
+            }
+
+            return (animexists, i, actuallyred);
+        }
+    }
 }
