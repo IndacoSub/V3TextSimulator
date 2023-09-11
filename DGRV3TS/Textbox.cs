@@ -70,6 +70,7 @@
 			Textbox.Text = bk;
 			Textbox.Refresh();
 			Textbox.Update();
+			// TODO: What does this do?
 			RecreateImageBase();
 		}
 

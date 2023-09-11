@@ -1,6 +1,6 @@
 ﻿namespace DGRV3TS
 {
-	internal class PoInternal
+	public class PoInternal
 	{
 		public string Character = "DefaultCharacter";
 		public string Expression = "DefaultExpression";

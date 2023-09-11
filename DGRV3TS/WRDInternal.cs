@@ -2,7 +2,7 @@
 
 namespace DGRV3TS
 {
-	internal class WRDInternal
+    public class WRDInternal
 	{
 
 		public class WRDAnimation

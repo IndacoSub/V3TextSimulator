@@ -1,21 +1,21 @@
 ﻿namespace DGRV3TS
 {
-	// A dictionary for AutoTranslation based on previous translations
+    // A dictionary for AutoTranslation based on previous translations
 
-	internal class Variant
+    public class Variant
 	{
 		public string File = "";
 		public string Line = "";
 		public string Message = "";
 	}
 
-	internal class Suggestion
+    public class Suggestion
 	{
 		public string OriginalLine = "";
 		public List<Variant> Variants = new List<Variant>();
 	}
 
-	internal class TLDictionary
+    public class TLDictionary
 	{
 		private readonly int MinimumLength = 1; // Arbitrary number
 		private List<Suggestion> Suggestions = new List<Suggestion>();

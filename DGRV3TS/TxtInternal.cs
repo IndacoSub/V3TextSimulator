@@ -1,6 +1,6 @@
 ﻿namespace DGRV3TS
 {
-	internal class TxtInternal
+    public class TxtInternal
 	{
 		public string Text;
 	}

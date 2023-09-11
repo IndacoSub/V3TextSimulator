@@ -1,6 +1,6 @@
 ﻿namespace DGRV3TS
 {
-    enum GameIndex
+    public enum GameIndex
     {
         V3,
         AI,

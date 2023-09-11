@@ -45,7 +45,9 @@
 			var file = fi.ManageFile(CheckboxTranslationMode.Checked, tm, CheckboxAutoTranslation.Checked, arg_file);
 
 			string ext = Path.GetExtension(fi.LastOpenedFile).ToLowerInvariant();
-			if (ext == ".ttf" || ext == ".otf")
+			bool is_font = ext == ".ttf" || ext == ".otf";
+
+            if (is_font)
 			{
 				fm = new FontManager(fi.LastOpenedFile);
 				LabelFontName.Text = fm.FontName;
@@ -97,7 +99,13 @@
 			UpdateTextbox();
 			UpdateLineCharacter();
 			DisplayCharacterImage();
-		}
+
+            if (!is_font)
+            {
+                DestroyVerticalView();
+                OpenVerticalView();
+            }
+        }
 
 		private void ButtonOpenFile_Click(object sender, EventArgs e)
 		{
@@ -113,7 +121,12 @@
 
 			CheckUnsaved();
 			StringIndexMinus();
-		}
+
+            if (vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
+            {
+                OpenVerticalView();
+            }
+        }
 
 		private void ButtonNextText_Click(object sender, EventArgs e)
 		{
@@ -124,7 +137,12 @@
 
 			CheckUnsaved();
 			StringIndexPlus();
-		}
+
+            if (vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
+            {
+                OpenVerticalView();
+            }
+        }
 
 		private void ButtonBackLanguage_Click(object sender, EventArgs e)
 		{
@@ -158,7 +176,7 @@
 
 			UpdateLineCharacter();
 			UpdateTextbox();
-		}
+        }
 
 		private void ButtonNextLanguage_Click(object sender, EventArgs e)
 		{
@@ -205,7 +223,7 @@
 
 			UpdateLineCharacter();
 			UpdateTextbox();
-		}
+        }
 
 		private void ButtonResetStringIndex_Click(object sender, EventArgs e)
 		{
@@ -226,7 +244,7 @@
 			UpdateTextbox();
 			UpdateLineCharacter();
 			DisplayCharacterImage();
-		}
+        }
 
 		private void ButtonFastRead_Click(object sender, EventArgs e)
 		{

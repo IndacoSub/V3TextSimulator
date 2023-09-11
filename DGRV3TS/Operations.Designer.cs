@@ -74,6 +74,7 @@
             this.SetupVoicelinesButton = new System.Windows.Forms.Button();
             this.DumpSelectedVoicelinesButton = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.OpenVerticalViewButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.NumericUpDownFontSize)).BeginInit();
             this.SuspendLayout();
             // 
@@ -86,7 +87,7 @@
             this.Textbox.Size = new System.Drawing.Size(520, 96);
             this.Textbox.TabIndex = 3;
             this.Textbox.Text = "This is an example\\nmessage.";
-            this.Textbox.TextChanged += new System.EventHandler(Textbox_TextChanged);
+            this.Textbox.TextChanged += new System.EventHandler(this.Textbox_TextChanged);
             // 
             // CB_Game
             // 
@@ -96,7 +97,7 @@
             this.CB_Game.Name = "CB_Game";
             this.CB_Game.Size = new System.Drawing.Size(63, 23);
             this.CB_Game.TabIndex = 67;
-            this.CB_Game.SelectedIndexChanged += new System.EventHandler(CB_Game_SelectedIndexChanged);
+            this.CB_Game.SelectedIndexChanged += new System.EventHandler(this.CB_Game_SelectedIndexChanged);
             // 
             // CheckboxAutoTranslation
             // 
@@ -108,7 +109,7 @@
             this.CheckboxAutoTranslation.TabIndex = 66;
             this.CheckboxAutoTranslation.Text = "AutoTranslation";
             this.CheckboxAutoTranslation.UseVisualStyleBackColor = true;
-            this.CheckboxAutoTranslation.CheckedChanged += new System.EventHandler(CheckboxAutoTranslation_CheckedChanged);
+            this.CheckboxAutoTranslation.CheckedChanged += new System.EventHandler(this.CheckboxAutoTranslation_CheckedChanged);
             // 
             // CheckboxPlayVoiceTTS
             // 
@@ -131,7 +132,7 @@
             this.CheckboxMaybeAccurateHeight.TabIndex = 64;
             this.CheckboxMaybeAccurateHeight.Text = "Size-adjusted height";
             this.CheckboxMaybeAccurateHeight.UseVisualStyleBackColor = true;
-            this.CheckboxMaybeAccurateHeight.CheckedChanged += new System.EventHandler(CheckboxMaybeAccurateHeight_CheckedChanged);
+            this.CheckboxMaybeAccurateHeight.CheckedChanged += new System.EventHandler(this.CheckboxMaybeAccurateHeight_CheckedChanged);
             // 
             // LabelUnsupportedWarning
             // 
@@ -154,7 +155,7 @@
             this.CB_TB.Name = "CB_TB";
             this.CB_TB.Size = new System.Drawing.Size(173, 23);
             this.CB_TB.TabIndex = 62;
-            this.CB_TB.SelectedIndexChanged += new System.EventHandler(CB_TB_SelectedIndexChanged);
+            this.CB_TB.SelectedIndexChanged += new System.EventHandler(this.CB_TB_SelectedIndexChanged);
             // 
             // LabelTextboxStyle
             // 
@@ -176,7 +177,7 @@
             this.ButtonReloadText.TabIndex = 60;
             this.ButtonReloadText.Text = "Refresh";
             this.ButtonReloadText.UseVisualStyleBackColor = true;
-            this.ButtonReloadText.Click += new System.EventHandler(ButtonReloadText_Click);
+            this.ButtonReloadText.Click += new System.EventHandler(this.ButtonReloadText_Click);
             // 
             // ListBoxMenuElements
             // 
@@ -187,8 +188,8 @@
             this.ListBoxMenuElements.Name = "ListBoxMenuElements";
             this.ListBoxMenuElements.Size = new System.Drawing.Size(387, 79);
             this.ListBoxMenuElements.TabIndex = 73;
-            this.ListBoxMenuElements.SelectedIndexChanged += new System.EventHandler(ListBoxMenuElements_SelectedIndexChanged);
-            this.ListBoxMenuElements.MouseUp += new MouseEventHandler(ListBoxMenuElements_RightClick);
+            this.ListBoxMenuElements.SelectedIndexChanged += new System.EventHandler(this.ListBoxMenuElements_SelectedIndexChanged);
+            this.ListBoxMenuElements.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ListBoxMenuElements_RightClick);
             // 
             // ListBoxMenuIndex
             // 
@@ -199,7 +200,7 @@
             this.ListBoxMenuIndex.Name = "ListBoxMenuIndex";
             this.ListBoxMenuIndex.Size = new System.Drawing.Size(158, 79);
             this.ListBoxMenuIndex.TabIndex = 72;
-            this.ListBoxMenuIndex.SelectedIndexChanged += new System.EventHandler(ListBoxMenuIndex_SelectedIndexChanged);
+            this.ListBoxMenuIndex.SelectedIndexChanged += new System.EventHandler(this.ListBoxMenuIndex_SelectedIndexChanged);
             // 
             // ButtonNextLanguage
             // 
@@ -210,7 +211,7 @@
             this.ButtonNextLanguage.TabIndex = 71;
             this.ButtonNextLanguage.Text = "Lang ++";
             this.ButtonNextLanguage.UseVisualStyleBackColor = true;
-            this.ButtonNextLanguage.Click += new System.EventHandler(ButtonNextLanguage_Click);
+            this.ButtonNextLanguage.Click += new System.EventHandler(this.ButtonNextLanguage_Click);
             // 
             // ButtonBackLanguage
             // 
@@ -221,7 +222,7 @@
             this.ButtonBackLanguage.TabIndex = 70;
             this.ButtonBackLanguage.Text = "Lang --";
             this.ButtonBackLanguage.UseVisualStyleBackColor = true;
-            this.ButtonBackLanguage.Click += new System.EventHandler(ButtonBackLanguage_Click);
+            this.ButtonBackLanguage.Click += new System.EventHandler(this.ButtonBackLanguage_Click);
             // 
             // ButtonNextText
             // 
@@ -275,7 +276,7 @@
             this.CheckboxUseAlternateVars.TabIndex = 78;
             this.CheckboxUseAlternateVars.Text = "Enable Alternate Vars";
             this.CheckboxUseAlternateVars.UseVisualStyleBackColor = true;
-            this.CheckboxUseAlternateVars.CheckedChanged += new System.EventHandler(CheckboxUseAlternateVars_CheckedChanged);
+            this.CheckboxUseAlternateVars.CheckedChanged += new System.EventHandler(this.CheckboxUseAlternateVars_CheckedChanged);
             // 
             // LabelCurrentTranslation
             // 
@@ -333,7 +334,7 @@
             this.CheckboxTranslationMode.TabIndex = 87;
             this.CheckboxTranslationMode.Text = "Translation Mode";
             this.CheckboxTranslationMode.UseVisualStyleBackColor = true;
-            this.CheckboxTranslationMode.CheckedChanged += new System.EventHandler(CheckboxTranslationMode_CheckedChanged);
+            this.CheckboxTranslationMode.CheckedChanged += new System.EventHandler(this.CheckboxTranslationMode_CheckedChanged);
             // 
             // CheckboxPauseAutoplay
             // 
@@ -345,7 +346,7 @@
             this.CheckboxPauseAutoplay.TabIndex = 86;
             this.CheckboxPauseAutoplay.Text = "Pause Autoplay";
             this.CheckboxPauseAutoplay.UseVisualStyleBackColor = true;
-            this.CheckboxPauseAutoplay.CheckedChanged += new System.EventHandler(CheckboxPauseAutoplay_CheckedChanged);
+            this.CheckboxPauseAutoplay.CheckedChanged += new System.EventHandler(this.CheckboxPauseAutoplay_CheckedChanged);
             // 
             // LabelOpenedFile
             // 
@@ -368,7 +369,7 @@
             this.CheckboxStartAutoplay.TabIndex = 84;
             this.CheckboxStartAutoplay.Text = "Start/Resume AutoPlay";
             this.CheckboxStartAutoplay.UseVisualStyleBackColor = true;
-            this.CheckboxStartAutoplay.CheckedChanged += new System.EventHandler(CheckboxStartAutoplay_CheckedChanged);
+            this.CheckboxStartAutoplay.CheckedChanged += new System.EventHandler(this.CheckboxStartAutoplay_CheckedChanged);
             // 
             // CheckboxDisplayCharacter
             // 
@@ -382,7 +383,7 @@
             this.CheckboxDisplayCharacter.TabIndex = 83;
             this.CheckboxDisplayCharacter.Text = "Display Character";
             this.CheckboxDisplayCharacter.UseVisualStyleBackColor = true;
-            this.CheckboxDisplayCharacter.CheckedChanged += new System.EventHandler(CheckboxDisplayCharacter_CheckedChanged);
+            this.CheckboxDisplayCharacter.CheckedChanged += new System.EventHandler(this.CheckboxDisplayCharacter_CheckedChanged);
             // 
             // CheckboxReplaceVariables
             // 
@@ -396,7 +397,7 @@
             this.CheckboxReplaceVariables.TabIndex = 82;
             this.CheckboxReplaceVariables.Text = "Replace Variables";
             this.CheckboxReplaceVariables.UseVisualStyleBackColor = true;
-            this.CheckboxReplaceVariables.CheckedChanged += new System.EventHandler(CheckboxReplaceVariables_CheckedChanged);
+            this.CheckboxReplaceVariables.CheckedChanged += new System.EventHandler(this.CheckboxReplaceVariables_CheckedChanged);
             // 
             // CheckboxDisplayOriginalText
             // 
@@ -408,7 +409,7 @@
             this.CheckboxDisplayOriginalText.TabIndex = 81;
             this.CheckboxDisplayOriginalText.Text = "Display Original Text";
             this.CheckboxDisplayOriginalText.UseVisualStyleBackColor = true;
-            this.CheckboxDisplayOriginalText.CheckedChanged += new System.EventHandler(CheckboxDisplayOriginalText_CheckedChanged);
+            this.CheckboxDisplayOriginalText.CheckedChanged += new System.EventHandler(this.CheckboxDisplayOriginalText_CheckedChanged);
             // 
             // TextboxCurrentLanguage
             // 
@@ -445,7 +446,7 @@
             this.NumericUpDownFontSize.Name = "NumericUpDownFontSize";
             this.NumericUpDownFontSize.Size = new System.Drawing.Size(59, 23);
             this.NumericUpDownFontSize.TabIndex = 94;
-            this.NumericUpDownFontSize.ValueChanged += new System.EventHandler(NumericUpDownFontSize_ValueChanged);
+            this.NumericUpDownFontSize.ValueChanged += new System.EventHandler(this.NumericUpDownFontSize_ValueChanged);
             // 
             // ButtonSaveAs
             // 
@@ -456,7 +457,7 @@
             this.ButtonSaveAs.TabIndex = 93;
             this.ButtonSaveAs.Text = "Save File As";
             this.ButtonSaveAs.UseVisualStyleBackColor = true;
-            this.ButtonSaveAs.Click += new System.EventHandler(ButtonSaveAs_Click);
+            this.ButtonSaveAs.Click += new System.EventHandler(this.ButtonSaveAs_Click);
             // 
             // ButtonReloadVariables
             // 
@@ -467,7 +468,7 @@
             this.ButtonReloadVariables.TabIndex = 92;
             this.ButtonReloadVariables.Text = "Reload Vars";
             this.ButtonReloadVariables.UseVisualStyleBackColor = true;
-            this.ButtonReloadVariables.Click += new System.EventHandler(ButtonReloadVariables_Click);
+            this.ButtonReloadVariables.Click += new System.EventHandler(this.ButtonReloadVariables_Click);
             // 
             // ButtonFastRead
             // 
@@ -478,7 +479,7 @@
             this.ButtonFastRead.TabIndex = 91;
             this.ButtonFastRead.Text = "Fast-Read";
             this.ButtonFastRead.UseVisualStyleBackColor = true;
-            this.ButtonFastRead.Click += new System.EventHandler(ButtonFastRead_Click);
+            this.ButtonFastRead.Click += new System.EventHandler(this.ButtonFastRead_Click);
             // 
             // ButtonResetStringIndex
             // 
@@ -489,7 +490,7 @@
             this.ButtonResetStringIndex.TabIndex = 90;
             this.ButtonResetStringIndex.Text = "Reset";
             this.ButtonResetStringIndex.UseVisualStyleBackColor = true;
-            this.ButtonResetStringIndex.Click += new System.EventHandler(ButtonResetStringIndex_Click);
+            this.ButtonResetStringIndex.Click += new System.EventHandler(this.ButtonResetStringIndex_Click);
             // 
             // ButtonOpenFile
             // 
@@ -512,7 +513,7 @@
             this.ButtonCopyImage.TabIndex = 88;
             this.ButtonCopyImage.Text = "Copy image";
             this.ButtonCopyImage.UseVisualStyleBackColor = true;
-            this.ButtonCopyImage.Click += new System.EventHandler(ButtonCopyImage_Click);
+            this.ButtonCopyImage.Click += new System.EventHandler(this.ButtonCopyImage_Click);
             // 
             // contextMenuStrip1
             // 
@@ -528,7 +529,7 @@
             this.ReopenWindowButton.TabIndex = 98;
             this.ReopenWindowButton.Text = "[  ]";
             this.ReopenWindowButton.UseVisualStyleBackColor = true;
-            this.ReopenWindowButton.Click += new System.EventHandler(ReopenWindowButton_Click);
+            this.ReopenWindowButton.Click += new System.EventHandler(this.ReopenWindowButton_Click);
             // 
             // SetupSpritesButton
             // 
@@ -548,23 +549,34 @@
             this.SetupVoicelinesButton.TabIndex = 100;
             this.SetupVoicelinesButton.Text = "[<]";
             this.SetupVoicelinesButton.UseVisualStyleBackColor = true;
-            this.SetupVoicelinesButton.Click += new System.EventHandler(SetupVoicelinesButton_Click);
+            this.SetupVoicelinesButton.Click += new System.EventHandler(this.SetupVoicelinesButton_Click);
             // 
             // DumpSelectedVoicelinesButton
             // 
-            this.DumpSelectedVoicelinesButton.Location = new System.Drawing.Point(1503, 134);
+            this.DumpSelectedVoicelinesButton.Location = new System.Drawing.Point(1503, 117);
             this.DumpSelectedVoicelinesButton.Name = "DumpSelectedVoicelinesButton";
             this.DumpSelectedVoicelinesButton.Size = new System.Drawing.Size(40, 29);
             this.DumpSelectedVoicelinesButton.TabIndex = 1;
             this.DumpSelectedVoicelinesButton.Text = "[S<]";
             this.DumpSelectedVoicelinesButton.UseVisualStyleBackColor = true;
-            this.DumpSelectedVoicelinesButton.Click += new System.EventHandler(DumpVoicelineOnlyButton_Click);
+            this.DumpSelectedVoicelinesButton.Click += new System.EventHandler(this.DumpVoicelineOnlyButton_Click);
+            // 
+            // OpenVerticalViewButton
+            // 
+            this.OpenVerticalViewButton.Location = new System.Drawing.Point(1503, 149);
+            this.OpenVerticalViewButton.Name = "OpenVerticalViewButton";
+            this.OpenVerticalViewButton.Size = new System.Drawing.Size(40, 25);
+            this.OpenVerticalViewButton.TabIndex = 101;
+            this.OpenVerticalViewButton.Text = "VW";
+            this.OpenVerticalViewButton.UseVisualStyleBackColor = true;
+            this.OpenVerticalViewButton.Click += new System.EventHandler(this.OpenVerticalViewButton_Click);
             // 
             // Operations
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1546, 179);
+            this.Controls.Add(this.OpenVerticalViewButton);
             this.Controls.Add(this.DumpSelectedVoicelinesButton);
             this.Controls.Add(this.SetupVoicelinesButton);
             this.Controls.Add(this.SetupSpritesButton);
@@ -666,5 +678,6 @@
         private Button SetupVoicelinesButton;
         private Button DumpSelectedVoicelinesButton;
         private ToolTip toolTip1;
+        private Button OpenVerticalViewButton;
     }
 }

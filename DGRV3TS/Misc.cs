@@ -49,7 +49,12 @@ namespace DGRV3TS
 				return;
 			}
 
-			string replaced = Textbox.Text;
+			string old_translation = LoadedFile ? fi.GetCurrentTranslation() : "";
+
+			// TODO: Potentially bad?
+            CheckUnsaved();
+
+            string replaced = Textbox.Text;
 
 			if (CheckboxReplaceVariables.Checked)
 			{
@@ -161,6 +166,11 @@ namespace DGRV3TS
             if (LoadedFile && fi.Type == FileManager.LoadedFileType.Po && !Textbox.Text.Contains(fi.PoList[fi.StringIndex].OriginalMessage))
             {
                 //Textbox.Text += "|" + fi.PoList[fi.StringIndex].OriginalMessage;
+            }
+
+			if(old_translation != Textbox.Text && vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
+			{
+                OpenVerticalView();
             }
 
             ScaledHB.Dispose();
@@ -408,7 +418,7 @@ namespace DGRV3TS
 				}
 				else
 				{
-					// 2500 should be enough
+					// TODO: 2500 should be enough
 					Thread.Sleep(2500);
 				}
 

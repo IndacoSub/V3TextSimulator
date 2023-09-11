@@ -2,7 +2,7 @@
 
 namespace DGRV3TS
 {
-	internal class TranslationManager
+    public class TranslationManager
 	{
 		private readonly Regex cjkCharRegex = new Regex(@"\p{IsCJKUnifiedIdeographs}");
 		private readonly Regex cjkExt1CharRegex = new Regex(@"\p{IsCJKUnifiedIdeographsExtensionA}");

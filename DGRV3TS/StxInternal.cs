@@ -1,6 +1,6 @@
 ﻿namespace DGRV3TS
 {
-	internal class StxInternal
+    public class StxInternal
 	{
 		// Magic converts to TXTS, which is STXT inverted...
 		public static readonly uint Magic = 0x54585453; // Nyeh, I told you magic was real

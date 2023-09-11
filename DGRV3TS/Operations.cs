@@ -1,8 +1,12 @@
-﻿namespace DGRV3TS
+﻿using System.Transactions;
+// ^ ??? I swear, there aren't any DLCs and/or microtransactions here
+
+namespace DGRV3TS
 {
 	public partial class Operations : Form
 	{
 		DialogueWindow dialogue_window;
+		VerticalView vertical_view;
 		string[] program_args;
 		string auto_open_file = "";
 
@@ -17,6 +21,8 @@
 			InitializeComponent();
 			Init();
 			OpenWindow();
+			DestroyVerticalView();
+			OpenVerticalView();
 
 			if (auto_open_file.Length > 0)
 			{
@@ -48,6 +54,62 @@
 				}
 			}
 		}
+
+		public void DestroyVerticalView()
+		{
+			if(vertical_view != null)
+			{
+				vertical_view.Owner = null;
+                vertical_view.Controls.Clear();
+                vertical_view.Close();
+				vertical_view.Dispose();
+			}
+		}
+
+		public void OpenVerticalView()
+		{
+			if (!LoadedFile)
+			{
+				return;
+			}
+
+			if (vertical_view == null || vertical_view.Disposing || vertical_view.IsDisposed)
+			{
+				vertical_view = new VerticalView(new List<string>(), new List<string>(), new List<string>());
+				vertical_view.Owner = this;
+
+                List<string> translation = fi.GetAllTranslatedText();
+                List<string> original = fi.GetAllOriginalText();
+				List<string> speakers = fi.GetAllSpeakers();
+
+                vertical_view.InitSummaries(translation, original, speakers);
+                vertical_view.Show();
+            }
+			else
+			{
+				UpdateVerticalView();
+			}
+		}
+
+		public void UpdateVerticalView() {
+
+            List<string> translated = fi.GetAllTranslatedText();
+            List<string> original = fi.GetAllOriginalText();
+
+            vertical_view.UpdateSummaries(translated, original, -1);
+            vertical_view.Show();
+        }
+
+		public void OnVerticalViewClick(int ID)
+		{
+			CheckUnsaved();
+
+            fi.StringIndex = ID;
+            UpdateTextbox();
+            UpdateLineCharacter();
+            DisplayCharacterImage();
+			UpdateVerticalView();
+        }
 
 		private void ReopenWindowButton_Click(object sender, System.EventArgs e)
 		{
@@ -96,6 +158,12 @@
 				fi.PoList = pos;
 				fi.SaveTxt("dump.txt", false);
 			}
+        }
+
+        private void OpenVerticalViewButton_Click(object sender, EventArgs e)
+        {
+			DestroyVerticalView();
+			OpenVerticalView();
         }
     }
 }

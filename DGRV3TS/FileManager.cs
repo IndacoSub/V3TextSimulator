@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DGRV3TS
 {
-	internal class FileManager
+	public partial class FileManager
 	{
 		public enum LoadedFileType
 		{
@@ -57,6 +57,8 @@ namespace DGRV3TS
 
 			TxtList = new List<TxtInternal>();
 			TxtHasBrackets = new bool();
+
+			// TODO: STX intentionally not constructed?
 
 			XLSXList = new List<XLSXRow>();
 
