@@ -155,7 +155,8 @@
 				return;
 			}
 
-			Convention = CheckboxUseAlternateVars.Checked;
+			AltVars = CheckboxUseAlternateVars.Checked;
+			DoReloadVariables();
 		}
 
 		private void CheckboxMaybeAccurateHeight_CheckedChanged(object sender, EventArgs e)

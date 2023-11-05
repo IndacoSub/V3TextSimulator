@@ -25,7 +25,7 @@
 
 			// Variable
 			var unsolved = vm.UnSolve(st);
-			return unsolved;
+			return unsolved.Item1;
 		}
 
 		private void CreateListBoxMenu()
@@ -85,6 +85,36 @@
 			menuStrip.Items.Add(menuItem4);
 
 			contextMenuStrip1 = menuStrip;
+		}
+
+		private void ListBoxOnMouseMove(object sender, MouseEventArgs mouseEventArgs)
+		{
+			var listbox = sender as ListBox;
+
+			if (listbox == null)
+			{
+				return;
+			}
+
+			var strTip = string.Empty;
+			var index = listbox.IndexFromPoint(mouseEventArgs.Location);
+
+			if ((index >= 0) && (index < listbox.Items.Count))
+			{
+				var item = listbox.Items[index];
+				if (item != null)
+				{
+					string? value = item.ToString();
+					if (value != null && value.Length > 0)
+					{
+						var unsolve = vm.UnSolve(value, false);
+						string comment = vm.CommentFromDefinition(unsolve.Item1);
+						strTip = comment.Length <= 0 ? value + (unsolve.Item2 ? "-- ⚠️ (ambiguous)" : "") : value + (unsolve.Item2 ? "-- ⚠️ (ambiguous)" : "") + " | " + comment;
+					}
+				}
+			}
+
+			listbox_tooltip.SetToolTip(listbox, strTip);
 		}
 	}
 }

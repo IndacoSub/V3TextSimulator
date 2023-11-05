@@ -47,7 +47,7 @@
 			string ext = Path.GetExtension(fi.LastOpenedFile).ToLowerInvariant();
 			bool is_font = ext == ".ttf" || ext == ".otf";
 
-            if (is_font)
+			if (is_font)
 			{
 				fm = new FontManager(fi.LastOpenedFile);
 				LabelFontName.Text = fm.FontName;
@@ -100,12 +100,12 @@
 			UpdateLineCharacter();
 			DisplayCharacterImage();
 
-            if (!is_font)
-            {
-                DestroyVerticalView();
-                OpenVerticalView();
-            }
-        }
+			if (!is_font)
+			{
+				DestroyVerticalView();
+				OpenVerticalView();
+			}
+		}
 
 		private void ButtonOpenFile_Click(object sender, EventArgs e)
 		{
@@ -122,11 +122,11 @@
 			CheckUnsaved();
 			StringIndexMinus();
 
-            if (vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
-            {
-                OpenVerticalView();
-            }
-        }
+			if (vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
+			{
+				OpenVerticalView();
+			}
+		}
 
 		private void ButtonNextText_Click(object sender, EventArgs e)
 		{
@@ -138,11 +138,11 @@
 			CheckUnsaved();
 			StringIndexPlus();
 
-            if (vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
-            {
-                OpenVerticalView();
-            }
-        }
+			if (vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
+			{
+				OpenVerticalView();
+			}
+		}
 
 		private void ButtonBackLanguage_Click(object sender, EventArgs e)
 		{
@@ -176,7 +176,7 @@
 
 			UpdateLineCharacter();
 			UpdateTextbox();
-        }
+		}
 
 		private void ButtonNextLanguage_Click(object sender, EventArgs e)
 		{
@@ -223,7 +223,7 @@
 
 			UpdateLineCharacter();
 			UpdateTextbox();
-        }
+		}
 
 		private void ButtonResetStringIndex_Click(object sender, EventArgs e)
 		{
@@ -244,7 +244,7 @@
 			UpdateTextbox();
 			UpdateLineCharacter();
 			DisplayCharacterImage();
-        }
+		}
 
 		private void ButtonFastRead_Click(object sender, EventArgs e)
 		{
@@ -357,14 +357,14 @@
 			Reload();
 		}
 
-		private void ButtonReloadVariables_Click(object sender, EventArgs e)
+		private void DoReloadVariables()
 		{
 			if (AutoPlayOn || FastReading)
 			{
 				return;
 			}
 
-			vm = new VariableManager(Convention);
+			vm = new VariableManager(AltVars);
 
 			ListBoxMenuIndex.Items.Clear();
 			ListBoxMenuElements.Items.Clear();
@@ -374,10 +374,15 @@
 				ListBoxMenuIndex.Items.Add(ms);
 			}
 
-            bool has_vars = ListBoxMenuIndex.Items.Count > 0;
-            ListBoxMenuIndex.Visible = has_vars;
-            ListBoxMenuElements.Visible = has_vars;
-        }
+			bool has_vars = ListBoxMenuIndex.Items.Count > 0;
+			ListBoxMenuIndex.Visible = has_vars;
+			ListBoxMenuElements.Visible = has_vars;
+		}
+
+		private void ButtonReloadVariables_Click(object sender, EventArgs e)
+		{
+			DoReloadVariables();
+		}
 
 		private void ButtonSaveAs_Click(object sender, EventArgs e)
 		{

@@ -84,14 +84,15 @@
 
 		private void menuItem0_Click(object sender, EventArgs e)
 		{
-			string temp_str = vm.UnSolve(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString());
+			string temp_str = vm.UnSolve(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString()).Item1;
 			Clipboard.SetText(temp_str);
 			InputManager.Print("Copied!");
 		}
 
 		private void menuItem1_Click(object sender, EventArgs e)
 		{
-			string temp_str = vm.UnSolve(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString());
+			string name = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
+			string temp_str = vm.UnSolve(name).Item1;
 
 			if (temp_str.Length <= 0)
 			{
@@ -108,8 +109,10 @@
 				InputManager.Print(temp_str + " not found, remember to add it later!");
 			}
 
+			string comment = vm.CommentFromDefinition(temp_str);
+
 			vm.AddVariantVWithPriority(temp_str,
-				ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString().ToLowerInvariant());
+				name.ToLowerInvariant(), comment);
 
 			Clipboard.SetText(temp_str);
 			InputManager.Print("Copied!");
@@ -117,7 +120,8 @@
 
 		private void menuItem2_Click(object sender, EventArgs e)
 		{
-			string temp_str = vm.UnSolve(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString());
+			string name = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
+			string temp_str = vm.UnSolve(name).Item1;
 
 			if (temp_str.Length <= 0)
 			{
@@ -134,8 +138,10 @@
 				InputManager.Print(temp_str + " not found, remember to add it later!");
 			}
 
+			string comment = vm.CommentFromDefinition(temp_str);
+
 			vm.AddVariantVWithPriority(temp_str,
-				ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString().ToUpperInvariant());
+				name.ToUpperInvariant(), comment);
 
 			Clipboard.SetText(temp_str);
 			InputManager.Print("Copied!");
@@ -190,7 +196,7 @@
 		{
 			int index = ListBoxMenuElements.SelectedIndex;
 			string str = ListBoxMenuElements.Items[index].ToString();
-			string var = vm.UnSolve(str);
+			string var = vm.UnSolve(str).Item1;
 
 			string view = "Index: " + index + "\nString: " + str + "\nVariable: " + var;
 			InputManager.Print(view);
@@ -199,7 +205,7 @@
 		private void menuItem6_Click(object sender, EventArgs e)
 		{
 			string value = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
-			string tentative_raw = vm.UnSolve(value);
+			string tentative_raw = vm.UnSolve(value).Item1;
 			VariableManager vm2 = new VariableManager(!CheckboxUseAlternateVars.Checked);
 			string variant = vm2.SolveVar(tentative_raw);
 			InputManager.Print(variant);

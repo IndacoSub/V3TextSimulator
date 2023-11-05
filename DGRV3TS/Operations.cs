@@ -7,6 +7,7 @@ namespace DGRV3TS
 	{
 		DialogueWindow dialogue_window;
 		VerticalView vertical_view;
+		ToolTip listbox_tooltip;
 		string[] program_args;
 		string auto_open_file = "";
 

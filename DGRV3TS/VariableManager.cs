@@ -1,4 +1,4 @@
-namespace DGRV3TS
+﻿namespace DGRV3TS
 {
 	internal class VariableManager
 	{
@@ -11,8 +11,8 @@ namespace DGRV3TS
 
 		public string NoVarStr = "No Variables";
 
-		// Definition, Value
-		public List<Tuple<string, string>> Variables;
+		// Definition, Value, Comment
+		public List<Tuple<string, string, string>> Variables;
 
 		public VariableManager(bool alt_vars)
 		{
@@ -31,7 +31,7 @@ namespace DGRV3TS
 		// Get the Value from the Definition
 		public string SolveVar(string var)
 		{
-			foreach (Tuple<string, string> tp in Variables)
+			foreach (Tuple<string, string, string> tp in Variables)
 			{
 				if (tp.Item1 == var)
 				{
@@ -44,13 +44,38 @@ namespace DGRV3TS
 			return var;
 		}
 
+
+		// Get the Comment from the Definition
+		public string CommentFromDefinition(string var)
+		{
+			foreach (Tuple<string, string, string> tp in Variables)
+			{
+				if (tp.Item1 == var)
+				{
+					return tp.Item3;
+				}
+			}
+
+			// for now
+			// return "UnknownValue";
+			return "";
+		}
+
+
 		// Get the Definition from the Value
-		public string UnSolve(string str)
+		public Tuple<string, bool> UnSolve(string str, bool verbose = true)
 		{
 			//string ret = str; // "UnknownVar";
 			int howmany = 0;
 			string ret = str;
-			foreach (Tuple<string, string> tp in Variables)
+			bool ambiguous = false;
+
+			if (str == null || str.Length <= 0)
+			{
+				return new Tuple<string, bool>(ret, ambiguous);
+			}
+
+			foreach (Tuple<string, string, string> tp in Variables)
 			{
 				if (tp.Item2 == str)
 				{
@@ -61,12 +86,16 @@ namespace DGRV3TS
 
 			if (howmany > 1)
 			{
-				InputManager.Print("More than 1 found! The copied string may not be correct.");
+				ambiguous = true;
+				if (verbose)
+				{
+					InputManager.Print("More than 1 found! The string may be incorrect.");
+				}
 			}
 
 			// for now
 			//return "UnknownVar";
-			return ret;
+			return new Tuple<string, bool>(ret, ambiguous);
 		}
 
 		public int GetIndexInListbox(ListBox ll, string str)
@@ -85,14 +114,14 @@ namespace DGRV3TS
 			return -1;
 		}
 
-		public void AddV(string var, string value)
+		public void AddV(string var, string value, string comment)
 		{
-			Variables.Add(new Tuple<string, string>(var, value));
+			Variables.Add(new Tuple<string, string, string>(var, value, comment));
 		}
 
-		public void AddVariantVWithPriority(string var, string value)
+		public void AddVariantVWithPriority(string var, string value, string comment)
 		{
-			Variables.Insert(IndexOfVariableByRaw(var), new Tuple<string, string>(var, value));
+			Variables.Insert(IndexOfVariableByRaw(var), new Tuple<string, string, string>(var, value, comment));
 		}
 
 		public int IndexOfVariableByRaw(string raw)
@@ -109,37 +138,79 @@ namespace DGRV3TS
 			return cont;
 		}
 
-		public string RawByLine(string str)
+		public string NameByLine(string str)
 		{
-			if (str.IndexOf(",") >= 0)
+			string value = "";
+			int comma_index = str.IndexOf(",");
+
+			if (comma_index >= 0)
 			{
-				return str.Substring(0, str.IndexOf(","));
+				value = str.Substring(0, comma_index);
 			}
 
-			return str;
+			return value;
 		}
 
 		public string ValueByLine(string str, bool alt)
 		{
 			string ret = "";
 
+			int colon_index = str.IndexOf(": ");
+			bool has_colon = colon_index >= 0;
+			int comma_index = str.IndexOf(", ");
+			bool has_comma = comma_index >= 0;
+
 			if (AltNames)
 			{
-				ret = alt ? str.Substring(str.IndexOf(": ") + 2) : str.Substring(str.IndexOf(", ") + 2);
+				if (has_colon && colon_index > comma_index)
+				{
+					ret = str.Substring(colon_index + 2);
+				}
+				else
+				{
+					ret = str.Substring(comma_index + 2);
+				}
 			}
 			else
 			{
 				if (alt)
 				{
-					ret = str.Substring(str.IndexOf(", ") + 2);
-					ret = ret.Substring(0, ret.IndexOf(" :"));
+					ret = str.Substring(comma_index + 2);
+					has_colon = ret.Contains(": ");
+					if (has_colon && colon_index > comma_index)
+					{
+						colon_index = ret.IndexOf(": ");
+						ret = ret.Substring(0, colon_index);
+					}
 				}
 				else
 				{
-					ret = str.Substring(str.IndexOf(", ") + 2);
+					ret = str.Substring(comma_index + 2);
 				}
 			}
 
+			int pipe_index = ret.IndexOf('|');
+			bool has_pipe = pipe_index > 0 && !ret.EndsWith('|') && !ret.EndsWith("| ");
+			if(has_pipe)
+			{
+				ret = ret.Substring(0, pipe_index - 1);
+			}
+
+			return ret;
+		}
+
+		public string CommentByLine(string line)
+		{
+			int pipe_index = line.IndexOf('|');
+			int comma_index = line.IndexOf(',');
+			bool has_pipe = pipe_index > 0;
+			bool has_comment = has_pipe && pipe_index > comma_index && !line.EndsWith('|') && !line.EndsWith("| ");
+			if(!has_comment)
+			{
+				return "";
+			}
+
+			string ret = line.Substring(pipe_index + 2);
 			return ret;
 		}
 
@@ -151,7 +222,7 @@ namespace DGRV3TS
 
 		public void AddVariables()
 		{
-			Variables = new List<Tuple<string, string>>();
+			Variables = new List<Tuple<string, string, string>>();
 			Menu = new ListBox();
 
 			ListBoxes = new List<ListBox>();
@@ -202,21 +273,38 @@ namespace DGRV3TS
 					continue;
 				}
 
-				string raw = "";
+				string name = "";
 				string value = "";
+				string comment = "";
 
-				raw = RawByLine(line);
-				if (line.IndexOf(",") >= 0 && !line.Contains("SIGNAL") && !line.Contains("PLATFORM"))
+				int comma_index = line.IndexOf(',');
+				bool has_comma = comma_index >= 0;
+
+				var raw = NameByLine(line);
+				name = raw;
+
+				if (has_comma && !line.Contains("SIGNAL") && !line.Contains("PLATFORM"))
 				{
+					// Has a value
 					bool is_all_ice = IsAllIceCompatible(line);
 					value = ValueByLine(line, is_all_ice);
 				}
 				else
 				{
-					value = raw;
+					// No value? Value is the name
+					value = name;
 				}
 
-				AddV(raw, value);
+				int pipe_index = line.IndexOf('|');
+				bool has_pipe = pipe_index >= 0;
+				bool has_comment = has_pipe && pipe_index > comma_index && !line.EndsWith('|') && !line.EndsWith("| ");
+
+				if (has_comment)
+				{
+					comment = CommentByLine(line);
+				}
+
+				AddV(name, value, comment);
 
 				ListBoxes[catnum].Items.Add(value);
 			}
@@ -296,7 +384,7 @@ namespace DGRV3TS
 
             List<string> contained = new List<string>();
 
-            foreach (Tuple<string, string> tp in this.Variables)
+            foreach (Tuple<string, string, string> tp in this.Variables)
             {
                 if (replaced.Contains(tp.Item1))
                 {
@@ -306,6 +394,11 @@ namespace DGRV3TS
 
             foreach (string sc in contained)
             {
+				if(sc.Length <= 0)
+				{
+					continue;
+				}
+
                 if (sc.StartsWith("<CLT"))
                 {
                     continue;
