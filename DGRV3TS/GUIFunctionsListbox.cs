@@ -1,4 +1,9 @@
-﻿namespace DGRV3TS
+﻿using System.Drawing;
+using System.Drawing.Text;
+using System.Windows.Forms;
+using static OfficeOpenXml.ExcelErrorValue;
+
+namespace DGRV3TS
 {
 	partial class Operations
 	{
@@ -214,6 +219,66 @@
 		private void ListBoxMenuElements_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			// Needs to be empty?
+		}
+
+		private void DrawListbox(object sender, DrawItemEventArgs e)
+		{
+			var listbox = sender as ListBox;
+
+			if (listbox == null || listbox.Items == null || listbox.Items.Count <= 0 ||
+				e == null || e.Index < 0 || e.Index >= listbox.Items.Count || e.Font == null)
+			{
+				return;
+			}
+
+			var style = FontStyle.Regular;
+			var item = listbox.Items[e.Index];
+			if(item == null)
+			{
+				return;
+			}
+			string? itemstr = item.ToString();
+			if(itemstr == null || itemstr.Length <= 0)
+			{
+				return;
+			}
+
+			if (listbox == ListBoxMenuElements && ListBoxMenuElements.Items.Count > 0)
+			{
+				var unsolve = vm.UnSolve(itemstr, false);
+				string comment = vm.CommentFromDefinition(unsolve.Item1);
+				if (comment.Length > 0)
+				{
+					style = FontStyle.Underline;
+				}
+				if (unsolve.Item2)
+				{
+					style |= FontStyle.Italic;
+				}
+			}
+
+			// TODO: the text looks different, meanwhile using DrawMode.Normal the text looks fine
+
+			e.DrawBackground();
+			if (e.State == (DrawItemState.Selected | DrawItemState.NoAccelerator | DrawItemState.NoFocusRect) ||
+				e.State == (DrawItemState.Selected | DrawItemState.Focus | DrawItemState.NoFocusRect | DrawItemState.NoAccelerator))
+			{
+				e.Graphics.FillRectangle(new SolidBrush(Color.LightGray), e.Bounds);
+			}
+			e.Graphics.DrawString(itemstr, new Font(e.Font.Name ?? "Segoe UI", 9, style), new SolidBrush(SystemColors.WindowText), e.Bounds);
+			e.DrawFocusRectangle();
+			e.Dispose();
+		}
+
+		private void ListboxMeasure(object sender, MeasureItemEventArgs e)
+		{
+			var listbox = sender as ListBox;
+			if(listbox == null || listbox.Font == null)
+			{
+				return;
+			}
+
+			e.ItemHeight = listbox.Font.Height;
 		}
 	}
 }

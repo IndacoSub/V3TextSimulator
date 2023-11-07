@@ -95,6 +95,9 @@
 			bool has_vars = ListBoxMenuIndex.Items.Count > 0;
 			ListBoxMenuIndex.Visible = has_vars;
 			ListBoxMenuElements.Visible = has_vars;
+			ListBoxMenuElements.DrawMode = DrawMode.OwnerDrawFixed;
+			ListBoxMenuIndex.DrawMode = DrawMode.OwnerDrawFixed;
+			//ListBoxMenuElements.DrawMode = DrawMode.Normal;
 
 			tm = new TranslationManager();
 

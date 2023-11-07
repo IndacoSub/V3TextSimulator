@@ -58,11 +58,11 @@ namespace DGRV3TS
 
 		public void DestroyVerticalView()
 		{
-			if(vertical_view != null)
+			if (vertical_view != null)
 			{
 				vertical_view.Owner = null;
-                vertical_view.Controls.Clear();
-                vertical_view.Close();
+				vertical_view.Controls.Clear();
+				vertical_view.Close();
 				vertical_view.Dispose();
 			}
 		}
@@ -79,38 +79,39 @@ namespace DGRV3TS
 				vertical_view = new VerticalView(new List<string>(), new List<string>(), new List<string>());
 				vertical_view.Owner = this;
 
-                List<string> translation = fi.GetAllTranslatedText();
-                List<string> original = fi.GetAllOriginalText();
+				List<string> translation = fi.GetAllTranslatedText();
+				List<string> original = fi.GetAllOriginalText();
 				List<string> speakers = fi.GetAllSpeakers();
 
-                vertical_view.InitSummaries(translation, original, speakers);
-                vertical_view.Show();
-            }
+				vertical_view.InitSummaries(translation, original, speakers);
+				vertical_view.Show();
+			}
 			else
 			{
 				UpdateVerticalView();
 			}
 		}
 
-		public void UpdateVerticalView() {
+		public void UpdateVerticalView()
+		{
 
-            List<string> translated = fi.GetAllTranslatedText();
-            List<string> original = fi.GetAllOriginalText();
+			List<string> translated = fi.GetAllTranslatedText();
+			List<string> original = fi.GetAllOriginalText();
 
-            vertical_view.UpdateSummaries(translated, original, -1);
-            vertical_view.Show();
-        }
+			vertical_view.UpdateSummaries(translated, original, -1);
+			vertical_view.Show();
+		}
 
 		public void OnVerticalViewClick(int ID)
 		{
 			CheckUnsaved();
 
-            fi.StringIndex = ID;
-            UpdateTextbox();
-            UpdateLineCharacter();
-            DisplayCharacterImage();
+			fi.StringIndex = ID;
+			UpdateTextbox();
+			UpdateLineCharacter();
+			DisplayCharacterImage();
 			UpdateVerticalView();
-        }
+		}
 
 		private void ReopenWindowButton_Click(object sender, System.EventArgs e)
 		{
@@ -118,27 +119,27 @@ namespace DGRV3TS
 			OpenWindow();
 		}
 
-        private void DumpVoicelineOnlyButton_Click(object sender, EventArgs e)
-        {
+		private void DumpVoicelineOnlyButton_Click(object sender, EventArgs e)
+		{
 
 			// This *definitely* has more than one use-case
 
-            if (!LoadedFile)
-            {
-				return;
-            }
-
-			if(fi.Type != FileManager.LoadedFileType.Po)
+			if (!LoadedFile)
 			{
 				return;
 			}
 
-            List<PoInternal> pos = new List<PoInternal>();
+			if (fi.Type != FileManager.LoadedFileType.Po)
+			{
+				return;
+			}
 
-			foreach(PoInternal po in fi.PoList)
+			List<PoInternal> pos = new List<PoInternal>();
+
+			foreach (PoInternal po in fi.PoList)
 			{
 				// No voiceline = skip
-				if(po.Voiceline.Length <= 0)
+				if (po.Voiceline.Length <= 0)
 				{
 					continue;
 				}
@@ -146,7 +147,7 @@ namespace DGRV3TS
 				// Filter by character?
 				// In this case:
 				// Dump all Monokuma dialogues which contain a voiceline
-				if(!po.Character.Contains("Monok"))
+				if (!po.Character.Contains("Monok"))
 				{
 					continue;
 				}
@@ -159,12 +160,12 @@ namespace DGRV3TS
 				fi.PoList = pos;
 				fi.SaveTxt("dump.txt", false);
 			}
-        }
+		}
 
-        private void OpenVerticalViewButton_Click(object sender, EventArgs e)
-        {
+		private void OpenVerticalViewButton_Click(object sender, EventArgs e)
+		{
 			DestroyVerticalView();
 			OpenVerticalView();
-        }
-    }
+		}
+	}
 }

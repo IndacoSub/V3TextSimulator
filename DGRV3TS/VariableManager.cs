@@ -140,7 +140,7 @@
 
 		public string NameByLine(string str)
 		{
-			string value = "";
+			string value = str;
 			int comma_index = str.IndexOf(",");
 
 			if (comma_index >= 0)
@@ -242,12 +242,15 @@
 			var lines = File.ReadLines(vars_file);
 			foreach (var line in lines)
 			{
-				if (string.IsNullOrWhiteSpace(line))
+
+				if (string.IsNullOrWhiteSpace(line) || line.Length <= 0 || line == "\n")
 				{
 					continue;
 				}
 
-				if (line.StartsWith("//"))
+				string ln = line;
+
+				if (ln.StartsWith("//"))
 				{
 					if (!donefirst)
 					{
@@ -256,19 +259,34 @@
 					}
 
 					catnum++;
-					string catname = line.Substring(3); // // + space
+					string catname = ln.Substring(3); // // + space
 					AddMenu(catname);
 					ListBoxes.Add(new ListBox());
 					ListBoxes[catnum] = new ListBox();
 					continue;
 				}
 
-				if (line.Contains("_MN"))
+				if (ln.Contains("_MN"))
 				{
 					continue;
 				}
 
-				if (line.Contains("_MS"))
+				if (ln.Contains("_MS"))
+				{
+					continue;
+				}
+
+				while(ln.EndsWith(' '))
+				{
+					ln = ln.Substring(0, ln.Length - 1);
+				}
+
+				while(ln.StartsWith(' '))
+				{
+					ln = ln.Substring(1);
+				}
+
+				if(ln.Length <= 0)
 				{
 					continue;
 				}
@@ -277,17 +295,17 @@
 				string value = "";
 				string comment = "";
 
-				int comma_index = line.IndexOf(',');
+				int comma_index = ln.IndexOf(',');
 				bool has_comma = comma_index >= 0;
 
-				var raw = NameByLine(line);
+				var raw = NameByLine(ln);
 				name = raw;
 
-				if (has_comma && !line.Contains("SIGNAL") && !line.Contains("PLATFORM"))
+				if (has_comma && !ln.Contains("SIGNAL") && !ln.Contains("PLATFORM"))
 				{
 					// Has a value
-					bool is_all_ice = IsAllIceCompatible(line);
-					value = ValueByLine(line, is_all_ice);
+					bool is_all_ice = IsAllIceCompatible(ln);
+					value = ValueByLine(ln, is_all_ice);
 				}
 				else
 				{
@@ -295,18 +313,20 @@
 					value = name;
 				}
 
-				int pipe_index = line.IndexOf('|');
+				int pipe_index = ln.IndexOf('|');
 				bool has_pipe = pipe_index >= 0;
-				bool has_comment = has_pipe && pipe_index > comma_index && !line.EndsWith('|') && !line.EndsWith("| ");
+				bool has_comment = has_pipe && pipe_index > comma_index && !ln.EndsWith('|') && !ln.EndsWith("| ");
 
 				if (has_comment)
 				{
-					comment = CommentByLine(line);
+					comment = CommentByLine(ln);
 				}
 
-				AddV(name, value, comment);
-
-				ListBoxes[catnum].Items.Add(value);
+				if (name.Length > 0)
+				{
+					AddV(name, value, comment);
+					ListBoxes[catnum].Items.Add(value);
+				}
 			}
 		}
 
