@@ -223,7 +223,7 @@ namespace DGRV3TS
 
             if (dbg)
             {
-                InputManager.Print("Actually red: " + actuallyred);
+                //InputManager.Print("Actually red: " + actuallyred);
             }
 
             return (animexists, i, actuallyred);

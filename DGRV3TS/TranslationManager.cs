@@ -20,6 +20,31 @@ namespace DGRV3TS
 			LoadTranslatedFiles();
 		}
 
+		public bool IsDebateFile(string file)
+		{
+			List<string> debate_files = new List<string>()
+			{
+				// Chapter 1
+				"c01_202_001",
+				"c01_204_001",
+				"c01_206_001",
+				"c01_206_002",
+				"c01_206_003",
+				"c01_208_001",
+				"c01_210_001",
+				"c01_212_001",
+				"c01_214_001",
+				"c01_218_001",
+				"c01_220_001",
+				"c01_222_001",
+				"c01_225_001",
+				"c01_229_001",
+				"c01_231_001",
+			};
+
+			return debate_files.Contains(Path.GetFileNameWithoutExtension(file));
+		}
+
 		public void LoadTranslatedFiles()
 		{
 			// List of translated files

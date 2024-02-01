@@ -1,10 +1,12 @@
-﻿using System.Media;
+﻿using System.Diagnostics;
+using System.Media;
 using System.Speech.Synthesis;
 
 namespace DGRV3TS
 {
 	partial class Operations
 	{
+		bool DoneSpeaking = false;
 		// Actual voice file player
 		private SoundPlayer SndPlayer = new SoundPlayer();
 
@@ -411,10 +413,12 @@ namespace DGRV3TS
 
 				if (CheckboxPlayVoiceTTS.Checked)
 				{
-					while (!sm.DoneSpeaking)
+					Debug.WriteLine("Entering loop -- line " + fi.StringIndex);
+					while (!DoneSpeaking)
 					{
 						// Wait
 					}
+					Debug.WriteLine("Exiting loop -- line " + fi.StringIndex);
 				}
 				else
 				{
@@ -448,8 +452,23 @@ namespace DGRV3TS
 					dialogue_window.DisplayedImage.Refresh();
 				}
 
-				fi.StringIndex++;
+				Debug.WriteLine("Line" + fi.StringIndex + " completed.");
+
+				if (fi.StringIndex + 1 < count - 1)
+				{
+					fi.StringIndex++;
+				} else
+				{
+					break;
+				}
 			}
+
+			Debug.WriteLine("Exiting Autoplay");
+
+			this.CheckboxPauseAutoplay.Checked = true;
+			this.CheckboxStartAutoplay.Checked = false;
+			this.CheckboxPauseAutoplay.Checked = false;
+			this.Refresh();
 		}
 
 		private void CheckUnsaved()
@@ -601,7 +620,9 @@ namespace DGRV3TS
 			// Once again treat newlines as spaces, possibly for signals
 			text = text.Replace("\\n", " ");
 
-			if (SoundManager.SoundFileExists(voice, game) && !FastReading && !AutoPlayOn)
+			DoneSpeaking = false;
+
+			if (SoundManager.SoundFileExists(voice, game) && !FastReading)
 			{
 
 				// Actual voice file
@@ -613,17 +634,29 @@ namespace DGRV3TS
 				SndPlayer = new SoundPlayer();
 				SndPlayer.SoundLocation = SoundManager.GetSoundFileByName(voice, game);
 				SndPlayer.Load();
-				SndPlayer.Play();
+				if (AutoPlayOn)
+				{
+					SndPlayer.PlaySync();
+				} else
+				{
+					SndPlayer.Play();
+				}
+				DoneSpeaking = true;
 			}
 			else
 			{
+				bool debate_mode = AutoPlayOn && tm.IsDebateFile(fi.LoadedFileName);
 				// TTS
-				SndPlayer.Stop();
-				sm.Synthesizer.Pause();
-				sm.Synthesizer.SpeakAsyncCancelAll();
+				if (!debate_mode)
+				{
+					SndPlayer.Stop();
+					sm.Synthesizer.Pause();
+					sm.Synthesizer.SpeakAsyncCancelAll();
 
-				sm.Synthesizer = new SpeechSynthesizer();
-				sm.PlayVoice(text, language, gender, age, async);
+					sm.Synthesizer = new SpeechSynthesizer();
+					sm.PlayVoice(text.Replace("_MN", ""), language, gender, age, async);
+				}
+				DoneSpeaking = true;
 			}
 		}
 	}
