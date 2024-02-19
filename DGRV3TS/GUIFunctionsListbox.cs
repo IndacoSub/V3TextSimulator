@@ -1,6 +1,8 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
+using static DGRV3TS.VariableManager;
 using static OfficeOpenXml.ExcelErrorValue;
 
 namespace DGRV3TS
@@ -28,7 +30,9 @@ namespace DGRV3TS
 
 			foreach (string s in tempList)
 			{
-				ListBoxMenuElements.Items.Add(s);
+				string final_s = s;
+				final_s = vm.ReplaceVars(final_s);
+				ListBoxMenuElements.Items.Add(final_s);
 			}
 
 			if (ListBoxMenuElements.Items.Count == 0)
@@ -89,66 +93,66 @@ namespace DGRV3TS
 
 		private void menuItem0_Click(object sender, EventArgs e)
 		{
-			string temp_str = vm.UnSolve(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString()).Item1;
-			Clipboard.SetText(temp_str);
+			(VariableEntry v, int i) = vm.EntryByValue(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString());
+			Clipboard.SetText(v.Definition);
 			InputManager.Print("Copied!");
 		}
 
 		private void menuItem1_Click(object sender, EventArgs e)
 		{
 			string name = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
-			string temp_str = vm.UnSolve(name).Item1;
+			(VariableEntry v, int i) = vm.EntryByValue(name);
 
-			if (temp_str.Length <= 0)
+			if (v.Definition.Length <= 0)
 			{
 				return;
 			}
 
-			if (!temp_str.Contains("_MN"))
+			if (!v.Definition.Contains("_MN"))
 			{
-				temp_str += "_MN";
+				v.Definition += "_MN";
 			}
 
-			if (vm.SolveVar(temp_str) == temp_str)
+			if (vm.EntryByDefinition(v.Definition).Value == v.Definition)
 			{
-				InputManager.Print(temp_str + " not found, remember to add it later!");
+				InputManager.Print(v.Definition + " not found, remember to add it later!");
 			}
 
-			string comment = vm.CommentFromDefinition(temp_str);
+			string comment = vm.EntryByDefinition(v.Definition).Comment;
 
-			vm.AddVariantVWithPriority(temp_str,
+			vm.AddVariantVWithPriority(v.Definition,
 				name.ToLowerInvariant(), comment);
 
-			Clipboard.SetText(temp_str);
+			Clipboard.SetText(v.Definition);
 			InputManager.Print("Copied!");
 		}
 
 		private void menuItem2_Click(object sender, EventArgs e)
 		{
 			string name = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
-			string temp_str = vm.UnSolve(name).Item1;
+			(VariableEntry v, int i) = vm.EntryByValue(name);
 
-			if (temp_str.Length <= 0)
+			if (v.Definition.Length <= 0)
 			{
 				return;
 			}
 
-			if (!temp_str.Contains("_MS"))
+			if (!v.Definition.Contains("_MS"))
 			{
-				temp_str += "_MS";
+				v.Definition += "_MS";
 			}
 
-			if (vm.SolveVar(temp_str) == temp_str)
+			if (vm.EntryByDefinition(v.Definition).Value == v.Definition)
 			{
-				InputManager.Print(temp_str + " not found, remember to add it later!");
+				InputManager.Print(v.Definition + " not found, remember to add it later!");
 			}
 
-			string comment = vm.CommentFromDefinition(temp_str);
+			string comment = vm.EntryByDefinition(v.Definition).Comment;
 
-			vm.AddVariantVWithPriority(temp_str,
+			vm.AddVariantVWithPriority(v.Definition,
 				name.ToUpperInvariant(), comment);
 
-			Clipboard.SetText(temp_str);
+			Clipboard.SetText(v.Definition);
 			InputManager.Print("Copied!");
 		}
 
@@ -201,18 +205,18 @@ namespace DGRV3TS
 		{
 			int index = ListBoxMenuElements.SelectedIndex;
 			string str = ListBoxMenuElements.Items[index].ToString();
-			string var = vm.UnSolve(str).Item1;
+			(VariableEntry v, int i) = vm.EntryByValue(str);
 
-			string view = "Index: " + index + "\nString: " + str + "\nVariable: " + var;
+			string view = "Index: " + index + "\nString: " + str + "\nVariable: " + v.Definition;
 			InputManager.Print(view);
 		}
 
 		private void menuItem6_Click(object sender, EventArgs e)
 		{
 			string value = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
-			string tentative_raw = vm.UnSolve(value).Item1;
+			(VariableEntry v, int i) = vm.EntryByValue(value);
 			VariableManager vm2 = new VariableManager(!CheckboxUseAlternateVars.Checked);
-			string variant = vm2.SolveVar(tentative_raw);
+			string variant = vm.EntryByDefinition(v.Definition).Value;
 			InputManager.Print(variant);
 		}
 
@@ -243,17 +247,34 @@ namespace DGRV3TS
 				return;
 			}
 
-			if (listbox == ListBoxMenuElements && ListBoxMenuElements.Items.Count > 0)
+			if (itemstr != vm.NoVarStr && !itemstr.Contains("MAKE_") && !itemstr.Contains("MY_ARG"))
 			{
-				var unsolve = vm.UnSolve(itemstr, false);
-				string comment = vm.CommentFromDefinition(unsolve.Item1);
-				if (comment.Length > 0)
+				if (listbox == ListBoxMenuElements && ListBoxMenuElements.Items.Count > 0)
 				{
-					style = FontStyle.Underline;
-				}
-				if (unsolve.Item2)
-				{
-					style |= FontStyle.Italic;
+					(VariableEntry v, int i) = vm.EntryByValue(itemstr);
+					if (v == null)
+					{
+#if DEBUG
+						Debug.WriteLine("v == null, itemstr: " + itemstr);
+#else
+						Console.WriteLine("v == null, itemstr: " + itemstr);
+#endif
+						return;
+					}
+					VariableEntry vc = vm.EntryByDefinition(v.Definition);
+					if(vc == null)
+					{
+						return;
+					}
+					string comment = vc.Comment;
+					if (comment.Length > 0)
+					{
+						style = FontStyle.Underline;
+					}
+					if (i > 1)
+					{
+						style |= FontStyle.Italic;
+					}
 				}
 			}
 

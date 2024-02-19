@@ -1,4 +1,8 @@
-﻿namespace DGRV3TS
+﻿using System.Diagnostics;
+using static OfficeOpenXml.ExcelErrorValue;
+using static System.Collections.Specialized.BitVector32;
+
+namespace DGRV3TS
 {
 	internal class VariableManager
 	{
@@ -12,7 +16,16 @@
 		public string NoVarStr = "No Variables";
 
 		// Definition, Value, Comment
-		public List<Tuple<string, string, string>> Variables;
+		public List<VariableEntry> Variables;
+
+		static int MaxRecursive = 3;
+
+		public class VariableEntry
+		{
+			public string Definition;
+			public string Value;
+			public string Comment;
+		}
 
 		public VariableManager(bool alt_vars)
 		{
@@ -26,76 +39,6 @@
 
 			AddVariables();
 			ChangeItemNames();
-		}
-
-		// Get the Value from the Definition
-		public string SolveVar(string var)
-		{
-			foreach (Tuple<string, string, string> tp in Variables)
-			{
-				if (tp.Item1 == var)
-				{
-					return tp.Item2;
-				}
-			}
-
-			// for now
-			// return "UnknownValue";
-			return var;
-		}
-
-
-		// Get the Comment from the Definition
-		public string CommentFromDefinition(string var)
-		{
-			foreach (Tuple<string, string, string> tp in Variables)
-			{
-				if (tp.Item1 == var)
-				{
-					return tp.Item3;
-				}
-			}
-
-			// for now
-			// return "UnknownValue";
-			return "";
-		}
-
-
-		// Get the Definition from the Value
-		public Tuple<string, bool> UnSolve(string str, bool verbose = true)
-		{
-			//string ret = str; // "UnknownVar";
-			int howmany = 0;
-			string ret = str;
-			bool ambiguous = false;
-
-			if (str == null || str.Length <= 0)
-			{
-				return new Tuple<string, bool>(ret, ambiguous);
-			}
-
-			foreach (Tuple<string, string, string> tp in Variables)
-			{
-				if (tp.Item2 == str)
-				{
-					ret = tp.Item1;
-					howmany++;
-				}
-			}
-
-			if (howmany > 1)
-			{
-				ambiguous = true;
-				if (verbose)
-				{
-					InputManager.Print("More than 1 found! The string may be incorrect.");
-				}
-			}
-
-			// for now
-			//return "UnknownVar";
-			return new Tuple<string, bool>(ret, ambiguous);
 		}
 
 		public int GetIndexInListbox(ListBox ll, string str)
@@ -116,12 +59,21 @@
 
 		public void AddV(string var, string value, string comment)
 		{
-			Variables.Add(new Tuple<string, string, string>(var, value, comment));
+			VariableEntry ve = new VariableEntry();
+			ve.Definition = var;
+			ve.Value = value;
+			ve.Comment = comment;
+			Variables.Add(ve);
 		}
 
 		public void AddVariantVWithPriority(string var, string value, string comment)
 		{
-			Variables.Insert(IndexOfVariableByRaw(var), new Tuple<string, string, string>(var, value, comment));
+			VariableEntry ve = new VariableEntry();
+			ve.Definition = var;
+			ve.Value = value;
+			ve.Comment = comment;
+
+			Variables.Insert(IndexOfVariableByRaw(var), ve);
 		}
 
 		public int IndexOfVariableByRaw(string raw)
@@ -129,7 +81,7 @@
 			int cont = 0;
 			foreach (var iable in Variables)
 			{
-				if (iable.Item1 == raw)
+				if (iable.Definition == raw)
 				{
 					return cont;
 				}
@@ -146,6 +98,16 @@
 			if (comma_index >= 0)
 			{
 				value = str.Substring(0, comma_index);
+			}
+
+			while (value.StartsWith(" "))
+			{
+				value = value.Substring(1);
+			}
+
+			while (value.EndsWith(" "))
+			{
+				value = value.Substring(0, value.Length - 1);
 			}
 
 			return value;
@@ -191,9 +153,18 @@
 
 			int pipe_index = ret.IndexOf('|');
 			bool has_pipe = pipe_index > 0 && !ret.EndsWith('|') && !ret.EndsWith("| ");
-			if(has_pipe)
+			if (has_pipe)
 			{
 				ret = ret.Substring(0, pipe_index - 1);
+			}
+
+			while (ret.StartsWith(" "))
+			{
+				ret = ret.Substring(1);
+			}
+			while (ret.EndsWith(" "))
+			{
+				ret = ret.Substring(0, ret.Length - 1);
 			}
 
 			return ret;
@@ -205,12 +176,22 @@
 			int comma_index = line.IndexOf(',');
 			bool has_pipe = pipe_index > 0;
 			bool has_comment = has_pipe && pipe_index > comma_index && !line.EndsWith('|') && !line.EndsWith("| ");
-			if(!has_comment)
+			if (!has_comment)
 			{
 				return "";
 			}
 
 			string ret = line.Substring(pipe_index + 2);
+
+			while (ret.StartsWith(" "))
+			{
+				ret = ret.Substring(1);
+			}
+			while (ret.EndsWith(" "))
+			{
+				ret = ret.Substring(0, ret.Length - 1);
+			}
+
 			return ret;
 		}
 
@@ -222,13 +203,12 @@
 
 		public void AddVariables()
 		{
-			Variables = new List<Tuple<string, string, string>>();
 			Menu = new ListBox();
-
+			Variables = new List<VariableEntry>();
 			ListBoxes = new List<ListBox>();
 
 			string vars_file = FileManager.GetCurrentDirectory();
-			vars_file = Path.Combine(vars_file, "vars_bak.txt");	// Hardcoded
+			vars_file = Path.Combine(vars_file, "vars_bak.txt");    // Hardcoded
 
 			// The variables' file is "vars_bak.txt"
 
@@ -266,27 +246,17 @@
 					continue;
 				}
 
-				if (ln.Contains("_MN"))
-				{
-					continue;
-				}
-
-				if (ln.Contains("_MS"))
-				{
-					continue;
-				}
-
-				while(ln.EndsWith(' '))
+				while (ln.EndsWith(' '))
 				{
 					ln = ln.Substring(0, ln.Length - 1);
 				}
 
-				while(ln.StartsWith(' '))
+				while (ln.StartsWith(' '))
 				{
 					ln = ln.Substring(1);
 				}
 
-				if(ln.Length <= 0)
+				if (ln.Length <= 0)
 				{
 					continue;
 				}
@@ -300,6 +270,16 @@
 
 				var raw = NameByLine(ln);
 				name = raw;
+
+				if (name.Contains("_MN"))
+				{
+					continue;
+				}
+
+				if (name.Contains("_MS"))
+				{
+					continue;
+				}
 
 				if (has_comma && !ln.Contains("SIGNAL") && !ln.Contains("PLATFORM"))
 				{
@@ -324,9 +304,17 @@
 
 				if (name.Length > 0)
 				{
-					AddV(name, value, comment);
-					ListBoxes[catnum].Items.Add(value);
+					if (!name.StartsWith("MAKE_"))
+					{
+						AddV(name, value, comment);
+						ListBoxes[catnum].Items.Add(value);
+					}
 				}
+			}
+
+			foreach (var iables in Variables)
+			{
+				iables.Value = this.ReplaceVars(iables.Definition);
 			}
 		}
 
@@ -354,6 +342,7 @@
 			replaced = replaced.Replace("<CLT=typeNORMAL>", "");
 			replaced = replaced.Replace("<CLT=cltSYSTEM>", "");
 			replaced = replaced.Replace("<CLT=cltWEAK>", "");
+			replaced = replaced.Replace("<CLT=cltAGREE>", "");
 
 			replaced = replaced.Normalize();
 
@@ -398,36 +387,115 @@
 			}
 		}
 
-        public string ReplaceVars(string replaced)
-        {
-            // Replace variables using the VariableManager
+		public VariableEntry EntryByDefinition(string definition)
+		{
+			if (definition == null)
+			{
+				return null;
+			}
 
-            List<string> contained = new List<string>();
-
-            foreach (Tuple<string, string, string> tp in this.Variables)
-            {
-                if (replaced.Contains(tp.Item1))
-                {
-                    contained.Add(tp.Item1);
-                }
-            }
-
-            foreach (string sc in contained)
-            {
-				if(sc.Length <= 0)
+			foreach (VariableEntry tp in this.Variables)
+			{
+				if (tp.Definition == definition)
 				{
-					continue;
+					return tp;
+				}
+			}
+
+			return null;
+		}
+
+		public (VariableEntry, int) EntryByValue(string value)
+		{
+			if (value == null)
+			{
+				return (null, 9999);
+			}
+
+			int count = 0;
+			VariableEntry first = null;
+			foreach (VariableEntry tp in this.Variables)
+			{
+				string str = tp.Definition;
+				var solved = this.ReplaceVars(str);
+				if (solved == value)
+				{
+					if (first == null)
+					{
+						first = tp;
+					}
+					count++;
+				}
+				if (count > 1)
+				{
+					break;
+				}
+			}
+
+			return (first, count);
+		}
+
+		public string ReplaceVars(string replaced)
+		{
+			// Replace variables using the VariableManager
+
+			int count = 0;
+			bool cond = false;
+
+			do
+			{
+				List<string> contained = new List<string>();
+
+				foreach (VariableEntry tp in this.Variables)
+				{
+					if (replaced.Contains(tp.Definition))
+					{
+						contained.Add(tp.Definition);
+					}
+
+					if (!tp.Definition.Contains("MAKE_") || !replaced.Contains("MAKE_"))
+					{
+						continue;
+					}
+
+					int section_start = replaced.IndexOf("MAKE_");
+					string section = replaced.Substring(section_start);
+					int section_end = replaced.IndexOf(")");
+					section = section.Substring(0, section_end);
+					int find = replaced.IndexOf("(");
+					string value = replaced.Substring(find + 1);
+					find = value.IndexOf(")");
+					value = value.Substring(0, find);
+
+					replaced = replaced.Replace(section, tp.Value.Replace("MY_ARG", value));
 				}
 
-                if (sc.StartsWith("<CLT"))
-                {
-                    continue;
-                }
+				for (int i = 0; i < contained.Count; i++)
+				{
+					if (contained[i].Length <= 0)
+					{
+						continue;
+					}
 
-                replaced = replaced.Replace(sc, this.SolveVar(sc));
-            }
+					if (contained[i].StartsWith("<CLT"))
+					{
+						continue;
+					}
 
-            return replaced;
-        }
-    }
+					var entry = EntryByDefinition(contained[i]);
+					if (entry == null || entry.Value == null || entry.Value.Length == 0)
+					{
+						continue;
+					}
+
+					replaced = replaced.Replace(contained[i], entry.Value);
+				}
+
+				count++;
+				cond = (replaced.Contains("MAKE_") || replaced.Contains("VAR_")) && count < VariableManager.MaxRecursive;
+			} while (cond);
+
+			return replaced.Replace("  ", " ");
+		}
+	}
 }

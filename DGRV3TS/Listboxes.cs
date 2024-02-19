@@ -24,8 +24,16 @@
 			}
 
 			// Variable
-			var unsolved = vm.UnSolve(st);
-			return unsolved.Item1;
+			(var unsolved, int i) = vm.EntryByValue(st);
+			if(unsolved == null)
+			{
+				return "NullVar";
+			}
+			if(unsolved.Definition == null)
+			{
+				return "NullDef";
+			}
+			return unsolved.Definition;
 		}
 
 		private void CreateListBoxMenu()
@@ -107,9 +115,12 @@
 					string? value = item.ToString();
 					if (value != null && value.Length > 0)
 					{
-						var unsolve = vm.UnSolve(value, false);
-						string comment = vm.CommentFromDefinition(unsolve.Item1);
-						strTip = comment.Length <= 0 ? value + (unsolve.Item2 ? "-- ⚠️ (ambiguous)" : "") : value + (unsolve.Item2 ? "-- ⚠️ (ambiguous)" : "") + " | " + comment;
+						(var unsolve, int count) = vm.EntryByValue(value);
+						if (unsolve != null)
+						{
+							string comment = vm.EntryByDefinition(unsolve.Definition).Comment;
+							strTip = comment.Length <= 0 ? unsolve.Definition + (count > 1 ? " -- ⚠️ (ambiguous)" : "") : unsolve.Definition + (count > 1 ? " -- ⚠️ (ambiguous)" : "") + " | " + comment;
+						}
 					}
 				}
 			}
