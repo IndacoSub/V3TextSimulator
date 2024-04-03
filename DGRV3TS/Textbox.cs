@@ -86,49 +86,68 @@
 			switch (fi.Type)
 			{
 				case FileManager.LoadedFileType.Vo:
-					if (fi.VoList.Count < fi.StringIndex)
 					{
-						return;
-					}
+						if (fi.VoList.Count < fi.StringIndex)
+						{
+							return;
+						}
 
-					LabelLineNumber.Text = "Line: " + fi.VoList.ElementAt(fi.StringIndex).LineNumber;
-					LabelCharacterName.Text = "Character: " + fi.VoList.ElementAt(fi.StringIndex).Character;
-					LabelOriginFile.Text = "Origin file: " + fi.VoList.ElementAt(fi.StringIndex).OriginFile;
-					// 4 is opened file so it's always the same
-					if (CheckboxDisplayOriginalText.Checked)
-					{
-						LabelCurrentTranslation.Text = "Translation: Original Text";
-					}
-					else
-					{
-						LabelCurrentTranslation.Text = "Translation: " + (fi.SelectedLanguage + 1) + "/" +
-													   fi.VoList.ElementAt(fi.StringIndex).TranslationNumber;
-					}
+						var loaded_line = fi.VoList.ElementAt(fi.StringIndex).LineNumber;
+						var loaded_char = fi.VoList.ElementAt(fi.StringIndex).Character;
+						var loaded_of = fi.VoList.ElementAt(fi.StringIndex).OriginFile;
 
+						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line.ToString() : "";
+						LabelCharacterName.Text = loaded_char.Length > 0 && loaded_char != "DefaultCharacter" ? "Character: " + loaded_char : "";
+						LabelOriginFile.Text = loaded_of.Length > 0 && loaded_of != "DefaultOriginFile" ? "Origin file: " + loaded_of : "";
+						// 4 is opened file so it's always the same
+						if (CheckboxDisplayOriginalText.Checked)
+						{
+							LabelCurrentTranslation.Text = "Translation: Original Text";
+						}
+						else
+						{
+							LabelCurrentTranslation.Text = "Translation: " + (fi.SelectedLanguage + 1) + "/" +
+														   fi.VoList.ElementAt(fi.StringIndex).TranslationNumber;
+						}
+					}
 					break;
 				case FileManager.LoadedFileType.Po:
-					if (fi.PoList.Count < fi.StringIndex)
 					{
-						return;
-					}
+						if (fi.PoList.Count < fi.StringIndex)
+						{
+							return;
+						}
 
-					LabelLineNumber.Text = "Line: " + fi.PoList.ElementAt(fi.StringIndex).LineNumber;
-					LabelCharacterName.Text = "Character: " + fi.PoList.ElementAt(fi.StringIndex).Character;
-					LabelOriginFile.Text = "Origin file: " + fi.PoList.ElementAt(fi.StringIndex).OriginFile;
+						var loaded_line = fi.PoList.ElementAt(fi.StringIndex).LineNumber;
+						var loaded_char = fi.PoList.ElementAt(fi.StringIndex).Character;
+						var loaded_of = fi.PoList.ElementAt(fi.StringIndex).OriginFile;
+						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line.ToString() : "";
+						LabelCharacterName.Text = loaded_char.Length > 0 && loaded_char != "DefaultCharacter" ? "Character: " + loaded_char : "";
+						LabelOriginFile.Text = loaded_of.Length > 0 && loaded_of != "DefaultOriginFile" ? "Origin file: " + loaded_of : "";
+					}
 					break;
 				case FileManager.LoadedFileType.Txt:
 				case FileManager.LoadedFileType.Xlsx:
-					LabelLineNumber.Text = "Line: " + (fi.StringIndex + 1);
-					LabelOriginFile.Text = "Origin file: " + Path.GetFileName(fi.LoadedFileName);
+					{
+						var loaded_line = fi.StringIndex + 1;
+						var loaded_of = Path.GetFileName(fi.LoadedFileName);
+						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line : "";
+						LabelOriginFile.Text = loaded_of.Length > 0 && loaded_of != "DefaultOriginFile" ? "Origin file: " + loaded_of : "";
+					}
 					break;
 				case FileManager.LoadedFileType.Stx:
-					LabelLineNumber.Text = "Line: " + (fi.StringIndex + 1);
-					if (fi.StxFile.LoadedWRD != null)
 					{
-						LabelCharacterName.Text = "Character: " + fi.StxFile.CharacterByLineNumber(fi.StringIndex);
-					}
+						var loaded_line = fi.StringIndex + 1;
+						var loaded_char = fi.StxFile.CharacterByLineNumber(fi.StringIndex);
+						var loaded_of = Path.GetFileName(fi.LoadedFileName);
+						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line : "";
+						if (fi.StxFile.LoadedWRD != null)
+						{
+							LabelCharacterName.Text = loaded_char.Length > 0 && loaded_char != "DefaultCharacter" ? "Character: " + loaded_char : "";
+						}
 
-					LabelOriginFile.Text = "Origin file: " + Path.GetFileName(fi.LoadedFileName);
+						LabelOriginFile.Text = loaded_of.Length > 0 && loaded_of != "DefaultOriginFile" ? "Origin file: " + loaded_of : "";
+					}
 					break;
 			}
 

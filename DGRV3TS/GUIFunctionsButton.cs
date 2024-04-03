@@ -35,7 +35,7 @@
 
 			LoadedFile = false;
 			fi = new FileManager();
-			fi.GameIndex = CurrentGameIndex;
+			fi.FMGameIndex = CurrentGameIndex;
 			// Reset to default text
 			Textbox.Text = "This is an example\\nmessage.";
 			UpdateLineCharacter();
@@ -52,6 +52,10 @@
 				fm = new FontManager(fi.LastOpenedFile);
 				LabelFontName.Text = fm.FontName;
 				Reload();
+			} else
+			{
+				LabelOpenedFile.Visible = true;
+				LabelLineNumber.Visible = true;
 			}
 
 			if (string.IsNullOrEmpty(file))
@@ -60,7 +64,7 @@
 				return;
 			}
 
-			CheckboxAutoTranslation.Visible = false;
+			CheckboxAutoTranslation.Enabled = false;
 
 			switch (fi.Type)
 			{
@@ -81,6 +85,25 @@
 				default:
 					return;
 			}
+			ButtonNextText.Visible = true;
+			ButtonBackText.Visible = true;
+
+			switch(fi.Type)
+			{
+				case FileManager.LoadedFileType.Txt:
+				case FileManager.LoadedFileType.Stx:
+					break;
+				default:
+					CheckboxDisplayOriginalText.Visible = true;
+					break;
+			}
+
+			CheckboxMaybeAccurateHeight.Visible = true;
+			CheckboxPauseAutoplay.Visible = true;
+			CheckboxStartAutoplay.Visible = true;
+			ButtonSaveAs.Visible = true;
+			ButtonResetStringIndex.Visible = true;
+			ButtonFastRead.Visible = true;
 
 			LoadedFile = true;
 
@@ -99,6 +122,8 @@
 			UpdateTextbox();
 			UpdateLineCharacter();
 			DisplayCharacterImage();
+
+			LoadGameSpecificGUI();
 
 			if (!is_font)
 			{
@@ -359,24 +384,7 @@
 
 		private void DoReloadVariables()
 		{
-			if (AutoPlayOn || FastReading)
-			{
-				return;
-			}
-
-			vm = new VariableManager(AltVars);
-
-			ListBoxMenuIndex.Items.Clear();
-			ListBoxMenuElements.Items.Clear();
-
-			foreach (string ms in vm.Menu.Items)
-			{
-				ListBoxMenuIndex.Items.Add(ms);
-			}
-
-			bool has_vars = ListBoxMenuIndex.Items.Count > 0;
-			ListBoxMenuIndex.Visible = has_vars;
-			ListBoxMenuElements.Visible = has_vars;
+			ReloadListboxes();
 		}
 
 		private void ButtonReloadVariables_Click(object sender, EventArgs e)

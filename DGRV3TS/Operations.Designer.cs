@@ -102,7 +102,7 @@
 			// CheckboxAutoTranslation
 			// 
 			CheckboxAutoTranslation.AutoSize = true;
-			CheckboxAutoTranslation.Location = new Point(400, 155);
+			CheckboxAutoTranslation.Location = new Point(400, 138);
 			CheckboxAutoTranslation.Margin = new Padding(4, 3, 4, 3);
 			CheckboxAutoTranslation.Name = "CheckboxAutoTranslation";
 			CheckboxAutoTranslation.Size = new Size(109, 19);
@@ -125,7 +125,7 @@
 			// CheckboxMaybeAccurateHeight
 			// 
 			CheckboxMaybeAccurateHeight.AutoSize = true;
-			CheckboxMaybeAccurateHeight.Location = new Point(400, 138);
+			CheckboxMaybeAccurateHeight.Location = new Point(400, 156);
 			CheckboxMaybeAccurateHeight.Margin = new Padding(4, 3, 4, 3);
 			CheckboxMaybeAccurateHeight.Name = "CheckboxMaybeAccurateHeight";
 			CheckboxMaybeAccurateHeight.Size = new Size(133, 19);
@@ -209,10 +209,10 @@
 			// 
 			// ButtonNextLanguage
 			// 
-			ButtonNextLanguage.Location = new Point(636, 135);
+			ButtonNextLanguage.Location = new Point(631, 136);
 			ButtonNextLanguage.Margin = new Padding(4, 3, 4, 3);
 			ButtonNextLanguage.Name = "ButtonNextLanguage";
-			ButtonNextLanguage.Size = new Size(79, 30);
+			ButtonNextLanguage.Size = new Size(71, 30);
 			ButtonNextLanguage.TabIndex = 71;
 			ButtonNextLanguage.Text = "Lang ++";
 			ButtonNextLanguage.UseVisualStyleBackColor = true;
@@ -223,7 +223,7 @@
 			ButtonBackLanguage.Location = new Point(544, 136);
 			ButtonBackLanguage.Margin = new Padding(4, 3, 4, 3);
 			ButtonBackLanguage.Name = "ButtonBackLanguage";
-			ButtonBackLanguage.Size = new Size(85, 30);
+			ButtonBackLanguage.Size = new Size(79, 30);
 			ButtonBackLanguage.TabIndex = 70;
 			ButtonBackLanguage.Text = "Lang --";
 			ButtonBackLanguage.UseVisualStyleBackColor = true;
@@ -231,10 +231,10 @@
 			// 
 			// ButtonNextText
 			// 
-			ButtonNextText.Location = new Point(636, 102);
+			ButtonNextText.Location = new Point(631, 100);
 			ButtonNextText.Margin = new Padding(4, 3, 4, 3);
 			ButtonNextText.Name = "ButtonNextText";
-			ButtonNextText.Size = new Size(79, 31);
+			ButtonNextText.Size = new Size(71, 31);
 			ButtonNextText.TabIndex = 69;
 			ButtonNextText.Text = "Line ++";
 			ButtonNextText.UseVisualStyleBackColor = true;
@@ -245,7 +245,7 @@
 			ButtonBackText.Location = new Point(544, 100);
 			ButtonBackText.Margin = new Padding(4, 3, 4, 3);
 			ButtonBackText.Name = "ButtonBackText";
-			ButtonBackText.Size = new Size(85, 31);
+			ButtonBackText.Size = new Size(79, 31);
 			ButtonBackText.TabIndex = 68;
 			ButtonBackText.Text = "Line --";
 			ButtonBackText.UseVisualStyleBackColor = true;
@@ -332,7 +332,7 @@
 			CheckboxTranslationMode.AutoSize = true;
 			CheckboxTranslationMode.Checked = true;
 			CheckboxTranslationMode.CheckState = CheckState.Checked;
-			CheckboxTranslationMode.Location = new Point(1104, 25);
+			CheckboxTranslationMode.Location = new Point(1104, 27);
 			CheckboxTranslationMode.Margin = new Padding(4, 3, 4, 3);
 			CheckboxTranslationMode.Name = "CheckboxTranslationMode";
 			CheckboxTranslationMode.Size = new Size(117, 19);
@@ -344,7 +344,7 @@
 			// CheckboxPauseAutoplay
 			// 
 			CheckboxPauseAutoplay.AutoSize = true;
-			CheckboxPauseAutoplay.Location = new Point(1105, 142);
+			CheckboxPauseAutoplay.Location = new Point(1104, 132);
 			CheckboxPauseAutoplay.Margin = new Padding(4, 3, 4, 3);
 			CheckboxPauseAutoplay.Name = "CheckboxPauseAutoplay";
 			CheckboxPauseAutoplay.Size = new Size(108, 19);
@@ -367,7 +367,7 @@
 			// CheckboxStartAutoplay
 			// 
 			CheckboxStartAutoplay.AutoSize = true;
-			CheckboxStartAutoplay.Location = new Point(1105, 119);
+			CheckboxStartAutoplay.Location = new Point(1104, 111);
 			CheckboxStartAutoplay.Margin = new Padding(4, 3, 4, 3);
 			CheckboxStartAutoplay.Name = "CheckboxStartAutoplay";
 			CheckboxStartAutoplay.Size = new Size(148, 19);
@@ -381,21 +381,21 @@
 			CheckboxDisplayCharacter.AutoSize = true;
 			CheckboxDisplayCharacter.Checked = true;
 			CheckboxDisplayCharacter.CheckState = CheckState.Checked;
-			CheckboxDisplayCharacter.Location = new Point(1104, 97);
+			CheckboxDisplayCharacter.Location = new Point(1104, 68);
 			CheckboxDisplayCharacter.Margin = new Padding(4, 3, 4, 3);
 			CheckboxDisplayCharacter.Name = "CheckboxDisplayCharacter";
 			CheckboxDisplayCharacter.Size = new Size(118, 19);
 			CheckboxDisplayCharacter.TabIndex = 83;
 			CheckboxDisplayCharacter.Text = "Display Character";
 			CheckboxDisplayCharacter.UseVisualStyleBackColor = true;
-			CheckboxDisplayCharacter.CheckedChanged += CheckboxDisplayCharacter_CheckedChanged;
+			CheckboxDisplayCharacter.CheckedChanged += this.CheckboxDisplayCharacter_CheckedChanged;
 			// 
 			// CheckboxReplaceVariables
 			// 
 			CheckboxReplaceVariables.AutoSize = true;
 			CheckboxReplaceVariables.Checked = true;
 			CheckboxReplaceVariables.CheckState = CheckState.Checked;
-			CheckboxReplaceVariables.Location = new Point(1104, 75);
+			CheckboxReplaceVariables.Location = new Point(1104, 47);
 			CheckboxReplaceVariables.Margin = new Padding(4, 3, 4, 3);
 			CheckboxReplaceVariables.Name = "CheckboxReplaceVariables";
 			CheckboxReplaceVariables.Size = new Size(116, 19);
@@ -407,7 +407,7 @@
 			// CheckboxDisplayOriginalText
 			// 
 			CheckboxDisplayOriginalText.AutoSize = true;
-			CheckboxDisplayOriginalText.Location = new Point(1104, 52);
+			CheckboxDisplayOriginalText.Location = new Point(1104, 89);
 			CheckboxDisplayOriginalText.Margin = new Padding(4, 3, 4, 3);
 			CheckboxDisplayOriginalText.Name = "CheckboxDisplayOriginalText";
 			CheckboxDisplayOriginalText.Size = new Size(133, 19);

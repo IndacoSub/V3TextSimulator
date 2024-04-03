@@ -25,7 +25,7 @@
 		private SoundManager sm;
 
 		private TranslationManager tm = new TranslationManager();
-		private VariableManager vm = new VariableManager(false);
+		private VariableManager vm = new VariableManager(false, GameIndex.V3);
 
 		private void InitWindow()
 		{
@@ -83,21 +83,32 @@
             DEBUG_ON = true;
 #endif
 
+			CheckboxMaybeAccurateHeight.Visible = false;
+			CheckboxDisplayOriginalText.Visible = false;
+			CheckboxPauseAutoplay.Visible = false;
+			CheckboxStartAutoplay.Visible = false;
+			CheckboxUseAlternateVars.Visible = false;
+			LabelVoiceline.Visible = false;
+			LabelCharacterName.Visible = false;
+			LabelCurrentAnimation.Visible = false;
+			LabelLineNumber.Visible = false;
+			LabelOriginFile.Visible = false;
+			LabelCurrentTranslation.Visible = false;
+			LabelOpenedFile.Visible = false;
+			ButtonSaveAs.Visible = false;
+			ButtonResetStringIndex.Visible = false;
+			ButtonFastRead.Visible = false;
+			ButtonBackLanguage.Visible = false;
+			ButtonBackText.Visible = false;
+			ButtonNextLanguage.Visible = false;
+			ButtonNextText.Visible = false;
+			CheckboxPauseAutoplay.Enabled = false;
+
 			im = new ImageManager(CurrentGameIndex);
 
 			InitCBTB(CurrentGameIndex);
 
-			vm = new VariableManager(AltVars);
-			foreach (string ms in vm.Menu.Items)
-			{
-				ListBoxMenuIndex.Items.Add(ms);
-			}
-			bool has_vars = ListBoxMenuIndex.Items.Count > 0;
-			ListBoxMenuIndex.Visible = has_vars;
-			ListBoxMenuElements.Visible = has_vars;
-			ListBoxMenuElements.DrawMode = DrawMode.OwnerDrawFixed;
-			ListBoxMenuIndex.DrawMode = DrawMode.OwnerDrawFixed;
-			//ListBoxMenuElements.DrawMode = DrawMode.Normal;
+			ReloadListboxes();
 
 			tm = new TranslationManager();
 
@@ -111,7 +122,7 @@
 
 			fi = new FileManager();
 
-			fi.GameIndex = CurrentGameIndex;
+			fi.FMGameIndex = CurrentGameIndex;
 
 			CB_TB.SelectedIndexChanged += CB_TB_SelectedIndexChanged;
 
@@ -133,6 +144,32 @@
 
 			// Collect garbage from initialization?
 			GC.Collect();
+		}
+
+		private void ReloadListboxes()
+		{
+			if (AutoPlayOn || FastReading)
+			{
+				return;
+			}
+
+			vm = new VariableManager(AltVars, CurrentGameIndex);
+
+			ListBoxMenuIndex.Items.Clear();
+			ListBoxMenuElements.Items.Clear();
+
+			foreach (string ms in vm.Menu.Items)
+			{
+				ListBoxMenuIndex.Items.Add(ms);
+			}
+			bool has_vars = ListBoxMenuIndex.Items.Count > 0;
+			ListBoxMenuIndex.Visible = has_vars;
+			ListBoxMenuElements.Visible = has_vars;
+			ListBoxMenuElements.DrawMode = DrawMode.OwnerDrawFixed;
+			ListBoxMenuIndex.DrawMode = DrawMode.OwnerDrawFixed;
+			//ListBoxMenuElements.DrawMode = DrawMode.Normal;
+
+			CheckboxUseAlternateVars.Visible = has_vars;
 		}
 
 		private void InitCBTB(GameIndex index)

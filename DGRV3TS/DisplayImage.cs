@@ -11,6 +11,14 @@ namespace DGRV3TS
 			string expression = "";
 			string voice = "";
 
+			switch(CurrentGameIndex)
+			{
+				case GameIndex.AI:
+					return ("", "", "", "");
+				default:
+					break;
+			}
+
 			switch (fi.Type)
 			{
 				case FileManager.LoadedFileType.Vo:
@@ -23,20 +31,6 @@ namespace DGRV3TS
 					origin = fi.PoList.ElementAt(fi.StringIndex).OriginFile;
 					expression = fi.PoList.ElementAt(fi.StringIndex).Expression;
 					voice = fi.PoList.ElementAt(fi.StringIndex).Voiceline;
-
-					if (voice.Length > 0)
-					{
-						LabelVoiceline.Text = "Voiceline: " + voice;
-					}
-					else
-					{
-						LabelVoiceline.Text = "Voiceline: None";
-					}
-
-					LabelCharacterName.Visible = ch != "DefaultCharacter";
-					LabelOriginFile.Visible = origin != "DefaultOriginFile";
-					LabelCurrentAnimation.Visible = expression != "DefaultExpression";
-					LabelCurrentAnimation.Text = "Current Animation: " + expression;
 					break;
 
 				case FileManager.LoadedFileType.Stx:
@@ -48,17 +42,23 @@ namespace DGRV3TS
 						LabelCurrentAnimation.Text = "Current Animation: " + expression;
 						origin = Path.GetFileName(fi.LoadedFileName);
 						voice = fi.StxFile.VoicelineByLineNumber(fi.StringIndex);
-						if (voice.Length > 0)
-						{
-							LabelVoiceline.Text = "Voiceline: " + voice;
-						}
-						else
-						{
-							LabelVoiceline.Text = "Voiceline: None";
-						}
 					}
 					break;
 			}
+
+			if (voice.Length > 0)
+			{
+				LabelVoiceline.Text = "Voiceline: " + voice;
+			}
+			else
+			{
+				LabelVoiceline.Text = "";
+			}
+
+			LabelCharacterName.Visible = ch.Length > 0 && ch != "DefaultCharacter";
+			LabelOriginFile.Visible = origin.Length > 0 && origin != "DefaultOriginFile";
+			LabelCurrentAnimation.Visible = expression.Length > 0 && expression != "DefaultExpression";
+			LabelCurrentAnimation.Text = expression.Length > 0 ? "Current Animation: " + expression : "";
 
 			return (ch, origin, expression, voice);
 		}
@@ -220,10 +220,17 @@ namespace DGRV3TS
 						if (DEBUG_ON && expression != "" && expression != "non" && expression != "None")
 						{
 							// debug
-							InputManager.Print("Unsupported animation for " + ch + ": \"" + expression +
-											   "\" (file: " + origin + ", line: " + LabelLineNumber.Text +
-											   ")\n\""
-											   + Textbox.Text + "\"");
+							switch (CurrentGameIndex)
+							{
+								case GameIndex.V3:
+									InputManager.Print("Unsupported animation for " + ch + ": \"" + expression +
+									   "\" (file: " + origin + ", line: " + LabelLineNumber.Text +
+									   ")\n\""
+									   + Textbox.Text + "\"");
+									break;
+								default:
+									break;
+							}
 						}
 					}
 

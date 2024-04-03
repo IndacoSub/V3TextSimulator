@@ -85,12 +85,20 @@
 			menuItem6.Name = "Lookup variant";
 
 			menuStrip.Items.Add(menuItem0);
-			menuStrip.Items.Add(menuItem1);
-			menuStrip.Items.Add(menuItem2);
-			menuStrip.Items.Add(menuItem3);
-			menuStrip.Items.Add(menuItem6);
-			menuStrip.Items.Add(menuItem5);
-			menuStrip.Items.Add(menuItem4);
+
+			switch (CurrentGameIndex)
+			{
+				case GameIndex.V3:
+					menuStrip.Items.Add(menuItem2);
+					menuStrip.Items.Add(menuItem3);
+					menuStrip.Items.Add(menuItem6);
+					menuStrip.Items.Add(menuItem5);
+					menuStrip.Items.Add(menuItem4);
+					menuStrip.Items.Add(menuItem1);
+					break;
+				default:
+					break;
+			}
 
 			contextMenuStrip1 = menuStrip;
 		}
@@ -99,13 +107,14 @@
 		{
 			var listbox = sender as ListBox;
 
-			if (listbox == null)
+			if (listbox == null || !listbox.Visible)
 			{
 				return;
 			}
 
 			var strTip = string.Empty;
 			var index = listbox.IndexFromPoint(mouseEventArgs.Location);
+			bool should_set_tooltip = false;
 
 			if ((index >= 0) && (index < listbox.Items.Count))
 			{
@@ -115,17 +124,32 @@
 					string? value = item.ToString();
 					if (value != null && value.Length > 0)
 					{
-						(var unsolve, int count) = vm.EntryByValue(value);
-						if (unsolve != null)
+						switch(CurrentGameIndex)
 						{
-							string comment = vm.EntryByDefinition(unsolve.Definition).Comment;
-							strTip = comment.Length <= 0 ? unsolve.Definition + (count > 1 ? " -- ⚠️ (ambiguous)" : "") : unsolve.Definition + (count > 1 ? " -- ⚠️ (ambiguous)" : "") + " | " + comment;
+							case GameIndex.V3:
+								(var unsolve, int count) = vm.EntryByValue(value);
+								if (unsolve != null)
+								{
+									string comment = vm.EntryByDefinition(unsolve.Definition).Comment;
+									strTip = comment.Length <= 0 ? unsolve.Definition + (count > 1 ? " -- ⚠️ (ambiguous)" : "") : unsolve.Definition + (count > 1 ? " -- ⚠️ (ambiguous)" : "") + " | " + comment;
+									should_set_tooltip = true;
+								}
+								break;
+							case GameIndex.AI:
+								strTip = value;
+								should_set_tooltip = true;
+								break;
+							default:
+								break;
 						}
 					}
 				}
 			}
 
-			listbox_tooltip.SetToolTip(listbox, strTip);
+			if (should_set_tooltip)
+			{
+				listbox_tooltip.SetToolTip(listbox, strTip);
+			}
 		}
 	}
 }

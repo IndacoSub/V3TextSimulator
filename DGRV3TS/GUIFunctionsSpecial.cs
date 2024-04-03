@@ -74,6 +74,7 @@
 		{
 			GC.Collect();
 			RecreateImageBase();
+			ReloadListboxes();
 		}
 
 		private void CB_Game_SelectedIndexChanged(object sender, EventArgs e)
@@ -95,6 +96,14 @@
 				fm.FontSize = 29;
 			}
 
+			if (LoadedFile)
+			{
+				LoadGameSpecificGUI();
+			}
+		}
+
+		private void LoadGameSpecificGUI()
+		{
 			// Game-specific support for character/expression/voiceline etc.
 			switch (CurrentGameIndex)
 			{
@@ -111,7 +120,7 @@
 					LabelVoiceline.Visible = false;
 					break;
 			}
-		}
+		} 
 
 		private void SetupSpritesButton_Click(object sender, EventArgs e)
 		{
@@ -123,6 +132,7 @@
 
 			var character_ids = new List<Tuple<string, string>>()
 			{
+				// V3
 				new Tuple<string, string>("Shuichi Saihara", "C000_Saiha"),
 				new Tuple<string, string>("Kaito Momota", "C001_Momot"),
 				new Tuple<string, string>("Ryoma Hoshi", "C002_Hoshi"),

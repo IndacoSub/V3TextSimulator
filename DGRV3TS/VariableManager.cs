@@ -27,17 +27,17 @@ namespace DGRV3TS
 			public string Comment;
 		}
 
-		public VariableManager(bool alt_vars)
+		public VariableManager(bool alt_vars, GameIndex game)
 		{
-			Init(alt_vars);
+			Init(alt_vars, game);
 		}
 
-		public void Init(bool alt_vars)
+		public void Init(bool alt_vars, GameIndex game)
 		{
 			AltNames = new bool();
 			AltNames = alt_vars;
 
-			AddVariables();
+			AddVariables(game);
 			ChangeItemNames();
 		}
 
@@ -201,18 +201,34 @@ namespace DGRV3TS
 			return str.IndexOf(" : ") >= 0 && !string.IsNullOrWhiteSpace(str);
 		}
 
-		public void AddVariables()
+		public void AddVariables(GameIndex game)
 		{
 			Menu = new ListBox();
 			Variables = new List<VariableEntry>();
 			ListBoxes = new List<ListBox>();
 
 			string vars_file = FileManager.GetCurrentDirectory();
-			vars_file = Path.Combine(vars_file, "vars_bak.txt");    // Hardcoded
+			string vars_filename = "";
+			switch(game)
+			{
+				case GameIndex.V3:
+					vars_filename = "vars_bak.txt";
+					break;
+				case GameIndex.AI:
+					vars_filename = "vars_ai.txt";
+					break;
+				default:
+					break;
+			}
 
-			// The variables' file is "vars_bak.txt"
+			if(vars_filename.Length <= 0)
+			{
+				return;
+			}
 
-			if (!File.Exists(vars_file))
+			vars_file = Path.Combine(vars_file, vars_filename);
+
+			if (vars_file.Length <= 0 || !File.Exists(vars_file))
 			{
 				return;
 			}

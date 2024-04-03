@@ -39,7 +39,7 @@ namespace DGRV3TS
 
 		public List<XLSXRow> XLSXList;
 
-		public GameIndex GameIndex = GameIndex.V3;
+		public GameIndex FMGameIndex = GameIndex.V3;
 
 		public FileManager()
 		{
@@ -155,7 +155,7 @@ namespace DGRV3TS
 
 				PoInternal pp = new PoInternal();
 
-				pp.GameIndex = GameIndex;
+				pp.PoGameIndex = FMGameIndex;
 
 				bool found_newline = false;
 				bool first = false;
@@ -192,7 +192,7 @@ namespace DGRV3TS
 					{
 						PoList.Add(pp);
 						pp = new PoInternal();
-						pp.GameIndex = GameIndex;
+						pp.PoGameIndex = FMGameIndex;
 						continue;
 					}
 

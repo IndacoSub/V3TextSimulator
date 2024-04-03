@@ -100,6 +100,7 @@
 			if (CheckboxStartAutoplay.Checked)
 			{
 				// NOT thread-safe
+				CheckboxPauseAutoplay.Enabled = true;
 				CheckForIllegalCrossThreadCalls = false;
 				Thread t = new Thread(AutoPlay);
 				t.Start();
@@ -108,6 +109,7 @@
 			{
 				if (CheckboxPauseAutoplay.Checked)
 				{
+					CheckboxPauseAutoplay.Enabled = false;
 					CheckboxPauseAutoplay.Checked = false;
 					CheckboxPauseAutoplay.Update();
 				}

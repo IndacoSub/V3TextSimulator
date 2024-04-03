@@ -31,7 +31,14 @@ namespace DGRV3TS
 			foreach (string s in tempList)
 			{
 				string final_s = s;
-				final_s = vm.ReplaceVars(final_s);
+				switch(CurrentGameIndex)
+				{
+					case GameIndex.V3:
+						final_s = vm.ReplaceVars(final_s);
+						break;
+					default:
+						break;
+				}
 				ListBoxMenuElements.Items.Add(final_s);
 			}
 
@@ -67,15 +74,25 @@ namespace DGRV3TS
 				return;
 			}
 
-			if (st == vm.NoVarStr)
-			{
-				return;
-			}
+			string tocopy = st;
 
-			string unsolved = GetVarFromListbox(index);
-			if (unsolved.Length <= 0)
+			switch(CurrentGameIndex)
 			{
-				return;
+				case GameIndex.V3:
+					if (st == vm.NoVarStr)
+					{
+						return;
+					}
+
+					string unsolved = GetVarFromListbox(index);
+					if (unsolved.Length <= 0)
+					{
+						return;
+					}
+					tocopy = unsolved;
+					break;
+				default:
+					break;
 			}
 
 			// Click with right button
@@ -86,15 +103,24 @@ namespace DGRV3TS
 			else
 			{
 				// Click with left button
-				Clipboard.SetText(unsolved);
+				Clipboard.SetText(tocopy);
 				InputManager.Print("Copied!");
 			}
 		}
 
 		private void menuItem0_Click(object sender, EventArgs e)
 		{
-			(VariableEntry v, int i) = vm.EntryByValue(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString());
-			Clipboard.SetText(v.Definition);
+			string tocopy = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
+			switch (CurrentGameIndex)
+			{
+				case GameIndex.V3:
+					(VariableEntry v, int i) = vm.EntryByValue(tocopy);
+					tocopy = v.Definition;
+					break;
+				default:
+					break;
+			}
+			Clipboard.SetText(tocopy);
 			InputManager.Print("Copied!");
 		}
 
@@ -215,7 +241,7 @@ namespace DGRV3TS
 		{
 			string value = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
 			(VariableEntry v, int i) = vm.EntryByValue(value);
-			VariableManager vm2 = new VariableManager(!CheckboxUseAlternateVars.Checked);
+			VariableManager vm2 = new VariableManager(!CheckboxUseAlternateVars.Checked, CurrentGameIndex);
 			string variant = vm.EntryByDefinition(v.Definition).Value;
 			InputManager.Print(variant);
 		}
@@ -247,35 +273,42 @@ namespace DGRV3TS
 				return;
 			}
 
-			if (itemstr != vm.NoVarStr && !itemstr.Contains("MAKE_") && !itemstr.Contains("MY_ARG"))
+			switch(CurrentGameIndex)
 			{
-				if (listbox == ListBoxMenuElements && ListBoxMenuElements.Items.Count > 0)
-				{
-					(VariableEntry v, int i) = vm.EntryByValue(itemstr);
-					if (v == null)
+				case GameIndex.V3:
+					if (itemstr != vm.NoVarStr && !itemstr.Contains("MAKE_") && !itemstr.Contains("MY_ARG"))
 					{
+						if (listbox == ListBoxMenuElements && ListBoxMenuElements.Items.Count > 0)
+						{
+							(VariableEntry v, int i) = vm.EntryByValue(itemstr);
+							if (v == null)
+							{
 #if DEBUG
 						Debug.WriteLine("v == null, itemstr: " + itemstr);
 #else
-						Console.WriteLine("v == null, itemstr: " + itemstr);
+								Console.WriteLine("v == null, itemstr: " + itemstr);
 #endif
-						return;
+								return;
+							}
+							VariableEntry vc = vm.EntryByDefinition(v.Definition);
+							if (vc == null)
+							{
+								return;
+							}
+							string comment = vc.Comment;
+							if (comment.Length > 0)
+							{
+								style = FontStyle.Underline;
+							}
+							if (i > 1)
+							{
+								style |= FontStyle.Italic;
+							}
+						}
 					}
-					VariableEntry vc = vm.EntryByDefinition(v.Definition);
-					if(vc == null)
-					{
-						return;
-					}
-					string comment = vc.Comment;
-					if (comment.Length > 0)
-					{
-						style = FontStyle.Underline;
-					}
-					if (i > 1)
-					{
-						style |= FontStyle.Italic;
-					}
-				}
+					break;
+				default:
+					break;
 			}
 
 			// TODO: the text looks different, meanwhile using DrawMode.Normal the text looks fine
