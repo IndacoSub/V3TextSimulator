@@ -16,8 +16,8 @@
 			}
 
 			// Value
-			string st = ListBoxMenuElements.Items[index].ToString();
-			if (st.Length <= 0)
+			string? st = ListBoxMenuElements.Items[index].ToString();
+			if (st == null || st.Length <= 0)
 			{
 				ListBoxMenuElements.SelectedIndex = -1;
 				return "";
@@ -27,11 +27,11 @@
 			(var unsolved, int i) = vm.EntryByValue(st);
 			if(unsolved == null)
 			{
-				return "NullVar";
+				return "(CONFLICT) " + st;
 			}
 			if(unsolved.Definition == null)
 			{
-				return "NullDef";
+				return "NullDef_" + st + "_" + i.ToString();
 			}
 			return unsolved.Definition;
 		}
@@ -93,14 +93,14 @@
 					menuStrip.Items.Add(menuItem3);
 					menuStrip.Items.Add(menuItem6);
 					menuStrip.Items.Add(menuItem5);
-					menuStrip.Items.Add(menuItem4);
 					menuStrip.Items.Add(menuItem1);
 					break;
 				default:
 					break;
 			}
+			menuStrip.Items.Add(menuItem4);
 
-			contextMenuStrip1 = menuStrip;
+			ListBoxRightClickCMS = menuStrip;
 		}
 
 		private void ListBoxOnMouseMove(object sender, MouseEventArgs mouseEventArgs)

@@ -32,16 +32,16 @@
 			Reload();
 		}
 
-		private void CheckboxReplaceVariables_CheckedChanged(object sender, EventArgs e)
+		private void ChangedReplaceVariables()
 		{
 			if (AutoPlayOn || CheckboxStartAutoplay.Checked)
 			{
-				CheckboxReplaceVariables.Checked = false;
-				CheckboxReplaceVariables.Update();
+				replaceVariablesToolStripMenuItem.Checked = false;
+				replaceVariablesToolStripMenuItem.Invalidate();
 				return;
 			}
 
-			if (CheckboxReplaceVariables.Checked)
+			if (replaceVariablesToolStripMenuItem.Checked)
 			{
 				UpdateRTB();
 				Reload();
@@ -53,32 +53,42 @@
 			}
 		}
 
-		private void CheckboxDisplayCharacter_CheckedChanged(object sender, EventArgs e)
+		private void CheckboxReplaceVariables_CheckedChanged(object sender, EventArgs e)
+		{
+			ChangedReplaceVariables();
+		}
+
+		private void ChangedDisplayCharacter()
 		{
 			if (!LoadedFile)
 			{
-				CheckboxDisplayCharacter.Checked = false;
-				CheckboxDisplayCharacter.Update();
+				displayCharacterToolStripMenuItem.Checked = false;
+				displayCharacterToolStripMenuItem.Invalidate();
 				return;
 			}
 
 			if (fi.Type == FileManager.LoadedFileType.Txt)
 			{
-				CheckboxDisplayCharacter.Checked = false;
-				CheckboxDisplayCharacter.Update();
+				displayCharacterToolStripMenuItem.Checked = false;
+				displayCharacterToolStripMenuItem.Invalidate();
 				return;
 			}
 
 			if (AutoPlayOn)
 			{
-				CheckboxDisplayCharacter.Checked = false;
-				CheckboxDisplayCharacter.Update();
+				displayCharacterToolStripMenuItem.Checked = false;
+				displayCharacterToolStripMenuItem.Invalidate();
 				return;
 			}
 
 			CheckUnsaved();
 			UpdateTextbox();
 			DisplayCharacterImage();
+		}
+
+		private void CheckboxDisplayCharacter_CheckedChanged(object sender, EventArgs e)
+		{
+			ChangedDisplayCharacter();
 		}
 
 		private void CheckboxStartAutoplay_CheckedChanged(object sender, EventArgs e)
@@ -131,43 +141,54 @@
 			}
 		}
 
-		private void CheckboxTranslationMode_CheckedChanged(object sender, EventArgs e)
+		private void ChangedTranslationMode()
 		{
 			if (LoadedFile)
 			{
 				// It needs to be activated before opening a file
-				CheckboxTranslationMode.Checked = false;
+				translationModeToolStripMenuItem.Checked = false;
 				CheckboxTranslationMode.Update();
 				return;
 			}
 
 			if (AutoPlayOn)
 			{
-				CheckboxTranslationMode.Checked = false;
+				translationModeToolStripMenuItem.Checked = false;
 				CheckboxTranslationMode.Update();
 			}
 		}
 
-		private void CheckboxUseAlternateVars_CheckedChanged(object sender, EventArgs e)
+		private void CheckboxTranslationMode_CheckedChanged(object sender, EventArgs e)
+		{
+			ChangedTranslationMode();
+		}
+
+		private void ChangedAlternateVars()
 		{
 			if (AutoPlayOn || FastReading)
 			{
-				CheckboxUseAlternateVars.Checked = false;
-				CheckboxUseAlternateVars.Update();
+				useAlternateVarsToolStripMenuItem.Checked = false;
+				useAlternateVarsToolStripMenuItem.Invalidate();
 				return;
 			}
 
-			AltVars = CheckboxUseAlternateVars.Checked;
+			AltVars = useAlternateVarsToolStripMenuItem.Checked;
 			DoReloadVariables();
 		}
 
-		private void CheckboxMaybeAccurateHeight_CheckedChanged(object sender, EventArgs e)
+		private void CheckboxUseAlternateVars_CheckedChanged(object sender, EventArgs e)
+		{
+			ChangedAlternateVars();
+		}
+
+		private void ChangedAccurateHeight()
 		{
 			Reload();
 		}
 
-		private void CheckboxAutoTranslation_CheckedChanged(object sender, EventArgs e)
+		private void CheckboxMaybeAccurateHeight_CheckedChanged(object sender, EventArgs e)
 		{
+			ChangedAccurateHeight();
 		}
 	}
 }

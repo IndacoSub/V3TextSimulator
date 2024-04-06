@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Xml.Linq;
 using static OfficeOpenXml.ExcelErrorValue;
 using static System.Collections.Specialized.BitVector32;
 
@@ -455,6 +456,11 @@ namespace DGRV3TS
 		{
 			// Replace variables using the VariableManager
 
+			if(replaced == null)
+			{
+				return null;
+			}
+			string backup = replaced.Clone() as string;
 			int count = 0;
 			bool cond = false;
 
@@ -511,7 +517,12 @@ namespace DGRV3TS
 				cond = (replaced.Contains("MAKE_") || replaced.Contains("VAR_")) && count < VariableManager.MaxRecursive;
 			} while (cond);
 
-			return replaced.Replace("  ", " ");
+			replaced = replaced.Replace("  ", " ");
+			if (replaced.Normalize().Trim().Length <= 0)
+			{
+				replaced = backup;
+			}
+			return replaced;
 		}
 	}
 }

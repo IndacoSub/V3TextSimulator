@@ -98,7 +98,7 @@ namespace DGRV3TS
 			// Click with right button
 			if (e.Button == MouseButtons.Right)
 			{
-				contextMenuStrip1.Show(ListBoxMenuIndex, e.Location);
+				ListBoxRightClickCMS.Show(ListBoxMenuElements, e.Location);
 			}
 			else
 			{
@@ -241,7 +241,7 @@ namespace DGRV3TS
 		{
 			string value = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
 			(VariableEntry v, int i) = vm.EntryByValue(value);
-			VariableManager vm2 = new VariableManager(!CheckboxUseAlternateVars.Checked, CurrentGameIndex);
+			VariableManager vm2 = new VariableManager(!useAlternateVarsToolStripMenuItem.Checked, CurrentGameIndex);
 			string variant = vm.EntryByDefinition(v.Definition).Value;
 			InputManager.Print(variant);
 		}
@@ -288,7 +288,8 @@ namespace DGRV3TS
 #else
 								Console.WriteLine("v == null, itemstr: " + itemstr);
 #endif
-								return;
+								itemstr = "(CONFLICT) " + itemstr;
+								break;
 							}
 							VariableEntry vc = vm.EntryByDefinition(v.Definition);
 							if (vc == null)

@@ -74,12 +74,12 @@
 		{
 			GC.Collect();
 			RecreateImageBase();
-			ReloadListboxes();
 		}
 
 		private void CB_Game_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			// Change game
+			GC.Collect();
 
 			var last = CurrentGameIndex;
 			CurrentGameIndex = (GameIndex)CB_Game.SelectedIndex;
@@ -100,6 +100,7 @@
 			{
 				LoadGameSpecificGUI();
 			}
+			ReloadListboxes();
 		}
 
 		private void LoadGameSpecificGUI()
@@ -120,9 +121,9 @@
 					LabelVoiceline.Visible = false;
 					break;
 			}
-		} 
+		}
 
-		private void SetupSpritesButton_Click(object sender, EventArgs e)
+		private void DoSetupSprites()
 		{
 			/*
 			From a folder containing extracted sprites of every character (except Maki?),
@@ -195,12 +196,12 @@
 			copy_to_folder = Path.Combine(copy_to_folder, "Graphics");
 			copy_to_folder = Path.Combine(copy_to_folder, "Sprites");
 
-			foreach(string file in files)
+			foreach (string file in files)
 			{
 				string filename = Path.GetFileName(file);
 				string actual_copy_to_folder = "";
 
-				if(file.Contains("Tsumugi Cosplay Sprites"))
+				if (file.Contains("Tsumugi Cosplay Sprites"))
 				{
 					continue;
 				}
@@ -245,14 +246,14 @@
 					}
 				}
 
-				if(!Directory.Exists(actual_copy_to_folder))
+				if (!Directory.Exists(actual_copy_to_folder))
 				{
 					Directory.CreateDirectory(actual_copy_to_folder);
 				}
 
 				// stand*.png -> anim*.png
 				int last_underscore_index = filename.LastIndexOf('_');
-				if(last_underscore_index == -1)
+				if (last_underscore_index == -1)
 				{
 					continue;
 				}
@@ -260,7 +261,7 @@
 				filename = filename.Insert(0, "anim");
 
 				string copy_file = Path.Combine(actual_copy_to_folder, filename);
-				if(File.Exists(copy_file))
+				if (File.Exists(copy_file))
 				{
 					File.Delete(copy_file);
 				}
@@ -270,9 +271,14 @@
 			InputManager.Print("Done!");
 		}
 
+		private void SetupSpritesButton_Click(object sender, EventArgs e)
+		{
+			DoSetupSprites();
+		}
+
 		private void SetupVoicelinesButton_Click(object sender, EventArgs e)
 		{
-			InputManager.Print("Currently unimplemented!");
+			
 		}
 	}
 }

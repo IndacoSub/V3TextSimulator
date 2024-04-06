@@ -10,6 +10,7 @@ namespace DGRV3TS
 		ToolTip listbox_tooltip;
 		string[] program_args;
 		string auto_open_file = "";
+		const string ProgramInfo = "Operations (v2.5)";
 
 		public Operations(string[] args)
 		{
@@ -119,7 +120,7 @@ namespace DGRV3TS
 			OpenWindow();
 		}
 
-		private void DumpVoicelineOnlyButton_Click(object sender, EventArgs e)
+		private void DoDumpVoicelines()
 		{
 
 			// This *definitely* has more than one use-case
@@ -162,10 +163,139 @@ namespace DGRV3TS
 			}
 		}
 
+		private void DumpVoicelineOnlyButton_Click(object sender, EventArgs e)
+		{
+			DoDumpVoicelines();
+		}
+
 		private void OpenVerticalViewButton_Click(object sender, EventArgs e)
+		{
+
+		}
+
+		private void Operations_Load(object sender, EventArgs e)
+		{
+
+		}
+
+		private void openFileToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			OpenFile("");
+		}
+
+		private void saveFileToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			SaveAs();
+		}
+
+		private void resetToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			ResetReadingProgress();
+		}
+
+		private void fastReadToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			DoFastRead();
+		}
+
+		private void copyScreenshotToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (this.dialogue_window == null)
+			{
+				return;
+			}
+			DoCopyImage();
+		}
+
+		private void saveScreenshotToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			if (this.dialogue_window == null)
+			{
+				return;
+			}
+
+			this.dialogue_window.DoSaveImage();
+		}
+
+		private void translationModeToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			ChangedTranslationMode();
+		}
+
+		private void replaceVariablesToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			ChangedReplaceVariables();
+		}
+
+		private void displayCharacterToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			ChangedDisplayCharacter();
+		}
+
+		private void useAlternateVarsToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			ChangedAlternateVars();
+		}
+
+		private void reloadVariablesToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			DoReloadVariables();
+		}
+
+		private void openGraphicsWinToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			OpenWindow();
+		}
+
+		private void reopenVerticalViewToolStripMenuItem_Click(object sender, EventArgs e)
 		{
 			DestroyVerticalView();
 			OpenVerticalView();
+		}
+
+		private void setupSpritesFromFolderToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			DoSetupSprites();
+		}
+
+		private void setupVoicelinesFromFolderToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			InputManager.Print("Currently unimplemented!");
+		}
+
+		private void dumpVoicelinesToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			DoDumpVoicelines();
+		}
+
+		private void DoMaximizeWindow()
+		{
+			if (this.Size.Width == 1562)
+			{
+				this.MinimumSize = new Size(1135, 218);
+				this.MaximumSize = this.MinimumSize;
+				this.Size = this.MaximumSize;
+			}
+			else
+			{
+				this.MaximumSize = new Size(1562, 218);
+				this.Size = this.MaximumSize;
+				this.MinimumSize = this.Size;
+			}
+		}
+
+		private void maximizeWindowToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			DoMaximizeWindow();
+		}
+
+		private void TranslationModeToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+			if (translationModeToolStripMenuItem.Checked)
+			{
+				autoTranslationToolStripMenuItem.Checked = true;
+				displayCharacterToolStripMenuItem.Checked = true;
+			}
 		}
 	}
 }

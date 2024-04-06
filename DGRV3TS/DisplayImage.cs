@@ -39,7 +39,7 @@ namespace DGRV3TS
 					{
 						ch = fi.StxFile.CharacterByLineNumber(fi.StringIndex);
 						expression = fi.StxFile.ExpressionByLineNumber(fi.StringIndex, ch);
-						LabelCurrentAnimation.Text = "Current Animation: " + expression;
+						LabelCurrentAnimation.Text = "Animation: " + expression;
 						origin = Path.GetFileName(fi.LoadedFileName);
 						voice = fi.StxFile.VoicelineByLineNumber(fi.StringIndex);
 					}
@@ -58,7 +58,7 @@ namespace DGRV3TS
 			LabelCharacterName.Visible = ch.Length > 0 && ch != "DefaultCharacter";
 			LabelOriginFile.Visible = origin.Length > 0 && origin != "DefaultOriginFile";
 			LabelCurrentAnimation.Visible = expression.Length > 0 && expression != "DefaultExpression";
-			LabelCurrentAnimation.Text = expression.Length > 0 ? "Current Animation: " + expression : "";
+			LabelCurrentAnimation.Text = expression.Length > 0 ? "Animation: " + expression : "";
 
 			return (ch, origin, expression, voice);
 		}
@@ -74,7 +74,7 @@ namespace DGRV3TS
 				(bool ret_img, Bitmap cc, string str) = im.V3CharacterImageFromString(ch, fi.Type, expression, DEBUG_ON);
 
                 // Set up the ToolTip text for the Button and Checkbox.
-                toolTip1.SetToolTip(this.LabelCurrentAnimation, "File red: " + str);
+                ListBoxToolTip.SetToolTip(this.LabelCurrentAnimation, "File red: " + str);
 
                 if (cc == null)
 				{
@@ -157,8 +157,11 @@ namespace DGRV3TS
 
 			bool loaded_img = false;
 
-			if (CheckboxDisplayCharacter.Checked)
+			if (displayCharacterToolStripMenuItem.Checked)
 			{
+				LabelCurrentAnimation.Visible = true;
+				LabelVoiceline.Visible = true;
+
 				(string ch, string origin, string expression, string voice) =
 					GetCharacterAndOrigin();
 
@@ -244,6 +247,10 @@ namespace DGRV3TS
 						LabelVoiceline.ForeColor = Color.Red;
 					}
 				}
+			} else
+			{
+				LabelCurrentAnimation.Visible = false;
+				LabelVoiceline.Visible = false;
 			}
 
 			dialogue_window.DisplayedImage.Refresh();

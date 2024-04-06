@@ -58,7 +58,7 @@ namespace DGRV3TS
 
             string replaced = Textbox.Text;
 
-			if (CheckboxReplaceVariables.Checked)
+			if (replaceVariablesToolStripMenuItem.Checked)
 			{
 				replaced = vm.ReplaceVars(replaced);
 			}
@@ -181,7 +181,7 @@ namespace DGRV3TS
 
 			DisplayCharacterImage();
 
-			if (CheckboxPlayVoiceTTS.Checked && play_voice)
+			if (enableTTSVoicelinesToolStripMenuItem.Checked && play_voice)
 			{
 				PlayVoice(!CheckboxStartAutoplay.Checked);
 			}
@@ -411,7 +411,7 @@ namespace DGRV3TS
 					return;
 				}
 
-				if (CheckboxPlayVoiceTTS.Checked)
+				if (enableTTSVoicelinesToolStripMenuItem.Checked)
 				{
 					Debug.WriteLine("Entering loop -- line " + fi.StringIndex);
 					while (!DoneSpeaking)
@@ -609,7 +609,7 @@ namespace DGRV3TS
 			string text = rawtext.Replace("\\n", " ");
 			// Treat \" as "
 			text = text.Replace("\\\"", "\"");
-			if (CheckboxReplaceVariables.Checked)
+			if (replaceVariablesToolStripMenuItem.Checked)
 			{
 				text = vm.ReplaceVars(text);
 			}

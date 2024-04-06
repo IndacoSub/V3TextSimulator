@@ -83,26 +83,24 @@
             DEBUG_ON = true;
 #endif
 
-			CheckboxMaybeAccurateHeight.Visible = false;
-			CheckboxDisplayOriginalText.Visible = false;
-			CheckboxPauseAutoplay.Visible = false;
-			CheckboxStartAutoplay.Visible = false;
-			CheckboxUseAlternateVars.Visible = false;
+			translationModeToolStripMenuItem.Checked = true;
+			replaceVariablesToolStripMenuItem.Checked = true;
+			CheckboxDisplayOriginalText.Enabled = false;
+			CheckboxPauseAutoplay.Enabled = false;
+			CheckboxStartAutoplay.Enabled = false;
+			useAlternateVarsToolStripMenuItem.Enabled = false;
 			LabelVoiceline.Visible = false;
 			LabelCharacterName.Visible = false;
 			LabelCurrentAnimation.Visible = false;
 			LabelLineNumber.Visible = false;
 			LabelOriginFile.Visible = false;
 			LabelCurrentTranslation.Visible = false;
-			LabelOpenedFile.Visible = false;
-			ButtonSaveAs.Visible = false;
-			ButtonResetStringIndex.Visible = false;
-			ButtonFastRead.Visible = false;
 			ButtonBackLanguage.Visible = false;
 			ButtonBackText.Visible = false;
 			ButtonNextLanguage.Visible = false;
 			ButtonNextText.Visible = false;
-			CheckboxPauseAutoplay.Enabled = false;
+			LabelCurrentAnimation.Text = "";
+			LabelVoiceline.Text = "";
 
 			im = new ImageManager(CurrentGameIndex);
 
@@ -118,8 +116,6 @@
 
 			NumericUpDownFontSize.ValueChanged += NumericUpDownFontSize_ValueChanged;
 
-			LabelFontName.Text = fm.DefaultFontName;
-
 			fi = new FileManager();
 
 			fi.FMGameIndex = CurrentGameIndex;
@@ -133,17 +129,84 @@
 			ButtonReloadText_Click(null, null);
 
 			// Create the ToolTip and associate with the Form container.
-			toolTip1 = new ToolTip();
+			ListBoxToolTip = new ToolTip();
 
 			// Set up the delays for the ToolTip.
-			toolTip1.AutoPopDelay = 5000;
-			toolTip1.InitialDelay = 1000;
-			toolTip1.ReshowDelay = 500;
+			ListBoxToolTip.AutoPopDelay = 5000;
+			ListBoxToolTip.InitialDelay = 1000;
+			ListBoxToolTip.ReshowDelay = 500;
 			// Force the ToolTip text to be displayed whether or not the form is active.
-			toolTip1.ShowAlways = true;
+			ListBoxToolTip.ShowAlways = true;
+
+			foreach(var toolstrips in this.Controls)
+			{
+				var menustrips = (toolstrips) as MenuStrip;
+				if(menustrips == null)
+				{
+					continue;
+				}
+				foreach (ToolStripMenuItem children in menustrips.Items)
+				{
+					if (children == null)
+					{
+						continue;
+					}
+					bool any_children_with_check = false;
+					if (children.HasDropDownItems)
+					{
+						foreach (ToolStripMenuItem child in children.DropDownItems)
+						{
+							if (child == null)
+							{
+								continue;
+							}
+
+							if (child.HasDropDownItems)
+							{
+								foreach (ToolStripMenuItem superchild in child.DropDownItems)
+								{
+									if (superchild == null)
+									{
+										continue;
+									}
+									if (superchild.CheckOnClick)
+									{
+										superchild.DropDown.Closing += DropDown_Closing;
+										any_children_with_check |= true;
+									}
+								}
+							}
+
+							if (child.CheckOnClick || any_children_with_check)
+							{
+								child.DropDown.Closing += DropDown_Closing;
+							}
+						}
+					}
+
+					if(children.CheckOnClick || any_children_with_check)
+					{
+						children.DropDown.Closing += DropDown_Closing;
+					}
+				}
+			}
 
 			// Collect garbage from initialization?
 			GC.Collect();
+		}
+
+		private void DropDown_Closing(object? sender, ToolStripDropDownClosingEventArgs e)
+		{
+			var tsdd = sender as ToolStripDropDown;
+			if(tsdd == null)
+			{
+				return;
+			}
+			Point p = tsdd.PointToClient(Control.MousePosition);
+			if (tsdd.ClientRectangle.Contains(p))
+			{
+				e.Cancel = true;
+			}
 		}
 
 		private void ReloadListboxes()
@@ -163,13 +226,15 @@
 				ListBoxMenuIndex.Items.Add(ms);
 			}
 			bool has_vars = ListBoxMenuIndex.Items.Count > 0;
-			ListBoxMenuIndex.Visible = has_vars;
-			ListBoxMenuElements.Visible = has_vars;
+			ListBoxMenuIndex.Enabled = has_vars;
+			ListBoxMenuElements.Enabled = has_vars;
+			ListBoxMenuIndex.BackColor = ListBoxMenuIndex.Enabled ? Color.White : Color.Gainsboro;
+			ListBoxMenuElements.BackColor = ListBoxMenuElements.Enabled ? Color.White : Color.Gainsboro;
 			ListBoxMenuElements.DrawMode = DrawMode.OwnerDrawFixed;
 			ListBoxMenuIndex.DrawMode = DrawMode.OwnerDrawFixed;
 			//ListBoxMenuElements.DrawMode = DrawMode.Normal;
 
-			CheckboxUseAlternateVars.Visible = has_vars;
+			useAlternateVarsToolStripMenuItem.Enabled = has_vars;
 		}
 
 		private void InitCBTB(GameIndex index)

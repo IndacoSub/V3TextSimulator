@@ -169,7 +169,7 @@
 
 					bool contains_clt = fm.ChangeBasedOnCLT(str);
 
-					if (CheckboxReplaceVariables.Checked && contains_clt)
+					if (replaceVariablesToolStripMenuItem.Checked && contains_clt)
 					{
 						str = VariableManager.ReplaceCLTs(str);
 					}
@@ -184,7 +184,7 @@
 					if (str == "\n" || str == "\\n")
 					{
 						posx = 0.0f;
-						posy += CheckboxMaybeAccurateHeight.Checked
+						posy += sizeadjustedHeightToolStripMenuItem.Checked
 							? g.MeasureString(str, fm.CurrentFont).Height
 							: GetNewlineHeight();
 						continue;
@@ -203,7 +203,7 @@
 					g.DrawString(str, fm.CurrentFont, sb, posx, posy);
 
 					float addx = g.MeasureString(str, fm.CurrentFont).Width;
-					if (contains_clt && CheckboxReplaceVariables.Checked)
+					if (contains_clt && replaceVariablesToolStripMenuItem.Checked)
 					{
 						// I don't know
 
@@ -218,7 +218,7 @@
 					if (str.EndsWith("\n") || str.EndsWith("\\n"))
 					{
 						posx = 0.0f;
-						posy += CheckboxMaybeAccurateHeight.Checked
+						posy += sizeadjustedHeightToolStripMenuItem.Checked
 							? g.MeasureString(str, fm.CurrentFont).Height
 							: GetNewlineHeight();
 					}

@@ -96,7 +96,7 @@
 						var loaded_char = fi.VoList.ElementAt(fi.StringIndex).Character;
 						var loaded_of = fi.VoList.ElementAt(fi.StringIndex).OriginFile;
 
-						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line.ToString() : "";
+						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line.ToString() + " (" + (fi.StringIndex + 1).ToString() + "/" + fi.GetMaxLine().ToString() + ")" : "";
 						LabelCharacterName.Text = loaded_char.Length > 0 && loaded_char != "DefaultCharacter" ? "Character: " + loaded_char : "";
 						LabelOriginFile.Text = loaded_of.Length > 0 && loaded_of != "DefaultOriginFile" ? "Origin file: " + loaded_of : "";
 						// 4 is opened file so it's always the same
@@ -121,7 +121,7 @@
 						var loaded_line = fi.PoList.ElementAt(fi.StringIndex).LineNumber;
 						var loaded_char = fi.PoList.ElementAt(fi.StringIndex).Character;
 						var loaded_of = fi.PoList.ElementAt(fi.StringIndex).OriginFile;
-						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line.ToString() : "";
+						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line.ToString() + " (" + (fi.StringIndex + 1).ToString() + "/" + fi.GetMaxLine().ToString() + ")" : "";
 						LabelCharacterName.Text = loaded_char.Length > 0 && loaded_char != "DefaultCharacter" ? "Character: " + loaded_char : "";
 						LabelOriginFile.Text = loaded_of.Length > 0 && loaded_of != "DefaultOriginFile" ? "Origin file: " + loaded_of : "";
 					}
@@ -131,7 +131,7 @@
 					{
 						var loaded_line = fi.StringIndex + 1;
 						var loaded_of = Path.GetFileName(fi.LoadedFileName);
-						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line : "";
+						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line.ToString() + " (" + (fi.StringIndex + 1).ToString() + "/" + fi.GetMaxLine().ToString() + ")" : "";
 						LabelOriginFile.Text = loaded_of.Length > 0 && loaded_of != "DefaultOriginFile" ? "Origin file: " + loaded_of : "";
 					}
 					break;
@@ -140,7 +140,7 @@
 						var loaded_line = fi.StringIndex + 1;
 						var loaded_char = fi.StxFile.CharacterByLineNumber(fi.StringIndex);
 						var loaded_of = Path.GetFileName(fi.LoadedFileName);
-						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line : "";
+						LabelLineNumber.Text = loaded_line.ToString().Length > 0 ? "Line: " + loaded_line.ToString() + " (" + (fi.StringIndex + 1).ToString() + "/" + fi.GetMaxLine().ToString() + ")" : "";
 						if (fi.StxFile.LoadedWRD != null)
 						{
 							LabelCharacterName.Text = loaded_char.Length > 0 && loaded_char != "DefaultCharacter" ? "Character: " + loaded_char : "";
