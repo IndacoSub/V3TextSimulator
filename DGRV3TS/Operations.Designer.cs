@@ -613,7 +613,7 @@
 		#endregion
 
 		private System.Windows.Forms.ContextMenuStrip ListBoxRightClickCMS;
-		private System.Windows.Forms.RichTextBox Textbox;
+		public System.Windows.Forms.RichTextBox Textbox;
 		private System.Windows.Forms.ComboBox CB_Game;
 		private System.Windows.Forms.CheckBox CheckboxTranslationMode;
 		private System.Windows.Forms.Label LabelUnsupportedWarning;

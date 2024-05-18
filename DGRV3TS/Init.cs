@@ -17,7 +17,7 @@
 		public bool DEBUG_ON = false;
 		private bool FastReading;
 
-		private FileManager fi;
+		public FileManager fi;
 		private FontManager fm = new FontManager("Arial");
 		private ImageManager im;
 

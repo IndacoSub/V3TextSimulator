@@ -49,8 +49,14 @@ namespace DGRV3TS.Subforms
 
 			menuItem4.Name = "I clicked by mistake";
 
-			menuStrip.Items.Add(menuItem0);
+			ToolStripMenuItem menuItem5 = new ToolStripMenuItem("Paste");
 
+			menuItem5.Click += OnPaste;
+
+			menuItem5.Name = "I clicked by mistake";
+
+			menuStrip.Items.Add(menuItem0);
+			menuStrip.Items.Add(menuItem5);
 			menuStrip.Items.Add(menuItem4);
 
 			cms = menuStrip;
@@ -60,6 +66,34 @@ namespace DGRV3TS.Subforms
 		{
 			Clipboard.SetText(Translation);
             cms.Close();
+		}
+
+		private void OnPaste(object sender, EventArgs e)
+		{
+			var text = Clipboard.GetText();
+
+			Panel panel = (this.Parent as Panel);
+			if (panel == null)
+			{
+				return;
+			}
+			//MessageBox.Show(panel.Parent.Name);
+			VerticalView parentForm = (panel.Parent as VerticalView);
+			if (parentForm == null)
+			{
+				return;
+			}
+			Operations op = (parentForm.Owner as Operations);
+			if(op == null)
+			{
+				return;
+			}
+			op.fi.OverrideLine(this.ID, text);
+			if(op.fi.StringIndex == this.ID)
+			{
+				op.Textbox.Text = text;
+			}
+			parentForm.OnClick(ID);
 		}
 
 		private void OnClickByMistake(object sender, EventArgs e)

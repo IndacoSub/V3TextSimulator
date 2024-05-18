@@ -195,5 +195,29 @@ namespace DGRV3TS
 
             return ret;
         }
+
+        public void OverrideLine(int index, string newline)
+        {
+			switch (this.Type)
+			{
+				case LoadedFileType.Vo:
+					VoList[index].Translations[0] = newline;
+                    break;
+				case LoadedFileType.Po:
+					PoList[index].MessageString = newline;
+                    break;
+				case LoadedFileType.Txt:
+					TxtList[index].Text = newline;
+                    break;
+				case LoadedFileType.Stx:
+					StxFile.Sentences[index] = newline;
+                    break;
+				case LoadedFileType.Xlsx:
+					XLSXList[index].Translations[0] = newline;
+                    break;
+				default:
+                    break;
+			}
+		}
     }
 }
