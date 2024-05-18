@@ -100,7 +100,11 @@ namespace DGRV3TS
 			List<string> original = fi.GetAllOriginalText();
 
 			vertical_view.UpdateSummaries(translated, original, -1);
-			vertical_view.Show();
+			if (!vertical_view.Visible)
+			{
+				vertical_view.Show();
+				vertical_view.Visible = true;
+			}
 		}
 
 		public void OnVerticalViewClick(int ID)

@@ -12,21 +12,69 @@ namespace DGRV3TS.Subforms
 {
     public partial class VerticalSummary : UserControl
     {
+        ContextMenuStrip cms = new ContextMenuStrip();
         public int ID = 0;
+        public string Translation = "";
 
         public VerticalSummary()
         {
             InitializeComponent();
+            cms = new ContextMenuStrip();
+            OnRightClick();
         }
 
-        public void SetID(int id)
+		private void Vertical_MouseUp(object sender, MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Right)
+			{
+				cms.Show(this, e.Location);
+			}
+		}
+
+		private void OnRightClick()
+		{
+			// This menu shows up when right-clicking an item from the listbox
+
+			ContextMenuStrip menuStrip = new ContextMenuStrip();
+
+			ToolStripMenuItem menuItem0 = new ToolStripMenuItem("Copy");
+
+			menuItem0.Click += OnCopy;
+
+			menuItem0.Name = "Copy";
+
+			ToolStripMenuItem menuItem4 = new ToolStripMenuItem("I clicked by mistake");
+
+			menuItem4.Click += OnClickByMistake;
+
+			menuItem4.Name = "I clicked by mistake";
+
+			menuStrip.Items.Add(menuItem0);
+
+			menuStrip.Items.Add(menuItem4);
+
+			cms = menuStrip;
+		}
+
+		private void OnCopy(object sender, EventArgs e)
+		{
+			Clipboard.SetText(Translation);
+            cms.Close();
+		}
+
+		private void OnClickByMistake(object sender, EventArgs e)
+		{
+			cms.Close();
+		}
+
+		public void SetID(int id)
         {
             this.ID = id;
         }
 
         public void SetString(string translation, string original)
         {
-
+            Translation = translation;
             string str = MakeString(translation, original);
             this.label1.Text = str;
         }
@@ -42,21 +90,25 @@ namespace DGRV3TS.Subforms
             return "------------------------------------------";
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-            Panel panel = (this.Parent as Panel);
-            if(panel == null)
-            {
-                return;
-            }
-            //MessageBox.Show(panel.Parent.Name);
-            VerticalView parentForm = (panel.Parent as VerticalView);
-            if(parentForm == null)
-            {
-                return;
-            }
-            parentForm.OnClick(ID);
+		private void Label1_MouseDown(object sender, MouseEventArgs e)
+		{
+			if(e.Button != MouseButtons.Left)
+			{
+				return;
+			}
 
-        }
+			Panel panel = (this.Parent as Panel);
+			if (panel == null)
+			{
+				return;
+			}
+			//MessageBox.Show(panel.Parent.Name);
+			VerticalView parentForm = (panel.Parent as VerticalView);
+			if (parentForm == null)
+			{
+				return;
+			}
+			parentForm.OnClick(ID);
+		}
     }
 }

@@ -20,46 +20,41 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+		#region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.Summaries = new List<DGRV3TS.Subforms.VerticalSummary>();
-            this.panel1.SuspendLayout();
-            this.SuspendLayout();
-            // 
-            // panel1
-            // 
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(250, 720);
-            this.panel1.TabIndex = 0;
-            // 
-            // VerticalView
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(250, 720);
-            this.Controls.Add(this.panel1);
-            this.MaximumSize = new System.Drawing.Size(266, 759);
-            this.MinimumSize = new System.Drawing.Size(266, 759);
-            this.Name = "VerticalView";
-            this.Text = "VerticalView";
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
-            this.ResumeLayout(false);
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
+			panel1 = new Panel();
+			SuspendLayout();
+			// 
+			// panel1
+			// 
+			panel1.Dock = DockStyle.Fill;
+			panel1.Location = new Point(0, 0);
+			panel1.Name = "panel1";
+			panel1.Size = new Size(250, 720);
+			panel1.TabIndex = 0;
+			// 
+			// VerticalView
+			// 
+			AutoScaleDimensions = new SizeF(7F, 15F);
+			AutoScaleMode = AutoScaleMode.Font;
+			ClientSize = new Size(250, 720);
+			Controls.Add(panel1);
+			MaximumSize = new Size(266, 759);
+			MinimumSize = new Size(266, 759);
+			Name = "VerticalView";
+			Text = "VerticalView";
+			ResumeLayout(false);
+		}
 
-        }
+		#endregion
 
-        #endregion
-
-        private Panel panel1;
+		private Panel panel1;
         private List<Subforms.VerticalSummary> Summaries;
     }
 }

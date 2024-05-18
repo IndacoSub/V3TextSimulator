@@ -20,52 +20,50 @@
             base.Dispose(disposing);
         }
 
-        #region Codice generato da Progettazione componenti
+		#region Codice generato da Progettazione componenti
 
-        /// <summary> 
-        /// Metodo necessario per il supporto della finestra di progettazione. Non modificare 
-        /// il contenuto del metodo con l'editor di codice.
-        /// </summary>
-        private void InitializeComponent()
-        {
-            this.label1 = new System.Windows.Forms.Label();
-            this.SuspendLayout();
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Location = new System.Drawing.Point(0, 0);
-            this.label1.MaximumSize = new System.Drawing.Size(230, 200);
-            this.label1.MinimumSize = new System.Drawing.Size(230, 40);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(230, 45);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "AAAAAAAAAAAAAAAAAAAAAaaaaaaaaa\r\n---------------------------------\r\nBBBBBBBBBBBBBB" +
-    "BBBBBBBBBBBBB";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label1.Click += new System.EventHandler(this.label1_Click);
-            // 
-            // VerticalSummary
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoScroll = true;
-            this.AutoSize = true;
-            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Controls.Add(this.label1);
-            this.MaximumSize = new System.Drawing.Size(230, 200);
-            this.MinimumSize = new System.Drawing.Size(230, 40);
-            this.Name = "VerticalSummary";
-            this.Size = new System.Drawing.Size(228, 45);
-            this.ResumeLayout(false);
-            this.PerformLayout();
+		/// <summary> 
+		/// Metodo necessario per il supporto della finestra di progettazione. Non modificare 
+		/// il contenuto del metodo con l'editor di codice.
+		/// </summary>
+		private void InitializeComponent()
+		{
+			label1 = new Label();
+			SuspendLayout();
+			// 
+			// label1
+			// 
+			label1.AutoSize = true;
+			label1.Dock = DockStyle.Fill;
+			label1.Location = new Point(0, 0);
+			label1.MaximumSize = new Size(230, 200);
+			label1.MinimumSize = new Size(230, 40);
+			label1.Name = "label1";
+			label1.Size = new Size(230, 45);
+			label1.TabIndex = 0;
+			label1.Text = "AAAAAAAAAAAAAAAAAAAAAaaaaaaaaa\r\n---------------------------------\r\nBBBBBBBBBBBBBBBBBBBBBBBBBBB";
+			label1.TextAlign = ContentAlignment.MiddleLeft;
+			label1.MouseDown += Label1_MouseDown;
+			label1.MouseUp += Vertical_MouseUp;
+			// 
+			// VerticalSummary
+			// 
+			AutoScaleDimensions = new SizeF(7F, 15F);
+			AutoScaleMode = AutoScaleMode.Font;
+			AutoSize = true;
+			AutoSizeMode = AutoSizeMode.GrowAndShrink;
+			BorderStyle = BorderStyle.FixedSingle;
+			Controls.Add(label1);
+			MaximumSize = new Size(230, 200);
+			MinimumSize = new Size(230, 40);
+			Name = "VerticalSummary";
+			Size = new Size(228, 45);
+			ResumeLayout(false);
+			PerformLayout();
+		}
 
-        }
+		#endregion
 
-        #endregion
-
-        private Label label1;
+		private Label label1;
     }
 }
