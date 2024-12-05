@@ -1,6 +1,6 @@
 ﻿namespace DGRV3TS
 {
-	internal class PoInternal
+	public class PoInternal
 	{
 		public string Character = "DefaultCharacter";
 		public string Expression = "DefaultExpression";
@@ -12,7 +12,7 @@
 		public string OriginFile = "DefaultOriginFile";
 		public int Stage;
 		public string Voiceline = "DefaultVoiceline";
-		public GameIndex GameIndex = GameIndex.V3;
+		public GameIndex PoGameIndex = GameIndex.V3;
 
 		public static string GetBlank()
 		{
@@ -99,76 +99,52 @@
 			}
 
 			string basestr = str.Substring(9); // msgctxt "
+			basestr = basestr.Substring(0, basestr.Length - 1);
 
-			MessageContext = basestr.Substring(0, basestr.Length - 1);
+			MessageContext = basestr;
 
-			bool is_V3 = GameIndex == GameIndex.V3;
-
-			if (!is_V3)
-			{
-				int next_quote = basestr.IndexOf('\"');
-				LineNumber = basestr.Substring(0, next_quote);
-				Stage++;
-				return;
-			}
-
-			if (basestr.Length < 3 + 1)
-			{
-				// ???
-				return;
-			}
-
-			string lineno = basestr.Substring(0, 4);
+			string lineno = "";
 			string ofile = "";
 			string chara = "";
 			string anim = "";
 			string voice = "";
-			basestr = basestr.Substring(4);
 
-			int count = basestr.Count(f => f == '|');
-
-			if (count > 0)
+			var split = basestr.Split(" | ");
+			switch(split.Length)
 			{
-				basestr = basestr.Substring(3); // ' | '
+				case 0:
+				case 1:
+					lineno = basestr;
+					break;
+				case 2:
+					lineno = split[0];
+					ofile = split[1];
+					break;
+				case 3:
+					lineno = split[0];
+					ofile = split[1];
+					chara = split[2];
+					break;
+				case 4:
+					lineno = split[0];
+					ofile = split[1];
+					chara = split[2];
+					anim = split[3];
+					break;
+				case 5:
+					lineno = split[0];
+					ofile = split[1];
+					chara = split[2];
+					anim = split[3];
+					voice = split[4];
+					break;
+
 			}
 
-			count--;
-
-			if (count >= 0)
+			if (anim.StartsWith("vic"))
 			{
-				switch (count)
-				{
-					case 0:
-						ofile = basestr.Substring(0, basestr.Length - 1);
-						break;
-					case 1:
-						ofile = basestr.Substring(0, basestr.IndexOf("|") - 1);
-						basestr = basestr.Substring(ofile.Length + 3);
-						chara = basestr.Substring(0, basestr.Length - 1);
-						break;
-					case 2:
-						ofile = basestr.Substring(0, basestr.IndexOf("|") - 1);
-						basestr = basestr.Substring(ofile.Length + 3);
-						chara = basestr.Substring(0, basestr.IndexOf("|") - 1);
-						basestr = basestr.Substring(chara.Length + 3);
-						anim = basestr.Substring(0, basestr.Length - 1);
-						if (anim.StartsWith("vic"))
-						{
-							voice = anim;
-							anim = "";
-						}
-
-						break;
-					case 3:
-						ofile = basestr.Substring(0, basestr.IndexOf("|") - 1);
-						basestr = basestr.Substring(ofile.Length + 3);
-						chara = basestr.Substring(0, basestr.IndexOf("|") - 1);
-						basestr = basestr.Substring(chara.Length + 3);
-						anim = basestr.Substring(0, basestr.IndexOf("|") - 1);
-						basestr = basestr.Substring(anim.Length + 3);
-						voice = basestr.Substring(0, basestr.Length - 1);
-						break;
-				}
+				voice = anim;
+				anim = "";
 			}
 
 			LineNumber = lineno;
@@ -180,14 +156,13 @@
 			/*
             InputManager.Print(
                 "Str: " + str + "\n" + 
-                "Found | : " + ogcount + " (" + count + ")\n" + 
                 "LineNo: " + this.LineNumber + "\n" +
                 "OriginFile: " + this.OriginFile + "\n" +
                 "Character: " + this.Character + "\n" +
                 "Expression: " + this.Expression + "\n" +
                 "VoiceLine: " + this.Voiceline
             );
-            */
+			*/
 
 			Stage++;
 		}

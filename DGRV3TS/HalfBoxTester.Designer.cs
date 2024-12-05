@@ -49,11 +49,11 @@
 			// 
 			// DialogueWindow
 			// 
-			AutoScaleDimensions = new SizeF(7F, 15F);
-			AutoScaleMode = AutoScaleMode.Font;
+			AutoScaleMode = AutoScaleMode.None;
 			ClientSize = new Size(1280, 720);
 			Controls.Add(DisplayedImage);
 			Margin = new Padding(4, 3, 4, 3);
+			MaximizeBox = false;
 			MaximumSize = new Size(1296, 759);
 			MinimumSize = new Size(1296, 759);
 			Name = "DialogueWindow";

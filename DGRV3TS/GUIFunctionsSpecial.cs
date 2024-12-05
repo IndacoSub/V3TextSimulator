@@ -79,6 +79,7 @@
 		private void CB_Game_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			// Change game
+			GC.Collect();
 
 			var last = CurrentGameIndex;
 			CurrentGameIndex = (GameIndex)CB_Game.SelectedIndex;
@@ -95,6 +96,15 @@
 				fm.FontSize = 29;
 			}
 
+			if (LoadedFile)
+			{
+				LoadGameSpecificGUI();
+			}
+			ReloadListboxes();
+		}
+
+		private void LoadGameSpecificGUI()
+		{
 			// Game-specific support for character/expression/voiceline etc.
 			switch (CurrentGameIndex)
 			{
@@ -113,7 +123,7 @@
 			}
 		}
 
-		private void SetupSpritesButton_Click(object sender, EventArgs e)
+		private void DoSetupSprites()
 		{
 			/*
 			From a folder containing extracted sprites of every character (except Maki?),
@@ -123,6 +133,7 @@
 
 			var character_ids = new List<Tuple<string, string>>()
 			{
+				// V3
 				new Tuple<string, string>("Shuichi Saihara", "C000_Saiha"),
 				new Tuple<string, string>("Kaito Momota", "C001_Momot"),
 				new Tuple<string, string>("Ryoma Hoshi", "C002_Hoshi"),
@@ -181,16 +192,16 @@
 
 			// We want to copy to the /Graphics/Sprites/CHARTACTER/ folder
 
-			string copy_to_folder = Directory.GetCurrentDirectory();
+			string copy_to_folder = FileManager.GetCurrentDirectory();
 			copy_to_folder = Path.Combine(copy_to_folder, "Graphics");
 			copy_to_folder = Path.Combine(copy_to_folder, "Sprites");
 
-			foreach(string file in files)
+			foreach (string file in files)
 			{
 				string filename = Path.GetFileName(file);
 				string actual_copy_to_folder = "";
 
-				if(file.Contains("Tsumugi Cosplay Sprites"))
+				if (file.Contains("Tsumugi Cosplay Sprites"))
 				{
 					continue;
 				}
@@ -235,14 +246,14 @@
 					}
 				}
 
-				if(!Directory.Exists(actual_copy_to_folder))
+				if (!Directory.Exists(actual_copy_to_folder))
 				{
 					Directory.CreateDirectory(actual_copy_to_folder);
 				}
 
 				// stand*.png -> anim*.png
 				int last_underscore_index = filename.LastIndexOf('_');
-				if(last_underscore_index == -1)
+				if (last_underscore_index == -1)
 				{
 					continue;
 				}
@@ -250,7 +261,7 @@
 				filename = filename.Insert(0, "anim");
 
 				string copy_file = Path.Combine(actual_copy_to_folder, filename);
-				if(File.Exists(copy_file))
+				if (File.Exists(copy_file))
 				{
 					File.Delete(copy_file);
 				}
@@ -260,9 +271,14 @@
 			InputManager.Print("Done!");
 		}
 
+		private void SetupSpritesButton_Click(object sender, EventArgs e)
+		{
+			DoSetupSprites();
+		}
+
 		private void SetupVoicelinesButton_Click(object sender, EventArgs e)
 		{
-			InputManager.Print("Currently unimplemented!");
+			
 		}
 	}
 }

@@ -1,4 +1,11 @@
-﻿namespace DGRV3TS
+﻿using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Text;
+using System.Windows.Forms;
+using static DGRV3TS.VariableManager;
+using static OfficeOpenXml.ExcelErrorValue;
+
+namespace DGRV3TS
 {
 	partial class Operations
 	{
@@ -23,7 +30,16 @@
 
 			foreach (string s in tempList)
 			{
-				ListBoxMenuElements.Items.Add(s);
+				string final_s = s;
+				switch(CurrentGameIndex)
+				{
+					case GameIndex.V3:
+						final_s = vm.ReplaceVars(final_s);
+						break;
+					default:
+						break;
+				}
+				ListBoxMenuElements.Items.Add(final_s);
 			}
 
 			if (ListBoxMenuElements.Items.Count == 0)
@@ -58,86 +74,111 @@
 				return;
 			}
 
-			if (st == vm.NoVarStr)
-			{
-				return;
-			}
+			string tocopy = st;
 
-			string unsolved = GetVarFromListbox(index);
-			if (unsolved.Length <= 0)
+			switch(CurrentGameIndex)
 			{
-				return;
+				case GameIndex.V3:
+					if (st == vm.NoVarStr)
+					{
+						return;
+					}
+
+					string unsolved = GetVarFromListbox(index);
+					if (unsolved.Length <= 0)
+					{
+						return;
+					}
+					tocopy = unsolved;
+					break;
+				default:
+					break;
 			}
 
 			// Click with right button
 			if (e.Button == MouseButtons.Right)
 			{
-				contextMenuStrip1.Show(ListBoxMenuIndex, e.Location);
+				ListBoxRightClickCMS.Show(ListBoxMenuElements, e.Location);
 			}
 			else
 			{
 				// Click with left button
-				Clipboard.SetText(unsolved);
+				Clipboard.SetText(tocopy);
 				InputManager.Print("Copied!");
 			}
 		}
 
 		private void menuItem0_Click(object sender, EventArgs e)
 		{
-			string temp_str = vm.UnSolve(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString());
-			Clipboard.SetText(temp_str);
+			string tocopy = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
+			switch (CurrentGameIndex)
+			{
+				case GameIndex.V3:
+					(VariableEntry v, int i) = vm.EntryByValue(tocopy);
+					tocopy = v.Definition;
+					break;
+				default:
+					break;
+			}
+			Clipboard.SetText(tocopy);
 			InputManager.Print("Copied!");
 		}
 
 		private void menuItem1_Click(object sender, EventArgs e)
 		{
-			string temp_str = vm.UnSolve(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString());
+			string name = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
+			(VariableEntry v, int i) = vm.EntryByValue(name);
 
-			if (temp_str.Length <= 0)
+			if (v.Definition.Length <= 0)
 			{
 				return;
 			}
 
-			if (!temp_str.Contains("_MN"))
+			if (!v.Definition.Contains("_MN"))
 			{
-				temp_str += "_MN";
+				v.Definition += "_MN";
 			}
 
-			if (vm.SolveVar(temp_str) == temp_str)
+			if (vm.EntryByDefinition(v.Definition).Value == v.Definition)
 			{
-				InputManager.Print(temp_str + " not found, remember to add it later!");
+				InputManager.Print(v.Definition + " not found, remember to add it later!");
 			}
 
-			vm.AddVariantVWithPriority(temp_str,
-				ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString().ToLowerInvariant());
+			string comment = vm.EntryByDefinition(v.Definition).Comment;
 
-			Clipboard.SetText(temp_str);
+			vm.AddVariantVWithPriority(v.Definition,
+				name.ToLowerInvariant(), comment);
+
+			Clipboard.SetText(v.Definition);
 			InputManager.Print("Copied!");
 		}
 
 		private void menuItem2_Click(object sender, EventArgs e)
 		{
-			string temp_str = vm.UnSolve(ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString());
+			string name = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
+			(VariableEntry v, int i) = vm.EntryByValue(name);
 
-			if (temp_str.Length <= 0)
+			if (v.Definition.Length <= 0)
 			{
 				return;
 			}
 
-			if (!temp_str.Contains("_MS"))
+			if (!v.Definition.Contains("_MS"))
 			{
-				temp_str += "_MS";
+				v.Definition += "_MS";
 			}
 
-			if (vm.SolveVar(temp_str) == temp_str)
+			if (vm.EntryByDefinition(v.Definition).Value == v.Definition)
 			{
-				InputManager.Print(temp_str + " not found, remember to add it later!");
+				InputManager.Print(v.Definition + " not found, remember to add it later!");
 			}
 
-			vm.AddVariantVWithPriority(temp_str,
-				ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString().ToUpperInvariant());
+			string comment = vm.EntryByDefinition(v.Definition).Comment;
 
-			Clipboard.SetText(temp_str);
+			vm.AddVariantVWithPriority(v.Definition,
+				name.ToUpperInvariant(), comment);
+
+			Clipboard.SetText(v.Definition);
 			InputManager.Print("Copied!");
 		}
 
@@ -190,24 +231,109 @@
 		{
 			int index = ListBoxMenuElements.SelectedIndex;
 			string str = ListBoxMenuElements.Items[index].ToString();
-			string var = vm.UnSolve(str);
+			(VariableEntry v, int i) = vm.EntryByValue(str);
 
-			string view = "Index: " + index + "\nString: " + str + "\nVariable: " + var;
+			string view = "Index: " + index + "\nString: " + str + "\nVariable: " + v.Definition;
 			InputManager.Print(view);
 		}
 
 		private void menuItem6_Click(object sender, EventArgs e)
 		{
 			string value = ListBoxMenuElements.Items[ListBoxMenuElements.SelectedIndex].ToString();
-			string tentative_raw = vm.UnSolve(value);
-			VariableManager vm2 = new VariableManager(!CheckboxUseAlternateVars.Checked);
-			string variant = vm2.SolveVar(tentative_raw);
+			(VariableEntry v, int i) = vm.EntryByValue(value);
+			VariableManager vm2 = new VariableManager(!useAlternateVarsToolStripMenuItem.Checked, CurrentGameIndex);
+			string variant = vm.EntryByDefinition(v.Definition).Value;
 			InputManager.Print(variant);
 		}
 
 		private void ListBoxMenuElements_SelectedIndexChanged(object sender, EventArgs e)
 		{
 			// Needs to be empty?
+		}
+
+		private void DrawListbox(object sender, DrawItemEventArgs e)
+		{
+			var listbox = sender as ListBox;
+
+			if (listbox == null || listbox.Items == null || listbox.Items.Count <= 0 ||
+				e == null || e.Index < 0 || e.Index >= listbox.Items.Count || e.Font == null)
+			{
+				return;
+			}
+
+			var style = FontStyle.Regular;
+			var item = listbox.Items[e.Index];
+			if(item == null)
+			{
+				return;
+			}
+			string? itemstr = item.ToString();
+			if(itemstr == null || itemstr.Length <= 0)
+			{
+				return;
+			}
+
+			switch(CurrentGameIndex)
+			{
+				case GameIndex.V3:
+					if (itemstr != vm.NoVarStr && !itemstr.Contains("MAKE_") && !itemstr.Contains("MY_ARG"))
+					{
+						if (listbox == ListBoxMenuElements && ListBoxMenuElements.Items.Count > 0)
+						{
+							(VariableEntry v, int i) = vm.EntryByValue(itemstr);
+							if (v == null)
+							{
+#if DEBUG
+						Debug.WriteLine("v == null, itemstr: " + itemstr);
+#else
+								Console.WriteLine("v == null, itemstr: " + itemstr);
+#endif
+								itemstr = "(CONFLICT) " + itemstr;
+								break;
+							}
+							VariableEntry vc = vm.EntryByDefinition(v.Definition);
+							if (vc == null)
+							{
+								return;
+							}
+							string comment = vc.Comment;
+							if (comment.Length > 0)
+							{
+								style = FontStyle.Underline;
+							}
+							if (i > 1)
+							{
+								style |= FontStyle.Italic;
+							}
+						}
+					}
+					break;
+				default:
+					break;
+			}
+
+			// TODO: the text looks different, meanwhile using DrawMode.Normal the text looks fine
+
+			e.DrawBackground();
+			if (e.State == (DrawItemState.Selected | DrawItemState.NoAccelerator | DrawItemState.NoFocusRect) ||
+				e.State == (DrawItemState.Selected | DrawItemState.Focus | DrawItemState.NoFocusRect | DrawItemState.NoAccelerator))
+			{
+				e.Graphics.FillRectangle(new SolidBrush(Color.LightGray), e.Bounds);
+			}
+			e.Graphics.DrawString(itemstr, new Font(e.Font.Name ?? "Segoe UI", 9, style), new SolidBrush(SystemColors.WindowText), e.Bounds);
+			e.DrawFocusRectangle();
+			e.Dispose();
+		}
+
+		private void ListboxMeasure(object sender, MeasureItemEventArgs e)
+		{
+			var listbox = sender as ListBox;
+			if(listbox == null || listbox.Font == null)
+			{
+				return;
+			}
+
+			e.ItemHeight = listbox.Font.Height;
 		}
 	}
 }

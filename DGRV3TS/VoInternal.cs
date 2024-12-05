@@ -1,6 +1,6 @@
 ﻿namespace DGRV3TS
 {
-	internal class VoInternal
+    public class VoInternal
 	{
 		private enum Indexes
 		{

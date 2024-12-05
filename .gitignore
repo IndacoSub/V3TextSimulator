@@ -29,3 +29,4 @@ DGRV3TS/bin/*
 DGRV3TS/obj/*
 DGRV3TS/Properties/PublishProfiles/*
 DGRV3TS/publish/*
+*.lnk

@@ -12,7 +12,7 @@
 			Reload();
 		}
 
-		private void ButtonCopyImage_Click(object sender, EventArgs e)
+		private void DoCopyImage()
 		{
 			if (dialogue_window == null)
 			{
@@ -29,36 +29,61 @@
 			InputManager.Print("Copied!");
 		}
 
-		private void ButtonOpenFile_Click(object sender, EventArgs e)
+		private void ButtonCopyImage_Click(object sender, EventArgs e)
+		{
+			DoCopyImage();
+		}
+
+		private void OpenFile(string arg_file)
 		{
 			// Try to open a file
 
+			if (LoadedFile && translationModeToolStripMenuItem.Checked)
+			{
+				var response = InputManager.Ask("Do you want to save before opening a new file?\nOtherwise you'll lose all your progress.\nYou can save using the File -> Save As... button.");
+				if(response == DialogResult.Yes)
+				{
+					return;
+				}
+			}
+
 			LoadedFile = false;
 			fi = new FileManager();
-			fi.GameIndex = CurrentGameIndex;
+			fi.FMGameIndex = CurrentGameIndex;
 			// Reset to default text
 			Textbox.Text = "This is an example\\nmessage.";
 			UpdateLineCharacter();
 			UpdateRTB();
 			Reload();
 
-			var file = fi.ManageFile(CheckboxTranslationMode.Checked, tm, CheckboxAutoTranslation.Checked);
+			string last_non_font_file = "";
+			var file = fi.ManageFile(translationModeToolStripMenuItem.Checked, tm, autoTranslationToolStripMenuItem.Checked, arg_file);
 
 			string ext = Path.GetExtension(fi.LastOpenedFile).ToLowerInvariant();
-			if (ext == ".ttf" || ext == ".otf")
+			bool is_font = ext == ".ttf" || ext == ".otf";
+
+			if (is_font)
 			{
 				fm = new FontManager(fi.LastOpenedFile);
-				LabelFontName.Text = fm.FontName;
 				Reload();
 			}
 
 			if (string.IsNullOrEmpty(file))
 			{
-				CheckboxAutoTranslation.Visible = true;
+				translationModeToolStripMenuItem.Enabled = true;
+				autoTranslationToolStripMenuItem.Enabled = true;
+				displayCharacterToolStripMenuItem.Checked = false;
+				ButtonBackLanguage.Visible = false;
+				ButtonNextLanguage.Visible = false;
+				CheckboxDisplayOriginalText.Enabled = false;
+				CheckboxStartAutoplay.Enabled = false;
+				this.Text = ProgramInfo;
+				last_non_font_file = "";
 				return;
 			}
 
-			CheckboxAutoTranslation.Visible = false;
+			translationModeToolStripMenuItem.Enabled = false;
+			autoTranslationToolStripMenuItem.Enabled = false;
 
 			switch (fi.Type)
 			{
@@ -79,6 +104,26 @@
 				default:
 					return;
 			}
+			ButtonNextText.Visible = true;
+			ButtonBackText.Visible = true;
+
+			if(!is_font)
+			{
+				last_non_font_file = fi.LastOpenedFile;
+				LabelLineNumber.Visible = true;
+			}
+
+			switch (fi.Type)
+			{
+				case FileManager.LoadedFileType.Txt:
+				case FileManager.LoadedFileType.Stx:
+					break;
+				default:
+					CheckboxDisplayOriginalText.Enabled = true;
+					break;
+			}
+
+			CheckboxStartAutoplay.Enabled = true;
 
 			LoadedFile = true;
 
@@ -91,12 +136,24 @@
 				pathfile += "...";
 			}
 
-			LabelOpenedFile.Text = "Opened: " + pathfile;
-			LabelOpenedFile.Update();
+			this.Text = ProgramInfo + (translationModeToolStripMenuItem.Checked ? " | " + "TM" : "") + " | " + "Working on: " + Path.GetFileNameWithoutExtension(fi.LoadedFileName) + " | " + "x" + fi.GetMaxLine().ToString() + " | " + ext.ToUpperInvariant().Replace(".", "") + " | " + fm.CurrentFont.FontFamily.Name;
 
 			UpdateTextbox();
 			UpdateLineCharacter();
 			DisplayCharacterImage();
+
+			LoadGameSpecificGUI();
+
+			if (!is_font)
+			{
+				DestroyVerticalView();
+				OpenVerticalView();
+			}
+		}
+
+		private void ButtonOpenFile_Click(object sender, EventArgs e)
+		{
+			OpenFile("");
 		}
 
 		private void ButtonBackText_Click(object sender, EventArgs e)
@@ -108,6 +165,11 @@
 
 			CheckUnsaved();
 			StringIndexMinus();
+
+			if (vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
+			{
+				OpenVerticalView();
+			}
 		}
 
 		private void ButtonNextText_Click(object sender, EventArgs e)
@@ -119,6 +181,11 @@
 
 			CheckUnsaved();
 			StringIndexPlus();
+
+			if (vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
+			{
+				OpenVerticalView();
+			}
 		}
 
 		private void ButtonBackLanguage_Click(object sender, EventArgs e)
@@ -202,7 +269,7 @@
 			UpdateTextbox();
 		}
 
-		private void ButtonResetStringIndex_Click(object sender, EventArgs e)
+		private void ResetReadingProgress()
 		{
 			if (!LoadedFile)
 			{
@@ -223,7 +290,12 @@
 			DisplayCharacterImage();
 		}
 
-		private void ButtonFastRead_Click(object sender, EventArgs e)
+		private void ButtonResetStringIndex_Click(object sender, EventArgs e)
+		{
+			ResetReadingProgress();
+		}
+
+		private void DoFastRead()
 		{
 			if (!LoadedFile)
 			{
@@ -251,7 +323,7 @@
 
 			Textbox.Visible = false;
 
-			CheckboxDisplayCharacter.Enabled = false;
+			displayCharacterToolStripMenuItem.Enabled = false;
 
 			FastReading = true;
 
@@ -327,32 +399,29 @@
 				dialogue_window.DisplayedImage.Visible = true;
 			}
 
-			CheckboxDisplayCharacter.Enabled = true;
+			displayCharacterToolStripMenuItem.Enabled = true;
 
 			UpdateTextbox();
 
 			Reload();
 		}
 
-		private void ButtonReloadVariables_Click(object sender, EventArgs e)
+		private void ButtonFastRead_Click(object sender, EventArgs e)
 		{
-			if (AutoPlayOn || FastReading)
-			{
-				return;
-			}
-
-			vm = new VariableManager(Convention);
-
-			ListBoxMenuIndex.Items.Clear();
-			ListBoxMenuElements.Items.Clear();
-
-			foreach (string ms in vm.Menu.Items)
-			{
-				ListBoxMenuIndex.Items.Add(ms);
-			}
+			DoFastRead();
 		}
 
-		private void ButtonSaveAs_Click(object sender, EventArgs e)
+		private void DoReloadVariables()
+		{
+			ReloadListboxes();
+		}
+
+		private void ButtonReloadVariables_Click(object sender, EventArgs e)
+		{
+			DoReloadVariables();
+		}
+
+		private void SaveAs()
 		{
 			if (!LoadedFile)
 			{
@@ -520,6 +589,11 @@
 					InputManager.Print("Unsupported extension: " + ext);
 					break;
 			}
+		}
+
+		private void ButtonSaveAs_Click(object sender, EventArgs e)
+		{
+			SaveAs();
 		}
 	}
 }

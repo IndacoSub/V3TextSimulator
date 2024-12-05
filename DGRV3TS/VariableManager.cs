@@ -1,9 +1,14 @@
+﻿using System.Diagnostics;
+using System.Xml.Linq;
+using static OfficeOpenXml.ExcelErrorValue;
+using static System.Collections.Specialized.BitVector32;
+
 namespace DGRV3TS
 {
 	internal class VariableManager
 	{
 		// Don't worry about this if you're not me
-		private bool AltConvention;
+		private bool AltNames;
 
 		public List<ListBox> ListBoxes;
 
@@ -11,62 +16,30 @@ namespace DGRV3TS
 
 		public string NoVarStr = "No Variables";
 
-		// Definition, Value
-		public List<Tuple<string, string>> Variables;
+		// Definition, Value, Comment
+		public List<VariableEntry> Variables;
 
-		public VariableManager(bool ic)
+		static int MaxRecursive = 3;
+
+		public class VariableEntry
 		{
-			Init(ic);
+			public string Definition;
+			public string Value;
+			public string Comment;
 		}
 
-		public void Init(bool ic)
+		public VariableManager(bool alt_vars, GameIndex game)
 		{
-			AltConvention = new bool();
-			AltConvention = ic;
+			Init(alt_vars, game);
+		}
 
-			AddVariables();
+		public void Init(bool alt_vars, GameIndex game)
+		{
+			AltNames = new bool();
+			AltNames = alt_vars;
+
+			AddVariables(game);
 			ChangeItemNames();
-		}
-
-		// Get the Value from the Definition
-		public string SolveVar(string var)
-		{
-			foreach (Tuple<string, string> tp in Variables)
-			{
-				if (tp.Item1 == var)
-				{
-					return tp.Item2;
-				}
-			}
-
-			// for now
-			// return "UnknownValue";
-			return var;
-		}
-
-		// Get the Definition from the Value
-		public string UnSolve(string str)
-		{
-			//string ret = str; // "UnknownVar";
-			int howmany = 0;
-			string ret = str;
-			foreach (Tuple<string, string> tp in Variables)
-			{
-				if (tp.Item2 == str)
-				{
-					ret = tp.Item1;
-					howmany++;
-				}
-			}
-
-			if (howmany > 1)
-			{
-				InputManager.Print("More than 1 found! The copied string may not be correct.");
-			}
-
-			// for now
-			//return "UnknownVar";
-			return ret;
 		}
 
 		public int GetIndexInListbox(ListBox ll, string str)
@@ -85,14 +58,23 @@ namespace DGRV3TS
 			return -1;
 		}
 
-		public void AddV(string var, string value)
+		public void AddV(string var, string value, string comment)
 		{
-			Variables.Add(new Tuple<string, string>(var, value));
+			VariableEntry ve = new VariableEntry();
+			ve.Definition = var;
+			ve.Value = value;
+			ve.Comment = comment;
+			Variables.Add(ve);
 		}
 
-		public void AddVariantVWithPriority(string var, string value)
+		public void AddVariantVWithPriority(string var, string value, string comment)
 		{
-			Variables.Insert(IndexOfVariableByRaw(var), new Tuple<string, string>(var, value));
+			VariableEntry ve = new VariableEntry();
+			ve.Definition = var;
+			ve.Value = value;
+			ve.Comment = comment;
+
+			Variables.Insert(IndexOfVariableByRaw(var), ve);
 		}
 
 		public int IndexOfVariableByRaw(string raw)
@@ -100,7 +82,7 @@ namespace DGRV3TS
 			int cont = 0;
 			foreach (var iable in Variables)
 			{
-				if (iable.Item1 == raw)
+				if (iable.Definition == raw)
 				{
 					return cont;
 				}
@@ -109,35 +91,106 @@ namespace DGRV3TS
 			return cont;
 		}
 
-		public string RawByLine(string str)
+		public string NameByLine(string str)
 		{
-			if (str.IndexOf(",") >= 0)
+			string value = str;
+			int comma_index = str.IndexOf(",");
+
+			if (comma_index >= 0)
 			{
-				return str.Substring(0, str.IndexOf(","));
+				value = str.Substring(0, comma_index);
 			}
 
-			return str;
+			while (value.StartsWith(" "))
+			{
+				value = value.Substring(1);
+			}
+
+			while (value.EndsWith(" "))
+			{
+				value = value.Substring(0, value.Length - 1);
+			}
+
+			return value;
 		}
 
 		public string ValueByLine(string str, bool alt)
 		{
 			string ret = "";
 
-			if (AltConvention)
+			int colon_index = str.IndexOf(": ");
+			bool has_colon = colon_index >= 0;
+			int comma_index = str.IndexOf(", ");
+			bool has_comma = comma_index >= 0;
+
+			if (AltNames)
 			{
-				ret = alt ? str.Substring(str.IndexOf(": ") + 2) : str.Substring(str.IndexOf(", ") + 2);
+				if (has_colon && colon_index > comma_index)
+				{
+					ret = str.Substring(colon_index + 2);
+				}
+				else
+				{
+					ret = str.Substring(comma_index + 2);
+				}
 			}
 			else
 			{
 				if (alt)
 				{
-					ret = str.Substring(str.IndexOf(", ") + 2);
-					ret = ret.Substring(0, ret.IndexOf(" :"));
+					ret = str.Substring(comma_index + 2);
+					has_colon = ret.Contains(": ");
+					if (has_colon && colon_index > comma_index)
+					{
+						colon_index = ret.IndexOf(": ");
+						ret = ret.Substring(0, colon_index);
+					}
 				}
 				else
 				{
-					ret = str.Substring(str.IndexOf(", ") + 2);
+					ret = str.Substring(comma_index + 2);
 				}
+			}
+
+			int pipe_index = ret.IndexOf('|');
+			bool has_pipe = pipe_index > 0 && !ret.EndsWith('|') && !ret.EndsWith("| ");
+			if (has_pipe)
+			{
+				ret = ret.Substring(0, pipe_index - 1);
+			}
+
+			while (ret.StartsWith(" "))
+			{
+				ret = ret.Substring(1);
+			}
+			while (ret.EndsWith(" "))
+			{
+				ret = ret.Substring(0, ret.Length - 1);
+			}
+
+			return ret;
+		}
+
+		public string CommentByLine(string line)
+		{
+			int pipe_index = line.IndexOf('|');
+			int comma_index = line.IndexOf(',');
+			bool has_pipe = pipe_index > 0;
+			bool has_comment = has_pipe && pipe_index > comma_index && !line.EndsWith('|') && !line.EndsWith("| ");
+			if (!has_comment)
+			{
+				return "";
+			}
+
+			string ret = line.Substring(pipe_index + 2);
+
+			while (ret.StartsWith(" "))
+			{
+				ret = ret.Substring(1);
+			}
+			while (ret.EndsWith(" "))
+			{
+				ret = ret.Substring(0, ret.Length - 1);
 			}
 
 			return ret;
@@ -149,31 +202,52 @@ namespace DGRV3TS
 			return str.IndexOf(" : ") >= 0 && !string.IsNullOrWhiteSpace(str);
 		}
 
-		public void AddVariables()
+		public void AddVariables(GameIndex game)
 		{
-			Variables = new List<Tuple<string, string>>();
 			Menu = new ListBox();
-
+			Variables = new List<VariableEntry>();
 			ListBoxes = new List<ListBox>();
 
-			// The variables' file is "vars_bak.txt"
+			string vars_file = FileManager.GetCurrentDirectory();
+			string vars_filename = "";
+			switch(game)
+			{
+				case GameIndex.V3:
+					vars_filename = "vars_bak.txt";
+					break;
+				case GameIndex.AI:
+					vars_filename = "vars_ai.txt";
+					break;
+				default:
+					break;
+			}
 
-			if (!File.Exists("vars_bak.txt"))
+			if(vars_filename.Length <= 0)
+			{
+				return;
+			}
+
+			vars_file = Path.Combine(vars_file, vars_filename);
+
+			if (vars_file.Length <= 0 || !File.Exists(vars_file))
 			{
 				return;
 			}
 
 			bool donefirst = false;
 			int catnum = -1;
-			var lines = File.ReadLines("vars_bak.txt");
+			var lines = File.ReadLines(vars_file);
 			foreach (var line in lines)
 			{
-				if (string.IsNullOrWhiteSpace(line))
+
+				if (string.IsNullOrWhiteSpace(line) || line.Length <= 0 || line == "\n")
 				{
 					continue;
 				}
 
-				if (line.StartsWith("//"))
+				string ln = line;
+
+				if (ln.StartsWith("//"))
 				{
 					if (!donefirst)
 					{
@@ -182,40 +256,82 @@ namespace DGRV3TS
 					}
 
 					catnum++;
-					string catname = line.Substring(3); // // + space
+					string catname = ln.Substring(3); // // + space
 					AddMenu(catname);
 					ListBoxes.Add(new ListBox());
 					ListBoxes[catnum] = new ListBox();
 					continue;
 				}
 
-				if (line.Contains("_MN"))
+				while (ln.EndsWith(' '))
+				{
+					ln = ln.Substring(0, ln.Length - 1);
+				}
+
+				while (ln.StartsWith(' '))
+				{
+					ln = ln.Substring(1);
+				}
+
+				if (ln.Length <= 0)
 				{
 					continue;
 				}
 
-				if (line.Contains("_MS"))
-				{
-					continue;
-				}
-
-				string raw = "";
+				string name = "";
 				string value = "";
+				string comment = "";
 
-				raw = RawByLine(line);
-				if (line.IndexOf(",") >= 0 && !line.Contains("SIGNAL") && !line.Contains("PLATFORM"))
+				int comma_index = ln.IndexOf(',');
+				bool has_comma = comma_index >= 0;
+
+				var raw = NameByLine(ln);
+				name = raw;
+
+				if (name.Contains("_MN"))
 				{
-					bool is_all_ice = IsAllIceCompatible(line);
-					value = ValueByLine(line, is_all_ice);
+					continue;
+				}
+
+				if (name.Contains("_MS"))
+				{
+					continue;
+				}
+
+				if (has_comma && !ln.Contains("SIGNAL") && !ln.Contains("PLATFORM"))
+				{
+					// Has a value
+					bool is_all_ice = IsAllIceCompatible(ln);
+					value = ValueByLine(ln, is_all_ice);
 				}
 				else
 				{
-					value = raw;
+					// No value? Value is the name
+					value = name;
 				}
 
-				AddV(raw, value);
+				int pipe_index = ln.IndexOf('|');
+				bool has_pipe = pipe_index >= 0;
+				bool has_comment = has_pipe && pipe_index > comma_index && !ln.EndsWith('|') && !ln.EndsWith("| ");
 
-				ListBoxes[catnum].Items.Add(value);
+				if (has_comment)
+				{
+					comment = CommentByLine(ln);
+				}
+
+				if (name.Length > 0)
+				{
+					if (!name.StartsWith("MAKE_"))
+					{
+						AddV(name, value, comment);
+						ListBoxes[catnum].Items.Add(value);
+					}
+				}
+			}
+
+			foreach (var iables in Variables)
+			{
+				iables.Value = this.ReplaceVars(iables.Definition);
 			}
 		}
 
@@ -224,7 +340,7 @@ namespace DGRV3TS
 			Menu.Items.Add(str);
 		}
 
-		public string ReplaceCLTs(string s)
+		public static string ReplaceCLTs(string s)
 		{
 			string replaced = s;
 
@@ -243,13 +359,14 @@ namespace DGRV3TS
 			replaced = replaced.Replace("<CLT=typeNORMAL>", "");
 			replaced = replaced.Replace("<CLT=cltSYSTEM>", "");
 			replaced = replaced.Replace("<CLT=cltWEAK>", "");
+			replaced = replaced.Replace("<CLT=cltAGREE>", "");
 
 			replaced = replaced.Normalize();
 
 			return replaced;
 		}
 
-		public string ReplaceSignals(string s)
+		public static string ReplaceSignals(string s)
 		{
 			string replaced = s;
 
@@ -285,6 +402,127 @@ namespace DGRV3TS
 			{
 				Menu.Items[j] += " [" + ListBoxes[j].Items.Count + "]";
 			}
+		}
+
+		public VariableEntry EntryByDefinition(string definition)
+		{
+			if (definition == null)
+			{
+				return null;
+			}
+
+			foreach (VariableEntry tp in this.Variables)
+			{
+				if (tp.Definition == definition)
+				{
+					return tp;
+				}
+			}
+
+			return null;
+		}
+
+		public (VariableEntry, int) EntryByValue(string value)
+		{
+			if (value == null)
+			{
+				return (null, 9999);
+			}
+
+			int count = 0;
+			VariableEntry first = null;
+			foreach (VariableEntry tp in this.Variables)
+			{
+				string str = tp.Definition;
+				var solved = this.ReplaceVars(str);
+				if (solved == value)
+				{
+					if (first == null)
+					{
+						first = tp;
+					}
+					count++;
+				}
+				if (count > 1)
+				{
+					break;
+				}
+			}
+
+			return (first, count);
+		}
+
+		public string ReplaceVars(string replaced)
+		{
+			// Replace variables using the VariableManager
+
+			if(replaced == null)
+			{
+				return null;
+			}
+			string backup = replaced.Clone() as string;
+			int count = 0;
+			bool cond = false;
+
+			do
+			{
+				List<string> contained = new List<string>();
+
+				foreach (VariableEntry tp in this.Variables)
+				{
+					if (replaced.Contains(tp.Definition))
+					{
+						contained.Add(tp.Definition);
+					}
+
+					if (!tp.Definition.Contains("MAKE_") || !replaced.Contains("MAKE_"))
+					{
+						continue;
+					}
+
+					int section_start = replaced.IndexOf("MAKE_");
+					string section = replaced.Substring(section_start);
+					int section_end = replaced.IndexOf(")");
+					section = section.Substring(0, section_end);
+					int find = replaced.IndexOf("(");
+					string value = replaced.Substring(find + 1);
+					find = value.IndexOf(")");
+					value = value.Substring(0, find);
+
+					replaced = replaced.Replace(section, tp.Value.Replace("MY_ARG", value));
+				}
+
+				for (int i = 0; i < contained.Count; i++)
+				{
+					if (contained[i].Length <= 0)
+					{
+						continue;
+					}
+
+					if (contained[i].StartsWith("<CLT"))
+					{
+						continue;
+					}
+
+					var entry = EntryByDefinition(contained[i]);
+					if (entry == null || entry.Value == null || entry.Value.Length == 0)
+					{
+						continue;
+					}
+
+					replaced = replaced.Replace(contained[i], entry.Value);
+				}
+
+				count++;
+				cond = (replaced.Contains("MAKE_") || replaced.Contains("VAR_")) && count < VariableManager.MaxRecursive;
+			} while (cond);
+
+			replaced = replaced.Replace("  ", " ");
+			if (replaced.Normalize().Trim().Length <= 0)
+			{
+				replaced = backup;
+			}
+			return replaced;
 		}
 	}
 }

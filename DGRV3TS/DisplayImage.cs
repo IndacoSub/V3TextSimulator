@@ -11,6 +11,14 @@ namespace DGRV3TS
 			string expression = "";
 			string voice = "";
 
+			switch(CurrentGameIndex)
+			{
+				case GameIndex.AI:
+					return ("", "", "", "");
+				default:
+					break;
+			}
+
 			switch (fi.Type)
 			{
 				case FileManager.LoadedFileType.Vo:
@@ -23,20 +31,6 @@ namespace DGRV3TS
 					origin = fi.PoList.ElementAt(fi.StringIndex).OriginFile;
 					expression = fi.PoList.ElementAt(fi.StringIndex).Expression;
 					voice = fi.PoList.ElementAt(fi.StringIndex).Voiceline;
-
-					if (voice.Length > 0)
-					{
-						LabelVoiceline.Text = "Voiceline: " + voice;
-					}
-					else
-					{
-						LabelVoiceline.Text = "Voiceline: None";
-					}
-
-					LabelCharacterName.Visible = ch != "DefaultCharacter";
-					LabelOriginFile.Visible = origin != "DefaultOriginFile";
-					LabelCurrentAnimation.Visible = expression != "DefaultExpression";
-					LabelCurrentAnimation.Text = "Current Animation: " + expression;
 					break;
 
 				case FileManager.LoadedFileType.Stx:
@@ -45,20 +39,26 @@ namespace DGRV3TS
 					{
 						ch = fi.StxFile.CharacterByLineNumber(fi.StringIndex);
 						expression = fi.StxFile.ExpressionByLineNumber(fi.StringIndex, ch);
-						LabelCurrentAnimation.Text = "Current Animation: " + expression;
+						LabelCurrentAnimation.Text = "Animation: " + expression;
 						origin = Path.GetFileName(fi.LoadedFileName);
 						voice = fi.StxFile.VoicelineByLineNumber(fi.StringIndex);
-						if (voice.Length > 0)
-						{
-							LabelVoiceline.Text = "Voiceline: " + voice;
-						}
-						else
-						{
-							LabelVoiceline.Text = "Voiceline: None";
-						}
 					}
 					break;
 			}
+
+			if (voice.Length > 0)
+			{
+				LabelVoiceline.Text = "Voiceline: " + voice;
+			}
+			else
+			{
+				LabelVoiceline.Text = "";
+			}
+
+			LabelCharacterName.Visible = ch.Length > 0 && ch != "DefaultCharacter";
+			LabelOriginFile.Visible = origin.Length > 0 && origin != "DefaultOriginFile";
+			LabelCurrentAnimation.Visible = expression.Length > 0 && expression != "DefaultExpression";
+			LabelCurrentAnimation.Text = expression.Length > 0 ? "Animation: " + expression : "";
 
 			return (ch, origin, expression, voice);
 		}
@@ -71,8 +71,12 @@ namespace DGRV3TS
 			Point point = new Point(0, 0);
 			using (Graphics g = Graphics.FromImage(dialogue_window.DisplayedImage.Image))
 			{
-				(bool ret_img, Bitmap cc) = im.V3CharacterImageFromString(ch, fi.Type, expression, DEBUG_ON);
-				if (cc == null)
+				(bool ret_img, Bitmap cc, string str) = im.V3CharacterImageFromString(ch, fi.Type, expression, DEBUG_ON);
+
+                // Set up the ToolTip text for the Button and Checkbox.
+                ListBoxToolTip.SetToolTip(this.LabelCurrentAnimation, "File red: " + str);
+
+                if (cc == null)
 				{
 					//InputManager.Print("Character image is null!");
 					return false;
@@ -153,8 +157,11 @@ namespace DGRV3TS
 
 			bool loaded_img = false;
 
-			if (CheckboxDisplayCharacter.Checked)
+			if (displayCharacterToolStripMenuItem.Checked)
 			{
+				LabelCurrentAnimation.Visible = true;
+				LabelVoiceline.Visible = true;
+
 				(string ch, string origin, string expression, string voice) =
 					GetCharacterAndOrigin();
 
@@ -204,8 +211,8 @@ namespace DGRV3TS
 				// Extensions supporting animations and voicelines
 				if (fi.Type == FileManager.LoadedFileType.Stx || fi.Type == FileManager.LoadedFileType.Po)
 				{
-					// If the image was successfully loaded
-					if (loaded_img)
+                    // If the image was successfully loaded
+                    if (loaded_img)
 					{
 						LabelCurrentAnimation.ForeColor = Color.Black;
 					}
@@ -216,10 +223,17 @@ namespace DGRV3TS
 						if (DEBUG_ON && expression != "" && expression != "non" && expression != "None")
 						{
 							// debug
-							InputManager.Print("Unsupported animation for " + ch + ": \"" + expression +
-											   "\" (file: " + origin + ", line: " + LabelLineNumber.Text +
-											   ")\n\""
-											   + Textbox.Text + "\"");
+							switch (CurrentGameIndex)
+							{
+								case GameIndex.V3:
+									InputManager.Print("Unsupported animation for " + ch + ": \"" + expression +
+									   "\" (file: " + origin + ", line: " + LabelLineNumber.Text +
+									   ")\n\""
+									   + Textbox.Text + "\"");
+									break;
+								default:
+									break;
+							}
 						}
 					}
 
@@ -233,6 +247,10 @@ namespace DGRV3TS
 						LabelVoiceline.ForeColor = Color.Red;
 					}
 				}
+			} else
+			{
+				LabelCurrentAnimation.Visible = false;
+				LabelVoiceline.Visible = false;
 			}
 
 			dialogue_window.DisplayedImage.Refresh();

@@ -13,6 +13,11 @@ namespace DGRV3TS
 
 		private void DisplayedImage_Click(object sender, EventArgs e)
 		{
+			DoSaveImage();
+		}
+
+		public void DoSaveImage()
+		{
 			// Does not include characters?
 			SaveImage(DisplayedImage.Image, DisplayedImage.Image);
 		}

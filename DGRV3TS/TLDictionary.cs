@@ -1,21 +1,21 @@
 ﻿namespace DGRV3TS
 {
-	// A dictionary for AutoTranslation based on previous translations
+    // A dictionary for AutoTranslation based on previous translations
 
-	internal class Variant
+    public class Variant
 	{
 		public string File = "";
 		public string Line = "";
 		public string Message = "";
 	}
 
-	internal class Suggestion
+    public class Suggestion
 	{
 		public string OriginalLine = "";
 		public List<Variant> Variants = new List<Variant>();
 	}
 
-	internal class TLDictionary
+    public class TLDictionary
 	{
 		private readonly int MinimumLength = 1; // Arbitrary number
 		private List<Suggestion> Suggestions = new List<Suggestion>();
@@ -74,6 +74,11 @@
 					// Read each line individually
 					foreach (PoInternal po in fm.PoList)
 					{
+						bool is_empty = po.OriginalMessage.Contains("[EMPTY_LINE]") || po.MessageString.Contains("[EMPTY_LINE]");
+						if(is_empty)
+						{
+							continue;
+						}
 						// Has the line already been autotranslated?
 						bool is_autotl = po.MessageString.Contains("AutoTL");
 						int tl_index = po.MessageString.Length;
@@ -171,6 +176,11 @@
 						fm.ReadVo(file, false);
 						foreach (VoInternal vo in fm.VoList)
 						{
+							bool is_empty = vo.OriginalMessage.Contains("[EMPTY_LINE]") || vo.Translations[vo.TranslationNumber].Contains("[EMPTY_LINE]");
+							if (is_empty)
+							{
+								continue;
+							}
 							bool is_autotl = vo.Translations[vo.TranslationNumber].Contains("AutoTL");
 							int tl_index = vo.Translations[vo.TranslationNumber].Length;
 							if (is_autotl)
@@ -261,6 +271,11 @@
 							int cont_columns = 0;
 							foreach (XLSXRow xlsx in fm.XLSXList)
 							{
+								bool is_empty = xlsx.Original.Contains("[EMPTY_LINE]") || xlsx.Translations[fm.SelectedLanguage].Contains("[EMPTY_LINE]");
+								if (is_empty)
+								{
+									continue;
+								}
 								bool is_autotl = xlsx.Translations[fm.SelectedLanguage].Contains("AutoTL");
 								int tl_index = xlsx.Translations[fm.SelectedLanguage].Length;
 								if (is_autotl)
@@ -414,6 +429,16 @@
 							continue;
 						}
 
+						if (gg.OriginalLine.Contains("[EMPTY_LINE]"))
+						{
+							continue;
+						}
+						gg.Variants.RemoveAll(x => x.Message.Contains("[EMPTY_LINE]"));
+						if (gg.Variants.Count <= 0)
+						{
+							continue;
+						}
+
 						// Do checks
 						if (check)
 						{
@@ -497,6 +522,16 @@
 						const bool check = true; // Debug option?
 						Suggestion gg = GetSuggestionFromString(pi.OriginalMessage);
 						if (gg == null || gg == new Suggestion())
+						{
+							continue;
+						}
+
+						if(gg.OriginalLine.Contains("[EMPTY_LINE]"))
+						{
+							continue;
+						}
+						gg.Variants.RemoveAll(x => x.Message.Contains("[EMPTY_LINE]"));
+						if (gg.Variants.Count <= 0)
 						{
 							continue;
 						}
@@ -586,6 +621,16 @@
 						const bool check = true; // Debug option?
 						Suggestion gg = GetSuggestionFromString(row.Original);
 						if (gg == null || gg == new Suggestion())
+						{
+							continue;
+						}
+
+						if (gg.OriginalLine.Contains("[EMPTY_LINE]"))
+						{
+							continue;
+						}
+						gg.Variants.RemoveAll(x => x.Message.Contains("[EMPTY_LINE]"));
+						if (gg.Variants.Count <= 0)
 						{
 							continue;
 						}

@@ -1,10 +1,12 @@
-﻿using System.Media;
+﻿using System.Diagnostics;
+using System.Media;
 using System.Speech.Synthesis;
 
 namespace DGRV3TS
 {
 	partial class Operations
 	{
+		bool DoneSpeaking = false;
 		// Actual voice file player
 		private SoundPlayer SndPlayer = new SoundPlayer();
 
@@ -49,11 +51,16 @@ namespace DGRV3TS
 				return;
 			}
 
-			string replaced = Textbox.Text;
+			string old_translation = LoadedFile ? fi.GetCurrentTranslation() : "";
 
-			if (CheckboxReplaceVariables.Checked)
+			// TODO: Potentially bad?
+            CheckUnsaved();
+
+            string replaced = Textbox.Text;
+
+			if (replaceVariablesToolStripMenuItem.Checked)
 			{
-				replaced = ReplaceVars(replaced);
+				replaced = vm.ReplaceVars(replaced);
 			}
 
 			replaced = replaced.Replace("\\n", "\n");
@@ -158,13 +165,23 @@ namespace DGRV3TS
 				dialogue_window.DisplayedImage.Image = ScaledHB.Clone() as Bitmap; // ???
 			}
 
-			ScaledHB.Dispose();
+            if (LoadedFile && fi.Type == FileManager.LoadedFileType.Po && !Textbox.Text.Contains(fi.PoList[fi.StringIndex].OriginalMessage))
+            {
+                //Textbox.Text += "|" + fi.PoList[fi.StringIndex].OriginalMessage;
+            }
+
+			if(old_translation != Textbox.Text && vertical_view != null && vertical_view.Visible && LoadedFile && !FastReading)
+			{
+                OpenVerticalView();
+            }
+
+            ScaledHB.Dispose();
 			HB.Dispose();
 			MyText.Dispose();
 
 			DisplayCharacterImage();
 
-			if (CheckboxPlayVoiceTTS.Checked && play_voice)
+			if (enableTTSVoicelinesToolStripMenuItem.Checked && play_voice)
 			{
 				PlayVoice(!CheckboxStartAutoplay.Checked);
 			}
@@ -394,16 +411,18 @@ namespace DGRV3TS
 					return;
 				}
 
-				if (CheckboxPlayVoiceTTS.Checked)
+				if (enableTTSVoicelinesToolStripMenuItem.Checked)
 				{
-					while (!sm.DoneSpeaking)
+					Debug.WriteLine("Entering loop -- line " + fi.StringIndex);
+					while (!DoneSpeaking)
 					{
 						// Wait
 					}
+					Debug.WriteLine("Exiting loop -- line " + fi.StringIndex);
 				}
 				else
 				{
-					// 2500 should be enough
+					// TODO: 2500 should be enough
 					Thread.Sleep(2500);
 				}
 
@@ -433,8 +452,23 @@ namespace DGRV3TS
 					dialogue_window.DisplayedImage.Refresh();
 				}
 
-				fi.StringIndex++;
+				Debug.WriteLine("Line" + fi.StringIndex + " completed.");
+
+				if (fi.StringIndex + 1 < count - 1)
+				{
+					fi.StringIndex++;
+				} else
+				{
+					break;
+				}
 			}
+
+			Debug.WriteLine("Exiting Autoplay");
+
+			this.CheckboxPauseAutoplay.Checked = true;
+			this.CheckboxStartAutoplay.Checked = false;
+			this.CheckboxPauseAutoplay.Checked = false;
+			this.Refresh();
 		}
 
 		private void CheckUnsaved()
@@ -575,18 +609,20 @@ namespace DGRV3TS
 			string text = rawtext.Replace("\\n", " ");
 			// Treat \" as "
 			text = text.Replace("\\\"", "\"");
-			if (CheckboxReplaceVariables.Checked)
+			if (replaceVariablesToolStripMenuItem.Checked)
 			{
-				text = ReplaceVars(text);
+				text = vm.ReplaceVars(text);
 			}
 
 			// Replace signals and CLTs
-			text = vm.ReplaceCLTs(text);
-			text = vm.ReplaceSignals(text);
+			text = VariableManager.ReplaceCLTs(text);
+			text = VariableManager.ReplaceSignals(text);
 			// Once again treat newlines as spaces, possibly for signals
 			text = text.Replace("\\n", " ");
 
-			if (SoundManager.SoundFileExists(voice, game) && !FastReading && !AutoPlayOn)
+			DoneSpeaking = false;
+
+			if (SoundManager.SoundFileExists(voice, game) && !FastReading)
 			{
 
 				// Actual voice file
@@ -598,45 +634,30 @@ namespace DGRV3TS
 				SndPlayer = new SoundPlayer();
 				SndPlayer.SoundLocation = SoundManager.GetSoundFileByName(voice, game);
 				SndPlayer.Load();
-				SndPlayer.Play();
+				if (AutoPlayOn)
+				{
+					SndPlayer.PlaySync();
+				} else
+				{
+					SndPlayer.Play();
+				}
+				DoneSpeaking = true;
 			}
 			else
 			{
+				bool debate_mode = AutoPlayOn && tm.IsDebateFile(fi.LoadedFileName);
 				// TTS
-				SndPlayer.Stop();
-				sm.Synthesizer.Pause();
-				sm.Synthesizer.SpeakAsyncCancelAll();
-
-				sm.Synthesizer = new SpeechSynthesizer();
-				sm.PlayVoice(text, language, gender, age, async);
-			}
-		}
-
-		public string ReplaceVars(string replaced)
-		{
-			// Replace variables using the VariableManager
-
-			List<string> contained = new List<string>();
-
-			foreach (Tuple<string, string> tp in vm.Variables)
-			{
-				if (replaced.Contains(tp.Item1))
+				if (!debate_mode)
 				{
-					contained.Add(tp.Item1);
+					SndPlayer.Stop();
+					sm.Synthesizer.Pause();
+					sm.Synthesizer.SpeakAsyncCancelAll();
+
+					sm.Synthesizer = new SpeechSynthesizer();
+					sm.PlayVoice(text.Replace("_MN", ""), language, gender, age, async);
 				}
+				DoneSpeaking = true;
 			}
-
-			foreach (string sc in contained)
-			{
-				if (sc.StartsWith("<CLT"))
-				{
-					continue;
-				}
-
-				replaced = replaced.Replace(sc, vm.SolveVar(sc));
-			}
-
-			return replaced;
 		}
 	}
 }

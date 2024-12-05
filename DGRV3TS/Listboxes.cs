@@ -16,16 +16,24 @@
 			}
 
 			// Value
-			string st = ListBoxMenuElements.Items[index].ToString();
-			if (st.Length <= 0)
+			string? st = ListBoxMenuElements.Items[index].ToString();
+			if (st == null || st.Length <= 0)
 			{
 				ListBoxMenuElements.SelectedIndex = -1;
 				return "";
 			}
 
 			// Variable
-			var unsolved = vm.UnSolve(st);
-			return unsolved;
+			(var unsolved, int i) = vm.EntryByValue(st);
+			if(unsolved == null)
+			{
+				return "(CONFLICT) " + st;
+			}
+			if(unsolved.Definition == null)
+			{
+				return "NullDef_" + st + "_" + i.ToString();
+			}
+			return unsolved.Definition;
 		}
 
 		private void CreateListBoxMenu()
@@ -77,14 +85,71 @@
 			menuItem6.Name = "Lookup variant";
 
 			menuStrip.Items.Add(menuItem0);
-			menuStrip.Items.Add(menuItem1);
-			menuStrip.Items.Add(menuItem2);
-			menuStrip.Items.Add(menuItem3);
-			menuStrip.Items.Add(menuItem6);
-			menuStrip.Items.Add(menuItem5);
+
+			switch (CurrentGameIndex)
+			{
+				case GameIndex.V3:
+					menuStrip.Items.Add(menuItem2);
+					menuStrip.Items.Add(menuItem3);
+					menuStrip.Items.Add(menuItem6);
+					menuStrip.Items.Add(menuItem5);
+					menuStrip.Items.Add(menuItem1);
+					break;
+				default:
+					break;
+			}
 			menuStrip.Items.Add(menuItem4);
 
-			contextMenuStrip1 = menuStrip;
+			ListBoxRightClickCMS = menuStrip;
+		}
+
+		private void ListBoxOnMouseMove(object sender, MouseEventArgs mouseEventArgs)
+		{
+			var listbox = sender as ListBox;
+
+			if (listbox == null || !listbox.Visible)
+			{
+				return;
+			}
+
+			var strTip = string.Empty;
+			var index = listbox.IndexFromPoint(mouseEventArgs.Location);
+			bool should_set_tooltip = false;
+
+			if ((index >= 0) && (index < listbox.Items.Count))
+			{
+				var item = listbox.Items[index];
+				if (item != null)
+				{
+					string? value = item.ToString();
+					if (value != null && value.Length > 0)
+					{
+						switch(CurrentGameIndex)
+						{
+							case GameIndex.V3:
+								(var unsolve, int count) = vm.EntryByValue(value);
+								if (unsolve != null)
+								{
+									string comment = vm.EntryByDefinition(unsolve.Definition).Comment;
+									strTip = comment.Length <= 0 ? unsolve.Definition + (count > 1 ? " -- ⚠️ (ambiguous)" : "") : unsolve.Definition + (count > 1 ? " -- ⚠️ (ambiguous)" : "") + " | " + comment;
+									should_set_tooltip = true;
+								}
+								break;
+							case GameIndex.AI:
+								strTip = value;
+								should_set_tooltip = true;
+								break;
+							default:
+								break;
+						}
+					}
+				}
+			}
+
+			if (should_set_tooltip)
+			{
+				listbox_tooltip.SetToolTip(listbox, strTip);
+			}
 		}
 	}
 }
