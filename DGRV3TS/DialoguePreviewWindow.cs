@@ -400,6 +400,9 @@ internal sealed class DialoguePreviewWindow : Form
         var lineHeight = (float)fixedLineHeight;
         var state = graphics.Save();
         graphics.SetClip(bounds);
+        // CLT boundaries must not introduce GDI+'s default per-run padding.
+        using var format = new StringFormat(StringFormat.GenericTypographic);
+        format.FormatFlags |= StringFormatFlags.MeasureTrailingSpaces;
         try
         {
             foreach (Match match in matches)
@@ -440,15 +443,15 @@ internal sealed class DialoguePreviewWindow : Form
                 if (lines[i].Length == 0) continue;
                 if (!wordWrap.Checked)
                 {
-                    graphics.DrawString(lines[i], font, brush, new PointF(x, y));
-                    x += graphics.MeasureString(lines[i], font).Width;
+                    graphics.DrawString(lines[i], font, brush, new PointF(x, y), format);
+                    x += graphics.MeasureString(lines[i], font, int.MaxValue, format).Width;
                     continue;
                 }
                 foreach (Match part in Regex.Matches(lines[i], @"\s+|\S+", RegexOptions.CultureInvariant))
                 {
-                    var width = graphics.MeasureString(part.Value, font).Width;
+                    var width = graphics.MeasureString(part.Value, font, int.MaxValue, format).Width;
                     if (x > bounds.Left && x + width > bounds.Right) NewLine(font);
-                    graphics.DrawString(part.Value, font, brush, new PointF(x, y));
+                    graphics.DrawString(part.Value, font, brush, new PointF(x, y), format);
                     x += width;
                 }
             }
