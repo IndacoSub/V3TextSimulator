@@ -113,7 +113,11 @@ internal sealed partial class Operations
     private ToolStripSeparator sepVariables1;
     private ToolStripMenuItem _insertLowerItem;
     private ToolStripMenuItem _insertUpperItem;
+    private ToolStripMenuItem _hideVariableItem;
+    private ToolStripMenuItem _variableInfoItem;
+    private ToolStripMenuItem _alternateVariableItem;
     private ContextMenuStrip _variableMenu;
+    private ToolTip _variableToolTip;
 
     /// <summary>Visual layout only. Runtime behavior is connected in Init.cs.</summary>
     private void InitializeComponent()
@@ -226,7 +230,11 @@ internal sealed partial class Operations
         sepVariables1 = new ToolStripSeparator();
         _insertLowerItem = new ToolStripMenuItem();
         _insertUpperItem = new ToolStripMenuItem();
+        _hideVariableItem = new ToolStripMenuItem();
+        _variableInfoItem = new ToolStripMenuItem();
+        _alternateVariableItem = new ToolStripMenuItem();
         _variableMenu = new ContextMenuStrip(components);
+        _variableToolTip = new ToolTip(components);
         _mainMenu.SuspendLayout();
         _rootLayout.SuspendLayout();
         _navigation.SuspendLayout();
@@ -490,7 +498,7 @@ internal sealed partial class Operations
         _autoTtsItem.Text = "TTS al cambio battuta";
         _autoTtsItem.CheckOnClick = true;
         _autoTtsItem.AccessibleName = "TTS al cambio battuta";
-        _variableMenu.Items.AddRange(new ToolStripItem[] { _copyVariableTokenItem, _copyVariableValueItem, sepVariables1, _insertLowerItem, _insertUpperItem });
+        _variableMenu.Items.AddRange(new ToolStripItem[] { _copyVariableTokenItem, _copyVariableValueItem, sepVariables1, _insertLowerItem, _insertUpperItem, _hideVariableItem, _variableInfoItem, _alternateVariableItem });
         _copyVariableTokenItem.Text = "Copia token";
         _copyVariableTokenItem.Tag = "CopyVariableToken";
         _copyVariableTokenItem.AccessibleName = "Copia token";
@@ -503,6 +511,15 @@ internal sealed partial class Operations
         _insertUpperItem.Text = "Inserisci variante maiuscola (_MS)";
         _insertUpperItem.Tag = "InsertUpperVariant";
         _insertUpperItem.AccessibleName = "Inserisci variante maiuscola (_MS)";
+        _hideVariableItem.Name = "_hideVariableItem";
+        _hideVariableItem.Text = "Rimuovi dalla lista";
+        _hideVariableItem.Tag = "HideVariable";
+        _variableInfoItem.Name = "_variableInfoItem";
+        _variableInfoItem.Text = "Informazioni variabile…";
+        _variableInfoItem.Tag = "VariableInfo";
+        _alternateVariableItem.Name = "_alternateVariableItem";
+        _alternateVariableItem.Text = "Mostra valore alternativo…";
+        _alternateVariableItem.Tag = "AlternateVariable";
 
         // Root layout
         _rootLayout.Dock = DockStyle.Fill;

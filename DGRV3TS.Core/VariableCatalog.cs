@@ -6,6 +6,7 @@ namespace DGRV3TS.Core;
 public sealed record VariableDefinition(string Token, string Value, string Category, string? AlternateValue = null)
 {
     public string Comment { get; init; } = "";
+    public bool IsTemporary { get; init; }
 }
 
 /// <summary>The external v25 variable vocabulary; raw tokens remain the identity of every row.</summary>
@@ -105,6 +106,26 @@ public sealed class VariableCatalog
     {
         ArgumentNullException.ThrowIfNull(text);
         return ResolveText(text, alternate, new HashSet<string>(StringComparer.Ordinal), 0);
+    }
+
+    /// <summary>Restores v25's session-only case variants without editing the external dictionary.</summary>
+    public (VariableCatalog Catalog, VariableDefinition Variant, bool Created) WithCaseVariant(string token, bool uppercase)
+    {
+        if (!byToken.TryGetValue(token, out var source)) throw new ArgumentException("Variabile non trovata.", nameof(token));
+        var suffix = uppercase ? "_MS" : "_MN";
+        // Prefer exact external definitions, including the bracketed convention accepted by the rewrite.
+        if (token.EndsWith(suffix, StringComparison.Ordinal)) return (this, source, false);
+        if (byToken.TryGetValue(token + suffix, out var existing)) return (this, existing, false);
+        if (token.EndsWith('>') && byToken.TryGetValue(token[..^1] + suffix + ">", out existing)) return (this, existing, false);
+        if (token.EndsWith(suffix + ">", StringComparison.Ordinal)) return (this, source, false);
+
+        string ChangeCase(string value) => uppercase ? value.ToUpperInvariant() : value.ToLowerInvariant();
+        var variant = new VariableDefinition(token + suffix, ChangeCase(Resolve(token)), source.Category,
+            source.AlternateValue is null ? null : ChangeCase(Resolve(token, alternate: true)))
+        { Comment = source.Comment, IsTemporary = true };
+        var rows = Variables.ToList();
+        rows.Add(variant);
+        return (new VariableCatalog(FilePath, rows, Warnings.ToList()), variant, true);
     }
 
     private string ResolveText(string text, bool alternate, HashSet<string> visiting, int depth)

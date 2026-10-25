@@ -5,8 +5,8 @@ namespace DGRV3TS;
 
 internal sealed partial class Operations
 {
-    private sealed record VariableItem(VariableDefinition Definition)
-    { public override string ToString() => $"{Definition.Token}  →  {Definition.Value}"; }
+    private sealed record VariableItem(VariableDefinition Definition, string DisplayValue)
+    { public override string ToString() => $"{Definition.Token}  →  {DisplayValue}"; }
 
     private void FindVariables(bool force = false)
     {
@@ -39,7 +39,9 @@ internal sealed partial class Operations
     private void LoadVariables(string path)
     {
         var loaded = VariableCatalog.Load(path);
-        _catalog = loaded; BindCatalog();
+        _catalog = loaded;
+        _hiddenVariableTokens.Clear();
+        BindCatalog();
         if (loaded.Warnings.Count > 0) MessageBox.Show(this, string.Join("\n", loaded.Warnings.Take(30)), "Avvisi dizionario", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
@@ -54,30 +56,72 @@ internal sealed partial class Operations
 
     private void FilterVariables()
     {
+        var selectedToken = (_variables.SelectedItem as VariableItem)?.Definition.Token;
         _variables.BeginUpdate();
         try
         {
             _variables.Items.Clear();
-            foreach (var v in _catalog.Variables.Where(v => (_category.SelectedIndex <= 0 || v.Category == _category.SelectedItem?.ToString()) &&
-                (v.Token.Contains(_variableQuery.Text, StringComparison.OrdinalIgnoreCase) || v.Value.Contains(_variableQuery.Text, StringComparison.OrdinalIgnoreCase)))
-                .OrderBy(v => v.Token, StringComparer.OrdinalIgnoreCase)) _variables.Items.Add(new VariableItem(v));
+            foreach (var item in _catalog.Variables
+                .Where(v => !_hiddenVariableTokens.Contains(v.Token) && (_category.SelectedIndex <= 0 || v.Category == _category.SelectedItem?.ToString()))
+                .Select(v => new VariableItem(v, _catalog.Resolve(v.Token, _alternate.Checked)))
+                .Where(v => v.Definition.Token.Contains(_variableQuery.Text, StringComparison.OrdinalIgnoreCase)
+                    || v.DisplayValue.Contains(_variableQuery.Text, StringComparison.OrdinalIgnoreCase)
+                    || v.Definition.Comment.Contains(_variableQuery.Text, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(v => v.Definition.Token, StringComparer.OrdinalIgnoreCase)) _variables.Items.Add(item);
+            for (int i = 0; i < _variables.Items.Count; i++)
+                if (_variables.Items[i] is VariableItem item && item.Definition.Token == selectedToken) { _variables.SelectedIndex = i; break; }
         }
         finally { _variables.EndUpdate(); }
     }
 
     private void InsertVariable()
-    { if (Current is not null && _variables.SelectedItem is VariableItem v) { _translation.SelectedText = v.Definition.Token; _translation.Focus(); } }
+    {
+        if (Current is null || _variables.SelectedItem is not VariableItem v) return;
+        _translation.SelectedText = _game.SelectedIndex == 0 ? v.Definition.Token : v.DisplayValue;
+        _translation.Focus();
+    }
 
     private void CopyVariable(string suffix)
-    { if (_variables.SelectedItem is VariableItem v) Safe(() => Clipboard.SetText(v.Definition.Token + suffix)); }
+    {
+        if (_variables.SelectedItem is not VariableItem v) return;
+        var text = _game.SelectedIndex == 0 ? v.Definition.Token + suffix : v.DisplayValue;
+        if (text.Length == 0) return;
+        Safe(() => { Clipboard.SetText(text); _status.Text = "Variabile copiata negli appunti."; });
+    }
 
     private void InsertVariant(string suffix)
     {
-        if (Current is null || _variables.SelectedItem is not VariableItem v) return;
-        var baseToken = v.Definition.Token;
-        var token = baseToken.EndsWith('>') ? baseToken[..^1] + suffix + ">" : baseToken + suffix;
-        if (!_catalog.Variables.Any(x => x.Token == token))
-        { MessageBox.Show(this, $"La variante {token} non è definita nel dizionario esterno. Aggiungila al file e ricarica."); return; }
-        _translation.SelectedText = token; _translation.Focus();
+        if (_variables.SelectedItem is not VariableItem v) return;
+        var result = _catalog.WithCaseVariant(v.Definition.Token, uppercase: suffix == "_MS");
+        _catalog = result.Catalog;
+        Clipboard.SetText(result.Variant.Token);
+        if (Current is not null) { _translation.SelectedText = result.Variant.Token; _translation.Focus(); }
+        FilterVariables();
+        UpdateChecks(); UpdatePreview();
+        _status.Text = result.Created
+            ? $"{result.Variant.Token}: variante temporanea creata e copiata. Aggiungila a VARS_BAK per conservarla dopo la ricarica."
+            : $"{result.Variant.Token}: variante esistente copiata.";
+    }
+
+    private void HideVariable()
+    {
+        if (_variables.SelectedItem is not VariableItem v) return;
+        _hiddenVariableTokens.Add(v.Definition.Token);
+        FilterVariables();
+        _status.Text = "Variabile rimossa dalla lista. Il file e la risoluzione dei token rimangono disponibili; ricarica per ripristinare la lista.";
+    }
+
+    private void ShowVariableInfo()
+    {
+        if (_variables.SelectedItem is not VariableItem v) return;
+        MessageBox.Show(this, $"Token: {v.Definition.Token}\nCategoria: {v.Definition.Category}\n" +
+            $"Valore: {_catalog.Resolve(v.Definition.Token)}\nAlternativo: {_catalog.Resolve(v.Definition.Token, true)}\n" +
+            $"Note: {v.Definition.Comment}\nTemporanea: {(v.Definition.IsTemporary ? "sì" : "no")}", "Informazioni variabile");
+    }
+
+    private void ShowAlternateVariable()
+    {
+        if (_variables.SelectedItem is not VariableItem v) return;
+        MessageBox.Show(this, _catalog.Resolve(v.Definition.Token, !_alternate.Checked), "Valore nella convenzione alternativa");
     }
 }

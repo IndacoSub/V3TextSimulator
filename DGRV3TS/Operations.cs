@@ -17,6 +17,7 @@ internal sealed partial class Operations : Form
     private CancellationTokenSource? _memoryScan;
     private bool _closeWhenScanStops;
     private bool _catalogIsExplicit;
+    private readonly HashSet<string> _hiddenVariableTokens = new(StringComparer.Ordinal);
     private string _assetRoot = AppContext.BaseDirectory;
     private readonly System.Windows.Forms.Timer _autoplay = new() { Interval = 3000 };
     private VerticalView? _vertical;

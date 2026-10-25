@@ -224,6 +224,29 @@ try
         Equal("Traduzione <TOKEN>", untouched.Entries[0].DisplayText());
         Equal("Keep <TOKEN>", untouched.Entries[0].DisplayText(original: true));
     });
+    Test("v25 TXT conversions wrap structured sources and preserve imported TXT layout", () =>
+    {
+        var structured = TranslationDocument.Load(Write("legacy-wrapper.po", "msgctxt \"1\"\nmsgid \"Original\"\nmsgstr \"Traduzione\"\n\nmsgctxt \"2\"\nmsgid \"Second original\"\nmsgstr \"\""));
+        structured.UpdateTranslation(structured.Entries[1], "");
+        structured.Save(PathOf("legacy-wrapper.txt"));
+        Equal("{\nTraduzione\n\n}", File.ReadAllText(PathOf("legacy-wrapper.txt")));
+        var exported = TranslationDocument.Load(PathOf("legacy-wrapper.txt"));
+        Equal(2, exported.Entries.Count);
+        Equal("", exported.Entries[1].Original);
+
+        const string unwrapped = "alpha\n\nomega\n";
+        var plain = TranslationDocument.Load(Write("legacy-unwrapped.txt", unwrapped));
+        plain.Save(PathOf("legacy-unwrapped.json"));
+        TranslationDocument.Load(PathOf("legacy-unwrapped.json")).Save(PathOf("legacy-unwrapped-copy.txt"));
+        Equal(unwrapped, File.ReadAllText(PathOf("legacy-unwrapped-copy.txt")));
+
+        var native = TranslationDocument.Create();
+        native.AddEntry("Native original");
+        native.Save(PathOf("legacy-native.json"));
+        TranslationDocument.Load(PathOf("legacy-native.json")).Save(PathOf("legacy-native.txt"));
+        Equal("{\nNative original\n}", File.ReadAllText(PathOf("legacy-native.txt")));
+    });
+    Test("v25 variable case variants preserve session-only definitions and explicit overrides", () => VariableVariantTests.Run(folder));
     Test("Atomic save backup and conflict check protect external changes", () =>
     {
         var path = Write("conflict.txt", "original"); var doc = TranslationDocument.Load(path); doc.UpdateTranslation(doc.Entries[0], "first"); doc.Save(path);

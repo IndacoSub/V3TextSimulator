@@ -1,132 +1,179 @@
-# V3 Text — riscrittura della versione v25
+# V3TextSimulator / DGRV3TS
 
-Questa riscrittura parte **esclusivamente dal ramo `v25`, commit `6601709c85e48cc17376fd700f40f58a47f02e4c`**. Sostituisce interfaccia, gestione dei documenti e funzioni accessorie, mantenendo il flusso di lavoro di quella versione. Il programma serve prima di tutto per tradurre e revisionare testi.
+Danganronpa V3 Text Simulator and translation editor. The program previews Danganronpa V3 conversations and helps translate and review the game's text. Translation is its primary purpose; graphics and audio are optional aids.
 
-## Le tre finestre
+**AI: The Somnium Files support remains a work in progress.** The project was originally based on the Fire Emblem If / Fates Text Simulator ("FEFTS" or "FEITS") by [SciresM](https://github.com/SciresM): [SciresM/FEITS](https://github.com/SciresM/FEITS).
 
-| Finestra | Funzione |
+This rewrite is based exclusively on **`v25`, commit `6601709c85e48cc17376fd700f40f58a47f02e4c`**. At least 100% feature parity with that version is a requirement, not a claim that every feature has already been verified. See the [feature-parity checklist](docs/FEATURE-PARITY.md) for coverage, remaining gaps and validation status. In particular, Windows UI, audio and exact preview rendering still need Windows validation.
+
+The project is licensed under the **GNU General Public License v3.0 (GPL v3.0)**. Contributions, bug reports and issue reports are welcome and appreciated.
+
+## The three windows
+
+| Window | Purpose |
 | --- | --- |
-| **Editor principale (`Operations`)** | Originale di sola lettura, textbox della traduzione, navigazione, lingue, ricerca e variabili esterne. Non contiene un elenco verticale dei dialoghi. |
-| **Vista verticale separata** (`F6`) | Riepilogo scorrevole di tutte le battute del file: ID, personaggio, originale e traduzione insieme. Il clic seleziona la battuta nell'editor; il menu contestuale copia o incolla la traduzione. Le schede si aggiornano mentre scrivi, senza ricreare migliaia di controlli. |
-| **Anteprima grafica separata** (`F7`) | Finestra orizzontale con sfondo, sprite, testo con tag CLT, font, audio e screenshot. È accessoria: nessuna risorsa del gioco è necessaria per tradurre. |
+| **Main editor (`Operations`)** | Read-only original, translation textbox, navigation, translation-language selection, search and external variables. The dialogue list is not embedded in this window. |
+| **Separate vertical summary (`F6`)** | A scrollable overview of every dialogue in the file, showing its ID, speaker, original and translation together. Click a card to select that dialogue in the editor; right-click to copy or paste a translation. |
+| **Separate graphics preview (`F7`)** | A landscape window with backgrounds, sprites, text styling, fonts, audio and screenshots. Game assets are not required to translate. |
 
-La vista verticale si apre quando viene caricato un documento. Puoi chiuderla e riaprirla dal menu. Mantiene lo scorrimento mentre modifichi una battuta, si sincronizza con la lingua selezionata e distingue una traduzione intenzionalmente vuota da una battuta ancora da tradurre.
+The vertical summary opens when a document is loaded. It can be closed and reopened, follows the selected translation language, updates while you type and preserves the scroll position. Cards distinguish an intentionally empty translation from an untranslated dialogue.
 
-## Avvio e compilazione
+Some Windows UI labels are currently in Italian; the commands below describe their function.
 
-Serve **SDK .NET 8, versione 8.0.400 o successiva della stessa serie**. L'interfaccia richiede Windows; il core e le regressioni possono essere eseguiti anche su Linux. Il progetto non richiede pacchetti NuGet esterni all'SDK e ai framework Microsoft.
+## Build and run
+
+Install the **.NET 8 SDK, version 8.0.400 or a later .NET 8 SDK feature band**. The desktop application requires Windows. The format-handling core and regression runner can also run on Linux. The rewrite does not require third-party NuGet packages beyond the Microsoft SDK and framework components.
+
+From the directory containing `DGRV3TS.sln`:
 
 ```sh
 dotnet build DGRV3TS.sln -c Release --warnaserror
 dotnet run --project DGRV3TS.Core.Tests -c Release --no-build
 ```
 
-Il secondo comando è il runner di regressione: termina con codice diverso da zero se un controllo fallisce. Non usare `dotnet test` per questa suite.
+The second command runs the repository's executable regression suite and returns a nonzero exit code on failure. `dotnet test` is not the runner for this suite.
 
-Su Windows:
+On Windows:
 
 ```sh
 dotnet run --project DGRV3TS
 dotnet run --project DGRV3TS -- examples/dialoghi.po
 ```
 
-L'argomento iniziale conserva il flusso “Apri con” della v25. Il file di esempio ha un dizionario `VARS_BAK` accanto e metadati personaggio/espressione/voce. Non distribuisce immagini o audio del gioco.
+The initial file argument preserves v25's command-line / "Open with" workflow. The sample has an adjacent `VARS_BAK` dictionary and speaker, expression and voice metadata; no game images or sounds are included.
 
-## Tradurre
+A Windows build is produced under `DGRV3TS/bin/Release/net8.0-windows/win-x64/`. Running that build requires the .NET 8 Windows Desktop Runtime x64 and its adjacent application files; using `dotnet run` requires the SDK.
 
-Apri PO, VO, TXT, STX, XLSX o un progetto JSON. Scrivi nella textbox **Traduzione**; cambiando battuta o lingua le modifiche rimangono in memoria. L'originale resta separato. Le variabili inserite restano token nel file; solo l'anteprima ne risolve il valore.
+## Translation workflow
 
-- `Ctrl+O`, `Ctrl+S`, `Ctrl+Maiusc+S`: apri, salva, salva con nome/conversione.
-- `Ctrl+↑/↓`: battuta precedente/successiva; numero di riga + **Vai** per saltare direttamente.
-- `Ctrl+F`, `Ctrl+H`: ricerca e sostituzione. La sostituzione multipla riguarda tutte le battute della lingua selezionata e richiede conferma.
-- `F8`: prossima battuta non tradotta; **Segna traduzione intenzionalmente vuota** serve per esportare una stringa vuota deliberatamente.
-- `Ctrl+Z` / `Ctrl+Y`: annulla/ripristina nella textbox corrente. La cronologia della textbox viene azzerata cambiando battuta.
-- **Riparti dalla prima battuta** e **Fast-read** conservano rispettivamente reset e salto rapido all'ultima battuta della v25.
+Open PO, VO, TXT, STX, XLSX or a JSON project. Write in the **Translation** textbox (`Traduzione`). Edits stay in memory when changing dialogue or translation language, while the original remains separate. Inserted variable tokens remain raw tokens in saved files; resolving them affects only the preview.
 
-Gli avvisi confrontano il numero di tag, variabili e placeholder .NET/printf tra originale e traduzione. Non verificano la qualità linguistica. Lo scorrimento automatico usa un timer dell'interfaccia, con pausa/ripresa/stop; si ferma quando inizi a modificare o apri operazioni modali, evitando scritture sulla battuta sbagliata. Le voci WAV e il TTS al cambio battuta sono attivabili dal menu; per i WAV l'intervallo è temporizzato, non basato sulla durata dell'audio.
-
-### Memoria di traduzione
-
-**Indicizza memoria da cartella** legge ricorsivamente traduzioni PO/VO/XLSX/JSON senza modificarle, escludendo il documento corrente, cartelle di build, risorse e collegamenti simbolici. Cerca corrispondenze esatte per originale e lingua, preferendo lo stesso personaggio.
-
-**Suggerimenti** mostra le alternative in conflitto e la provenienza. **Completa vuoti dalla memoria** applica solo candidati univoci e non sovrascrive traduzioni già completate. È il riuso locale della v25, non un servizio di traduzione automatica: non richiede rete o chiavi API.
-
-**Stop** annulla anche un'indicizzazione in corso, mantenendo la memoria precedente. Durante la scansione i comandi che cambiano documento o nome del file sono disabilitati; puoi continuare a modificare il testo. La chiusura annulla la scansione e poi gestisce normalmente le modifiche non salvate.
-
-## File e salvataggi
-
-**JSON è il formato di lavoro completo**: conserva originali, tutte le traduzioni, completamenti intenzionalmente vuoti e il modello del file importato, così da mantenere commenti, metadati e strutture quando viene riesportato. Salva con nome propone JSON.
-
-| Formato | Supporto e limiti |
+| Shortcut or command | Action |
 | --- | --- |
-| PO | `msgid`, `msgstr`, commenti, contesti v25 `ID \| origine \| personaggio \| espressione \| voce`, stringhe multilinea ed escape. Plurali, charset dichiarati non UTF-8 ed escape sconosciuti sono rifiutati esplicitamente. Esporta una sola lingua. |
-| VO | Metadati legacy, commenti, ultima battuta senza riga vuota finale, più lingue, escape reversibili. Il sentinel legacy `"(blank)"` viene letto come vuoto; quella stringa letterale non è esportabile senza ambiguità. |
-| TXT | Una battuta per riga, compreso il contenitore facoltativo `{`/`}`. Gli a capo interni diventano `\n`. |
-| STX | Tabella singola, UTF-16LE, ID non sequenziali, stringhe vuote e intestazione conservati. Controllo di puntatori e terminatori; le tabelle multiple sono rifiutate. |
-| XLSX | Primo foglio: intestazione, A=ID/OFFSET, B=originale, C e successive=traduzioni. Conserva gli altri fogli e le parti del file importato; non sostituisce formule modificate. Non supporta `.xls`. |
+| `Ctrl+O`, `Ctrl+S`, `Ctrl+Shift+S` | Open, save, save as / convert format. |
+| `Ctrl+Up` / `Ctrl+Down` | Previous / next dialogue. Use the dialogue number and **Go** (`Vai`) to jump directly. |
+| `Ctrl+F`, `Ctrl+H` | Search and replace. Replace-all affects the selected language and requires confirmation. |
+| `F8` | Next untranslated dialogue. |
+| **Mark intentionally empty** | Explicitly export an empty string rather than leaving a dialogue untranslated. |
+| `Ctrl+Z` / `Ctrl+Y` | Undo / redo in the current textbox. Its undo history is cleared when switching to another dialogue or language. |
+| **Reset reading progress** / **Fast-read** | Return to the first dialogue / jump to the final dialogue. |
 
-TXT/STX contengono solo il testo finale: le righe ancora da tradurre mantengono il sorgente, quelle segnate intenzionalmente vuote vengono svuotate. Mantieni anche JSON per conservare il confronto originale/traduzione. Il comando di esportazione degli originali non cambia il documento aperto.
+Warnings compare tag, variable and .NET/printf placeholder counts between the original and translation; they do not assess linguistic quality. Re-selecting the same dialogue preserves the textbox's caret, selection and undo history.
 
-Il salvataggio scrive prima un file temporaneo e mantiene la versione precedente in `<file>.bak`. Rileva modifiche esterne al documento aperto e rifiuta di sovrascriverle: salva con un altro nome e confronta. Non c'è autosalvataggio sul disco; `.bak` conserva una sola versione precedente. Aprire/chiudere un documento con modifiche chiede se salvarle, scartarle o annullare.
+Autoplay uses a UI timer with pause, resume and stop. Manual editing, navigation and modal operations stop autoplay to keep edits attached to the intended dialogue. WAV and text-to-speech playback on dialogue changes can be enabled from the menu. WAV advancement uses the selected interval rather than the audio file's duration.
 
-### STX e WRD
+### Translation memory
 
-Aprendo uno STX, un WRD omonimo accanto al file viene caricato se presente. Puoi sceglierlo anche dal menu. I metadati vengono associati tramite gli ID LOC, con controlli sui limiti e sugli opcode supportati, e alimentano personaggio/espressione/voce, riepilogo e conversione PO. L'importazione dei metadati segna il progetto come modificato; salva JSON per conservarli insieme al lavoro.
+**Index memory from folder** (`Indicizza memoria da cartella`) recursively reads PO/VO/XLSX/JSON translations without modifying their files. It excludes the current document, build directories, game assets and symbolic links. Suggestions match the exact original and translation-language index, preferring the same speaker.
 
-## VARS_BAK e VARS_AI
+**Suggestions** shows conflicting candidates and their source files. **Fill untranslated from memory** applies only unambiguous candidates and does not overwrite completed translations. This reuses existing local translations; it does not call an online machine-translation service or require API keys.
 
-La selezione V3/AI sceglie rispettivamente `VARS_BAK`/`vars_bak.txt` e `vars_ai.txt`. La ricerca automatica considera cartella del documento, risorse, eseguibile e cartella di lavoro. Puoi caricare un file diverso o ricaricarlo dopo una modifica esterna.
+**Stop** also cancels indexing and retains the previous memory. Commands that change the document or its filename are disabled during indexing, while text editing remains available. Closing the editor cancels the scan before handling unsaved changes normally.
 
-I dizionari individuati automaticamente vengono ricercati aprendo un altro documento, dando priorità alla sua cartella. Un dizionario scelto manualmente viene mantenuto finché non ne scegli un altro o cambi gioco.
+## Documents and saving
+
+**JSON is the complete working-project format.** It preserves separate originals, all translation languages, intentionally empty completion states and the imported source template so metadata and structures can survive re-export. Save As proposes JSON.
+
+| Format | Support and current limits |
+| --- | --- |
+| PO | `msgid`, `msgstr`, comments, multiline strings, escapes and v25 contexts: `ID \| origin \| speaker \| expression \| voice`. Plurals, declared non-UTF-8 charsets and unknown escapes are rejected explicitly. Exports one translation language. |
+| VO | Legacy metadata, comments, the final record without a trailing blank line, multiple languages and reversible escapes. Legacy `"(blank)"` means empty; that exact literal cannot be exported unambiguously. |
+| TXT | One dialogue per line, with optional enclosing `{` / `}`. Newlines inside a dialogue are exported as `\n`. |
+| STX | Single-table UTF-16LE files, nonsequential IDs, empty source strings and preserved headers. Pointers and string terminators are validated; multiple tables are rejected. |
+| XLSX | First worksheet: headers in row 1, A = ID/OFFSET, B = original, C onward = translations. Other worksheets and imported workbook parts are preserved. Changed translation formula cells cannot be overwritten. Legacy `.xls` is not supported. |
+
+TXT and STX store only final text: untranslated rows retain the source; intentionally empty rows are cleared. Keep a JSON project to preserve the original/translation comparison. Exporting originals produces a copy without changing the open document.
+
+Saving writes a temporary file first and keeps the previous version as `<filename>.bak`. If another program changes or removes the open file, saving refuses to overwrite it: save under another name and compare the versions. There is no automatic disk save, and `.bak` retains only one previous version. Opening or closing a modified document offers save, discard or cancel.
+
+### STX and WRD
+
+Opening an STX also loads an adjacent WRD with the same basename when present. A WRD can be selected manually from the menu. Metadata is associated by numeric LOC IDs, with bounds and supported-opcode checks, and supplies speaker, expression and voice information to the summaries, graphics preview and PO conversion. Importing metadata marks the project as modified; save JSON to retain it with the translation work.
+
+## External variables: VARS_BAK and VARS_AI
+
+The V3/AI selector uses `VARS_BAK` / `vars_bak.txt` and `vars_ai.txt`, respectively. Automatic lookup checks the document directory first, followed by the asset directory, executable directory and working directory. A dictionary can also be selected explicitly or reloaded after an external edit.
+
+Automatically discovered dictionaries are looked up again when opening another document. An explicitly chosen dictionary stays selected until another is chosen or the game is changed.
 
 ```text
-// Personaggi
-<HERO>, Kaede Akamatsu | Nota mostrata nell'editor
-// Glossario
-<ACADEMY>, Accademia per talenti : Ultimate Academy | Principale e alternativo
+// Characters
+<HERO>, Kaede Akamatsu | Note displayed in the editor
+// Glossary
+<ACADEMY>, Accademia per talenti : Ultimate Academy | Main and alternate values
 <ACADEMY_MN>, accademia per talenti
 ```
 
-`//` apre una categoria; le righe senza categoria sono accettate. Il primo `,` separa token e valore, ` : ` l'alternativa, ` | ` il commento. Categorie, ricerca e note sono disponibili nel pannello principale. Doppio clic inserisce il token alla posizione del cursore; il menu contestuale copia token/valore o inserisce una variante `_MN`/`_MS` realmente definita nel file.
+`//` starts a category; entries before the first category are accepted. The first `,` separates token and value, ` : ` separates an alternate value and ` | ` introduces a comment. The main editor provides categories, search, hover notes and entry information. A single left-click copies the raw token for V3 or the displayed value for AI; double-click inserts the corresponding token or AI value at the caret.
 
-Le sostituzioni annidate sono limitate a tre livelli, rispettano i confini e segnalano cicli. Token duplicati o righe malformate producono avvisi; non fanno bloccare l'avvio. Il programma non riscrive il dizionario esterno.
+The context menu can copy tokens and values, show alternate values and entry information, and copy or insert lowercase (`_MN`) and uppercase (`_MS`) variants. Existing external definitions take precedence. When no definition exists, a variant can be generated for the current session, preserving the original v25 convenience. Generated variants do not change the external dictionary and are cleared on reload. **Remove from list** hides an entry from the current list without deleting its file definition.
 
-## Risorse e anteprima
+Nested substitutions are limited to three levels, respect token boundaries and report cycles. Duplicate tokens and malformed lines produce warnings instead of preventing startup. The external dictionary is not rewritten automatically.
 
-Scegli la cartella che contiene `Graphics` e `Sound` da **Finestre e risorse**. I percorsi conservano la struttura v25:
+## Folders, files and preview assets
 
-```text
-Graphics/Backgrounds/DR/*.png
-Graphics/Backgrounds/Danganronpa/*.png    (anche convenzione README precedente)
-Graphics/Backgrounds/AI/*.png
-Graphics/Sprites/DR/C015_Akama/anim000.png
-Graphics/Sprites/DR/C015_Akama/default.png
-Sound/Voices/DR/vic_Akama/vic_Akama_01_001.wav
-font.ttf oppure font.otf
-```
+**This repository does not contain game image or sound files. You must provide those yourself.**
 
-L'anteprima offre sfondo, sprite facoltativi, selezione V3/AI, font installati e TTF/OTF esterni, dimensioni e tag CLT, interlinea fissa/adattiva, WAV, TTS Windows con lingua, copia immagine e PNG. Il rendering è indicativo, non una garanzia di impaginazione identica al gioco. File mancanti o audio non disponibile non impediscono di tradurre.
+By default, all paths below are relative to the executable. To use another asset location, choose the folder containing `Graphics` and `Sound` from the windows/assets menu.
 
-L'importazione degli sprite mantiene la mappa personaggi v25 e non sovrascrive file esistenti. L'esportazione delle battute con voce comprende tutti i personaggi, senza il filtro Monokuma hardcoded della v25. Il vecchio comando “Setup Voicelines” era esplicitamente non implementato: le voci si usano nelle cartelle documentate.
+| Asset | Folder and example |
+| --- | --- |
+| AI backgrounds | `Graphics/Backgrounds/AI`, e.g. `Graphics/Backgrounds/AI/AIBlank.png`. |
+| AI sprites | `Graphics/Sprites/AI`. AI support was marked TODO/WIP in the original; complete game-specific behavior is not yet verified. |
+| AI voice lines | `Sound/Voices/AI`. AI support was marked TODO/WIP in the original; complete game-specific behavior is not yet verified. |
+| DR backgrounds | `Graphics/Backgrounds/Danganronpa`, e.g. `Graphics/Backgrounds/Danganronpa/default_background.png`. The v25 `Graphics/Backgrounds/DR` convention is also supported. |
+| DR sprites | `Graphics/Sprites/DR`, e.g. `Graphics/Sprites/DR/C000_Saiha/anim000.png`. |
+| DR voice lines | `Sound/Voices/DR`, e.g. `Sound/Voices/DR/vic_Akama/vic_Akama_01_001.wav`. |
 
-## Verifiche e struttura
+Each character's sprite folder should also contain a **`default.png`** for use when no matching animation or expression is available. Background images should ideally be **1280×720**; sprite images should ideally be **no wider than 1024 pixels**. A default custom font can be supplied as `font.ttf` or `font.otf` in the asset root.
 
-- `DGRV3TS`: `Operations.cs` per stato e ciclo di vita, `Operations.Designer.cs` per il layout, `Init.cs` per eventi e inizializzazione, `Misc.cs` per navigazione e stato dell'editor; comandi e finestre secondarie separati per responsabilità.
-- `DGRV3TS.Core`: documenti, formati, memoria di traduzione, variabili, WRD e controlli.
-- `DGRV3TS.Core.Tests`: regressioni eseguibili anche su Linux, compresi metadati v25 e conflitti di salvataggio.
-- [Verifica Windows](docs/VERIFICA-WINDOWS.md): checklist visiva e audio. Queste verifiche richiedono Windows e non sono eseguite dal runner Linux.
-- [Mappa della riscrittura](docs/RISCRITTURA-V25.md): corrispondenza con i file originali v25 e contenuto dello ZIP dei sorgenti.
+The separate graphics preview provides backgrounds, optional sprites, V3/AI selection, installed fonts and external TTF/OTF files, font sizes, CLT tags, fixed/adaptive line spacing, WAV playback, Windows text-to-speech with language selection, image copying and PNG screenshots. Rendering is indicative; identical in-game layout has not been established. Missing assets or unavailable audio do not prevent translation.
 
-Per generare un archivio dei sorgenti senza cache, output di compilazione o risorse personali:
+Sprite import retains the v25 character mapping and does not overwrite existing files. Exporting voiced dialogues supports all speakers rather than only the original hardcoded Monokuma filter. The original **Setup Voicelines** menu item was explicitly unimplemented; voice files use the documented directories.
+
+## Project structure and validation
+
+- `DGRV3TS`: `Operations.cs` owns the main window's state and lifecycle; `Operations.Designer.cs` defines its layout; `Init.cs` connects events and initialization; `Misc.cs` handles navigation and editor state. File, variable and translation commands and secondary windows have separate files.
+- `DGRV3TS.Core`: documents, file formats, translation memory, variables, WRD metadata and text checks.
+- `DGRV3TS.Core.Tests`: regression runner that also works on Linux.
+- [Feature parity](docs/FEATURE-PARITY.md): comparison with v25 and remaining validation requirements.
+- [Rewrite map](docs/RISCRITTURA-V25.md): correspondence with original v25 files and source ZIP contents; currently in Italian.
+- [Windows verification](docs/VERIFICA-WINDOWS.md): manual visual/audio checklist; currently in Italian. These checks are not run by the Linux test runner.
+
+CI is configured to build Release with warnings treated as errors and run the regression suite. A successful Linux build does not establish Windows GUI, SAPI or audio-device behavior.
+
+To create a source ZIP without caches, build outputs or personal game assets:
 
 ```sh
 python3 tools/package_source.py
 ```
 
-L'archivio viene scritto nella cartella `artifacts` accanto al checkout; il comando stampa il percorso. Lo ZIP include soluzione, progetti, test, esempi e licenze e richiede SDK .NET 8 per essere compilato.
+The script writes the archive to an `artifacts` directory beside the checkout and prints its path. The ZIP contains the solution, projects, tests, examples, documentation and licenses; the .NET 8 SDK is needed to build it.
 
-La CI configura build Release con avvisi trattati come errori e runner di regressione. Una build riuscita su Linux non dimostra il funzionamento di GUI, SAPI o dispositivi audio Windows.
+## Project history
 
-## Licenza
+The internal name **DGRV3TS** was chosen early in development, in **early 2021**, and was never changed. The original README described the older code as "very messy and sometimes just... confusing" and announced further documentation. The historical changelog is retained in `CHANGELOG.txt`.
 
-GPL v3.0, vedi [LICENSE](LICENSE). Conservati i crediti storici FEITS/SciresM e DRV3-STX-TOOL/Liquid S in `ThirdParty` e il changelog originale. La riscrittura non dipende più da EPPlus, ExcelDataReader o System.Speech; per il TTS usa SAPI di Windows. I marchi e le risorse dei giochi appartengono ai rispettivi titolari; questo progetto non è affiliato e non distribuisce tali risorse.
+## License and credits
+
+This tool is licensed under the GNU General Public License v3.0: see [LICENSE](LICENSE).
+
+“DANGANRONPA” is a registered trademark of **Spike Chunsoft Co., Ltd., Too Kyo Games, LLC and NIS America Inc.** “AI: THE SOMNIUM FILES” is a registered trademark of **Spike Chunsoft Co., Ltd.** We are not affiliated or associated with these companies.
+
+Thanks to:
+
+- **[SciresM](https://github.com/SciresM)** for creating [FEITS](https://github.com/SciresM/FEITS), the original basis of this project. FEITS is licensed under [GPL v3.0](https://github.com/SciresM/FEITS/blob/master/LICENSE.txt).
+- **[Liquid S!](https://github.com/Liquid-S)** for [DRV3-STX-TOOL](https://github.com/Liquid-S/DRV3-STX-TOOL). The original `StxInternal.cs` and `WRDInternal.cs` incorporated code from that MIT-licensed project; its license remains in `ThirdParty`.
+- Members of the **SPIRAL Discord server** and the **[Spiral Framework project](https://spiralframework.info/)**, whose source is at [SpiralFramework/Spiral](https://github.com/SpiralFramework/Spiral).
+- All collaborators and reviewers.
+
+### Historical dependencies
+
+The original application used the following NuGet packages, which were useful during its development. Their licenses remain in `ThirdParty` for attribution and project history. **They are not active dependencies of this rewrite**; the current TTS implementation uses Windows SAPI.
+
+| Original package | Version | License |
+| --- | --- | --- |
+| [EPPlus](https://www.epplussoftware.com) | 6.1.3 | [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/). |
+| [ExcelDataReader](https://github.com/ExcelDataReader/ExcelDataReader) | 3.6.0 | [MIT](https://licenses.nuget.org/MIT). |
+| ExcelDataReader.DataSet | 3.6.0 | [MIT](https://licenses.nuget.org/MIT). |
+| [System.Speech](https://dot.net) | 7.0.0 | [MIT](https://licenses.nuget.org/MIT). |

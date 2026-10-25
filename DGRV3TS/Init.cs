@@ -43,11 +43,13 @@ internal sealed partial class Operations
             ["InsertVariable"] = InsertVariable, ["CopyVariableToken"] = () => CopyVariable(""),
             ["CopyVariableValue"] = () =>
             {
-                if (_variables.SelectedItem is VariableItem v && v.Definition.Value.Length > 0)
-                    Clipboard.SetText(v.Definition.Value);
+                if (_variables.SelectedItem is VariableItem v && v.DisplayValue.Length > 0)
+                    Clipboard.SetText(v.DisplayValue);
             },
             ["InsertLowerVariant"] = () => InsertVariant("_MN"),
-            ["InsertUpperVariant"] = () => InsertVariant("_MS")
+            ["InsertUpperVariant"] = () => InsertVariant("_MS"),
+            ["HideVariable"] = HideVariable, ["VariableInfo"] = ShowVariableInfo,
+            ["AlternateVariable"] = ShowAlternateVariable
         };
 
         void Dispatch(object? sender, EventArgs args)
@@ -156,8 +158,21 @@ internal sealed partial class Operations
             StopAutoplay();
             if (e.Button == MouseButtons.Right) _variables.SelectedIndex = _variables.IndexFromPoint(e.Location);
         };
+        _variables.MouseUp += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Left && _variables.IndexFromPoint(e.Location) >= 0) CopyVariable("");
+        };
+        _variables.MouseMove += (_, e) =>
+        {
+            var index = _variables.IndexFromPoint(e.Location);
+            var text = index >= 0 && _variables.Items[index] is VariableItem v
+                ? $"{v.Definition.Token} | {v.Definition.Comment}" + (v.Definition.IsTemporary ? " · variante temporanea" : "")
+                : "";
+            if (_variableToolTip.GetToolTip(_variables) != text) _variableToolTip.SetToolTip(_variables, text);
+        };
+        _variables.MouseLeave += (_, _) => _variableToolTip.SetToolTip(_variables, "");
         _resolve.CheckedChanged += (_, _) => UpdatePreview();
-        _alternate.CheckedChanged += (_, _) => UpdatePreview();
+        _alternate.CheckedChanged += (_, _) => { FilterVariables(); UpdatePreview(); };
         _previewOriginal.CheckedChanged += (_, _) => UpdatePreview();
         _query.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { FindNext(); e.SuppressKeyPress = true; } };
         _line.Enter += (_, _) => StopAutoplay();

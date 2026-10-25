@@ -351,7 +351,7 @@ internal sealed class DialoguePreviewWindow : Form
             { color = initialColor; fontSize = (float)size.Value; return; }
             color = tag switch
             {
-                "<CLT=cltSYSTEM>" => Color.LimeGreen,
+                "<CLT=cltSYSTEM>" => Color.Green,
                 "<CLT=cltMIND>" => Color.Aqua,
                 "<CLT=cltSTRONG>" => Color.Orange,
                 "<CLT=cltWEAK>" => Color.Gold,
