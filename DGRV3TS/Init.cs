@@ -9,6 +9,7 @@ internal sealed partial class Operations
     {
         BindCommands();
         BindEvents();
+        InitializeViewModes();
         ShowDocument();
         Shown += (_, _) =>
         {
@@ -23,7 +24,8 @@ internal sealed partial class Operations
         {
             ["Open"] = OpenFile, ["New"] = NewProject, ["Save"] = () => Save(false),
             ["SaveAs"] = () => Save(true), ["AddEntry"] = AddEntry, ["LoadWrd"] = LoadWrd,
-            ["ExportOriginal"] = ExportOriginal, ["Exit"] = Close, ["FocusSearch"] = () => _query.Focus(),
+            ["ExportOriginal"] = ExportOriginal, ["Exit"] = Close,
+            ["FocusSearch"] = () => { SetExtendedView(true); _query.Focus(); },
             ["Replace"] = Replace, ["Previous"] = () => Navigate(-1), ["Next"] = () => Navigate(1),
             ["NextUntranslated"] = NextUntranslated, ["MarkEmpty"] = MarkEmpty,
             ["Reset"] = () => SelectIndex(0), ["FastRead"] = () => SelectIndex(_document.Entries.Count - 1),
@@ -49,7 +51,8 @@ internal sealed partial class Operations
             ["InsertLowerVariant"] = () => InsertVariant("_MN"),
             ["InsertUpperVariant"] = () => InsertVariant("_MS"),
             ["HideVariable"] = HideVariable, ["VariableInfo"] = ShowVariableInfo,
-            ["AlternateVariable"] = ShowAlternateVariable
+            ["AlternateVariable"] = ShowAlternateVariable,
+            ["ToggleView"] = () => SetExtendedView(!_extendedView)
         };
 
         void Dispatch(object? sender, EventArgs args)

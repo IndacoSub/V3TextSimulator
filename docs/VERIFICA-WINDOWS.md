@@ -22,4 +22,9 @@ Questa è una checklist da eseguire su Windows, non l'elenco di test già svolti
 18. Apri un PO con battute vuote e una traduzione corrispondente nella cartella: deve essere proposta/riutilizzata senza un comando extra, con marker AutoTL e testo rosa in anteprima. I conflitti richiedono scelta; annullare o scrivere durante l'indicizzazione non deve sovrascrivere modifiche manuali.
 19. Usa un WAV più lungo dell'intervallo di autoplay: il cambio battuta deve attendere la fine senza bloccare l'interfaccia. Prova Stop prima e durante la riproduzione, chiusura/riapertura dell'anteprima e riproduzione TTS con personaggi di età/genere diversi.
 
+20. Avvia in vista semplice: originale, pulsanti variabili e barra ricerca/autoplay devono essere nascosti, senza spazi riservati vuoti. La lista delle variabili deve rimanere visibile e utilizzabile. Disponi a mano le tre finestre affiancate e ridimensiona l'anteprima: il canvas esportato deve restare 1280×720.
+21. Premi ⏬ per espandere verso il basso e ⏫ per ridurre. Modifica il testo, mantieni una selezione e prova Ctrl+Z dopo ogni cambio vista: testo, cursore e annullamento non devono essere azzerati. Le altezze delle due viste devono essere ricordate separatamente.
+22. Prova Ctrl+F in vista semplice: deve aprire la vista estesa e portare il focus sulla ricerca. Un clic sul contatore degli avvisi deve aprire i dettagli nella vista estesa.
+23. Prova entrambe le viste al 100%, 150% e 200% DPI, sposta la finestra fra monitor e prova l'espansione vicino al bordo inferiore dello schermo. Nessuna eccezione degli splitter; la lista variabili e i comandi principali devono restare accessibili anche quando la barra si dispone su due righe.
+
 Limiti espliciti: rendering indicativo; PO senza plurali/non-UTF8; STX a tabella singola; `.xls` non supportato; formule di traduzione XLSX protette. Opcode WRD non riconosciuti vengono rifiutati senza applicare metadati parziali.

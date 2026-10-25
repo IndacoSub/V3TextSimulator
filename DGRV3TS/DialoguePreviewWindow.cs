@@ -47,8 +47,8 @@ internal sealed class DialoguePreviewWindow : Form
     public DialoguePreviewWindow()
     {
         Text = "Anteprima grafica — V3 Text";
-        Size = new Size(1120, 760);
-        MinimumSize = new Size(700, 500);
+        Size = new Size(960, 650);
+        MinimumSize = new Size(480, 300);
         StartPosition = FormStartPosition.CenterParent;
         AutoScaleMode = AutoScaleMode.Dpi;
         Font = new Font("Segoe UI", 9);

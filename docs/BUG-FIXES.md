@@ -1,0 +1,51 @@
+# Bug fixes, with their origin and evidence
+
+This list distinguishes defects in the original **v25** (`6601709c85e48cc17376fd700f40f58a47f02e4c`) from regressions introduced and then corrected during the rewrite. A new feature, a renamed file or a redesigned window is not counted as a bug fix.
+
+The evidence below is source comparison plus the repository's regression fixtures. Tests of file data, geometry and text rules run on Linux. Native Windows GUI, font rasterization, clipboard and audio behavior still require the [Windows checks](VERIFICA-WINDOWS.md); this document does not claim those checks have been executed.
+
+## Defects inherited from v25
+
+| Defect and concrete trigger | Correction | Evidence |
+| --- | --- | --- |
+| **STX identifiers and header data changed on save.** `FileManager.SaveStx` wrote sequential row numbers instead of the loaded IDs, replaced the language with `JPLL` and zeroed retained header fields. A file with IDs `42`, `99`, `100` could therefore lose its original references. | `StxCodec` retains the original IDs and header bytes while rebuilding string offsets. | Runner group **v25 STX nonsequential IDs, duplicates, empty source, language header and UTF16**. |
+| **Empty STX strings became invented text.** `StxInternal.ReadSentencesFromSTX` replaced an empty source string with `[EMPTY_LINE]`; that sentinel was no longer the original data. | Empty strings stay empty, including through JSON and STX exports. | The same STX round-trip group verifies empty strings and shared source offsets. |
+| **The final VO dialogue disappeared without a trailing blank line.** `FileManager.ReadVo` added a record only when it encountered a blank separator and did not flush the final record at EOF. | `VoCodec.ReadVo` reads the final record from its declared fields and translation count. | **v25 VO comments, origin, speaker, final record and multiple translations** deliberately omits the final blank line. |
+| **VO comments were omitted from saved files.** `SaveVo` wrote `Number of comments` and `Comments:` but never wrote the actual comment lines, so the output did not agree with its declared structure. | The VO codec writes the retained comments and matching counts. | The VO round-trip group checks that `keep this note` survives save and reload. |
+| **The vertical summary read or changed the first language instead of the selected one.** `FileHelpers.GetAllTranslatedText`, `GetCurrentTranslation` and `OverrideLine` used `Translations[0]` for VO/XLSX. | Summary cards and paste callbacks use the document's selected language through `SelectLanguage` and `UpdateTranslation`. | Per-language VO/native-project regressions cover independent values and flags; the actual summary click/paste interaction remains a Windows check. |
+| **A variable dictionary with only one category header could crash.** `VariableManager.AddVariables` skipped the first `//` line as a title and could then index `ListBoxes[-1]` when reading a definition. Malformed delimiter assumptions were also unsafe. | Categories are parsed without assuming an extra title line; uncategorized definitions are accepted, and malformed definitions produce warnings. | `VariableVariantTests.Run` loads a dictionary beginning with one `// Names` header. `V25ExtraTests.Run` covers malformed rows, duplicates and bounded cyclic references. |
+
+## Regressions corrected during the rewrite
+
+These are corrections to the rewrite itself. They must not be presented as defects that were already present in the original program.
+
+| Defect and concrete trigger | Correction | Evidence |
+| --- | --- | --- |
+| **Sprites used a single fit and bottom anchor.** Regular full-body sprites, Monokubs, Maki, flashbacks and default portraits lost their v25-specific scale, offsets and clipping. The initial composition also drew sprites before the text. | `PreviewLayout.Sprite` restores the separate v25 formulas, including integer truncation and negative offsets. The renderer composes background, text, then sprite. | `PreviewLayoutTests.Run` checks all original mascot IDs, Maki, `_kak`, placeholders, missing animations and portraits without expressions. Native image composition still needs Windows comparison. |
+| **Text layout changed because font units and defaults changed.** The early renderer used pixel-sized fonts and general wrapping rather than the v25 point sizes and explicit line breaks; AI/ToWitter defaults were incomplete. | Calibri is used when available; font sizes are in points, wrapping is optional and initially off, and DR/AI/tutorial/ToWitter profiles restore their positions, sizes and line spacing. | `PreviewLayoutTests.Run` checks numeric profiles; `PreviewTextTests.Run` checks ToWitter selection and control-text handling. Actual glyph output is not verified by these pure tests. |
+| **Blank Excel languages disappeared.** A language named in row 1 but empty in every data row was not included in the language selector. The same loss could persist in JSON created by earlier rewrite revisions. | XLSX language extent includes headers and all populated data columns. JSON restores the source workbook's minimum language count; new XLSX exports label every language. | `XlsxLanguageTests.Run` covers header-only languages, sparse cells, blank VO-to-XLSX languages and preserved headers. `DocumentCompatibilityTests.Run` covers old-project migration. |
+| **Edited PO metadata was shown in memory but not exported.** Reusing the original `msgctxt` meant changed speaker, expression, voice or imported WRD metadata could revert to the old values on reload, including after JSON export. | `TextCodecs.WritePo` compares the original metadata snapshot and rebuilds changed contexts while preserving unchanged arbitrary contexts and comments. | `PoMetadataTests.Run`: direct PO export, JSON-to-PO, voice-only fields, missing contexts and multiline context/translation fields. |
+| **An intentional empty translation was replaced by the original.** Early fallback logic treated every empty string as untranslated, including in preview and text export. | Per-language `HasTranslation` flags distinguish an intentional blank from an untouched row; `DisplayText` is shared by preview/export paths. | **Intentional blank translations stay distinct from untranslated rows in every language** and **Editor display and text export preserve intentionally empty translations across languages**. |
+| **Other JSON documents could be accepted as empty translation projects.** Default model values allowed unrelated JSON objects to appear to load successfully. | Native-project loading requires the expected version/entries structure and rejects unrelated JSON before replacing the current document. | `DocumentCompatibilityTests.Run` rejects `{}`, arrays, SDK configuration JSON and a project without entries. |
+| **CR-only text files collapsed into one dialogue.** Splitting only on LF differed from the original `StreamReader.ReadLine` behavior. | TXT, PO and VO parsing recognizes CR-only separators as well as CRLF/LF. TXT preserves its detected separator on save and JSON round-trip. | `DocumentCompatibilityTests.Run` covers a CR-only wrapped TXT with a blank row, plus PO and VO input. |
+| **Autoplay could move the target while a modification dialog was open.** A replacement, suggestion or clipboard paste could then affect a different dialogue from the one originally selected. | Manual commands and editing stop autoplay; asynchronous suggestions retain their document/entry/language identity, and reused rows are checked again before applying changes. | Inspect `Init`, `Misc`, `TranslationCommands` and the summary callbacks in `WindowCoordinator`. The actual modal-dialog race is a Windows interaction check, not a headless test result. |
+| **Clicking the selected dialogue cleared caret, selection and undo history.** Rebinding the textbox unconditionally did this even at the first/last navigation boundary. | `Misc.SelectIndex` avoids rebinding unchanged entry/language/text and only resets undo when the selection actually changes. | Source-level state guard in `SelectIndex`; caret/undo behavior is explicitly included in the Windows checklist. |
+| **The wrong automatic dictionary could remain selected after opening a different document.** Startup discovery ran before the initial document was loaded, and automatic and explicitly selected dictionaries were not distinguished. | Lookup happens after the document/asset directory is known. Automatically discovered dictionaries follow the document; explicitly selected dictionaries remain selected. | `InitializeWorkspace`, `DocumentCommands.OpenPath` and `VariableCommands.FindVariables`; multi-document discovery is a Windows workflow check. |
+
+## Safeguards and restored features that are not counted above
+
+- **Temporary-file saves, `.bak` and external-change detection** reduce data-loss risk. The legacy save path could delete or truncate a destination before a write completed; the rewrite serializes first and refuses to overwrite a changed open file. The regression group **Atomic save backup and conflict check protect external changes** exercises a real external modification and verifies the old backup and retained dirty state. This is a persistence safeguard, not evidence that a particular user's old file was previously lost.
+- **Bounds checks and explicit unsupported-format errors** prevent partial interpretation of malformed STX/WRD or unsupported PO constructs. Rejection does not establish complete format parity.
+- **Automatic memory reuse, temporary case variants, comments/tooltips and clipboard menu actions** restore original workflows. Their presence is feature coverage; it should not inflate the count of fixed bugs.
+- **Simple/extended view, new JSON projects, search, packaging and file reorganization** are features or structural changes, not bug fixes.
+
+## Reproduce the automated checks
+
+From the solution directory, with the .NET 8 SDK:
+
+```sh
+dotnet build DGRV3TS.sln -c Release --warnaserror
+dotnet run --project DGRV3TS.Core.Tests -c Release --no-build
+```
+
+The runner's output reports the checks that actually executed. See [FEATURE-PARITY.md](FEATURE-PARITY.md) for the separate acceptance requirement and outstanding native-platform comparisons.

@@ -54,10 +54,12 @@ internal sealed partial class Operations
 
     private void UpdateChecks()
     {
-        if (Current is not { } entry) { _checks.Text = ""; return; }
+        if (Current is not { } entry) { _checks.Text = ""; _validationStatus.Text = ""; _validationStatus.ToolTipText = ""; return; }
         var issues = TranslationTools.Validate(TranslationReuse.CandidateText(entry.Original),
             TranslationReuse.CandidateText(entry.Translation), _catalog.Variables.Select(v => v.Token));
         _checks.Text = issues.Count == 0 ? $"{entry.Translation.EnumerateRunes().Count()} caratteri · nessuna differenza nei segnaposto" : string.Join("  ·  ", issues.Take(3).Select(i => i.Message));
+        _validationStatus.Text = issues.Count == 0 ? "" : $"⚠ {issues.Count}";
+        _validationStatus.ToolTipText = string.Join(Environment.NewLine, issues.Select(i => i.Message));
     }
 
     private void UpdateStatus()

@@ -12,11 +12,19 @@ The project is licensed under the **GNU General Public License v3.0 (GPL v3.0)**
 
 | Window | Purpose |
 | --- | --- |
-| **Main editor (`Operations`)** | Read-only original, translation textbox, navigation, translation-language selection, search and external variables. The dialogue list is not embedded in this window. |
+| **Main editor (`Operations`)** | A compact simple view by default, with the translation textbox, navigation, languages and visible variable list. Expand it for the read-only original, search and extra actions. The dialogue list is not embedded in this window. |
 | **Separate vertical summary (`F6`)** | A scrollable overview of every dialogue in the file, showing its ID, speaker, original and translation together. Click a card to select that dialogue in the editor; right-click to copy or paste a translation. |
 | **Separate graphics preview (`F7`)** | A landscape window with backgrounds, sprites, text styling, fonts, audio and screenshots. Game assets are not required to translate. |
 
 The vertical summary opens when a document is loaded. It can be closed and reopened, follows the selected translation language, updates while you type and preserves the scroll position. Cards distinguish an intentionally empty translation from an untranslated dialogue.
+
+### Simple and extended views
+
+`Operations` starts in **simple view**, designed around a 240-pixel client height at 96 DPI so the three independent windows can be placed together. Use **⏬ Extended view** (`Vista estesa`) at the bottom to expand downward; **⏫ Simple view** (`Vista semplice`) collapses it again. Each mode remembers its own height, while the width, document, selection and textbox undo state are retained.
+
+Simple view hides the original pane, variable Insert/Load/Reload buttons, Copy Original, Suggestions and the search/autoplay toolbar (query, Find Next, untranslated filter, Replace, Play/Resume, Pause, Stop and seconds). The variable list, its filter and categories remain visible; double-click and its context menu remain available. Hidden commands are still accessible through menus or extended view. `Ctrl+F` opens extended view before focusing text search. Placeholder warnings remain available in the status bar; clicking the warning count expands their details.
+
+The main window's **Dialogues** (`Dialoghi`) and **Preview** (`Anteprima`) buttons reopen the respective secondary windows. The preview opens smaller and can be resized down to 480×300; its zoom does not change the 1280×720 rendering/screenshot canvas.
 
 Some Windows UI labels are currently in Italian; the commands below describe their function.
 
@@ -141,6 +149,7 @@ Sprite import retains the v25 character mapping and does not overwrite existing 
 - `DGRV3TS.Core`: documents, file formats, translation memory, variables, WRD metadata and text checks.
 - `DGRV3TS.Core.Tests`: regression runner that also works on Linux.
 - [Feature parity](docs/FEATURE-PARITY.md): comparison with v25 and remaining validation requirements.
+- [Actual bug fixes](docs/BUG-FIXES.md): defects with triggers and evidence, distinguished from restored features and defects introduced during the rewrite.
 - [Rewrite map](docs/RISCRITTURA-V25.md): correspondence with original v25 files and source ZIP contents; currently in Italian.
 - [Windows verification](docs/VERIFICA-WINDOWS.md): manual visual/audio checklist; currently in Italian. These checks are not run by the Linux test runner.
 

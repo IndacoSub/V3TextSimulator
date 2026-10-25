@@ -47,6 +47,8 @@ internal sealed partial class Operations
     private StatusStrip _statusStrip;
     private ToolStripStatusLabel _status;
     private ToolStripStatusLabel _progress;
+    private ToolStripStatusLabel _validationStatus;
+    private ToolStripButton _viewToggleButton;
     private ToolStripMenuItem _autoVoiceItem;
     private ToolStripMenuItem _autoTtsItem;
     private ToolStripMenuItem _reuseOnOpenItem;
@@ -165,6 +167,8 @@ internal sealed partial class Operations
         _statusStrip = new StatusStrip();
         _status = new ToolStripStatusLabel();
         _progress = new ToolStripStatusLabel();
+        _validationStatus = new ToolStripStatusLabel();
+        _viewToggleButton = new ToolStripButton();
         _autoVoiceItem = new ToolStripMenuItem();
         _autoTtsItem = new ToolStripMenuItem();
         _reuseOnOpenItem = new ToolStripMenuItem();
@@ -597,6 +601,7 @@ internal sealed partial class Operations
         _navigation.Controls.Add(_game);
         _navigation.Controls.Add(_verticalButton);
         _navigation.Controls.Add(_previewButton);
+        _navigation.Controls.Add(_refreshPreviewButton);
         _searchBar.Controls.Add(_query);
         _searchBar.Controls.Add(_findButton);
         _searchBar.Controls.Add(_untranslated);
@@ -692,7 +697,7 @@ internal sealed partial class Operations
         _goButton.BackColor = Color.White;
         _goButton.AccessibleName = "Vai";
         _goButton.TabIndex = 4;
-        _verticalButton.Text = "Vista verticale";
+        _verticalButton.Text = "Dialoghi";
         _verticalButton.Tag = "ShowVertical";
         _verticalButton.AutoSize = true;
         _verticalButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -702,9 +707,9 @@ internal sealed partial class Operations
         _verticalButton.FlatStyle = FlatStyle.Flat;
         _verticalButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
         _verticalButton.BackColor = Color.White;
-        _verticalButton.AccessibleName = "Vista verticale";
+        _verticalButton.AccessibleName = "Apri finestra Dialoghi";
         _verticalButton.TabIndex = 5;
-        _previewButton.Text = "Anteprima gioco";
+        _previewButton.Text = "Anteprima";
         _previewButton.Tag = "ShowPreview";
         _previewButton.AutoSize = true;
         _previewButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -714,7 +719,7 @@ internal sealed partial class Operations
         _previewButton.FlatStyle = FlatStyle.Flat;
         _previewButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
         _previewButton.BackColor = Color.White;
-        _previewButton.AccessibleName = "Anteprima gioco";
+        _previewButton.AccessibleName = "Apri Anteprima";
         _previewButton.TabIndex = 6;
         _findButton.Text = "Trova successivo";
         _findButton.Tag = "FindNext";
@@ -800,11 +805,11 @@ internal sealed partial class Operations
         _suggestButton.BackColor = Color.White;
         _suggestButton.AccessibleName = "Suggerimenti…";
         _suggestButton.TabIndex = 13;
-        _refreshPreviewButton.Text = "Aggiorna anteprima";
+        _refreshPreviewButton.Text = "↻";
         _refreshPreviewButton.Tag = "UpdatePreview";
         _refreshPreviewButton.AutoSize = true;
         _refreshPreviewButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-        _refreshPreviewButton.MinimumSize = new Size(62, 31);
+        _refreshPreviewButton.MinimumSize = new Size(34, 31);
         _refreshPreviewButton.Padding = new Padding(6, 2, 6, 2);
         _refreshPreviewButton.Margin = new Padding(0, 2, 6, 2);
         _refreshPreviewButton.FlatStyle = FlatStyle.Flat;
@@ -962,7 +967,7 @@ internal sealed partial class Operations
         _sourceTitle.AccessibleName = "ORIGINALE · sola lettura";
         _sourceTitle.TabIndex = 0;
         _sourceTitle.Margin = new Padding(0, 3, 0, 3);
-        _translationTitle.Text = "TRADUZIONE · testo e token salvati senza sostituzioni";
+        _translationTitle.Text = "TRADUZIONE";
         _translationTitle.Dock = DockStyle.Fill;
         _translationTitle.AutoEllipsis = true;
         _translationTitle.TextAlign = ContentAlignment.MiddleLeft;
@@ -1057,7 +1062,6 @@ internal sealed partial class Operations
         _translation.TabIndex = 1;
         _textActions.Controls.Add(_copySourceButton);
         _textActions.Controls.Add(_suggestButton);
-        _textActions.Controls.Add(_refreshPreviewButton);
         _previewOptions.Controls.Add(_resolve);
         _previewOptions.Controls.Add(_alternate);
         _previewOptions.Controls.Add(_previewOriginal);
@@ -1098,7 +1102,17 @@ internal sealed partial class Operations
         _statusStrip.BackColor = Color.FromArgb(244, 247, 250);
         _statusStrip.TabIndex = 5;
         _statusStrip.AccessibleName = "Stato e avanzamento traduzione";
-        _statusStrip.Items.AddRange(new ToolStripItem[] { _status, _progress });
+        _statusStrip.Items.AddRange(new ToolStripItem[] { _status, _validationStatus, _progress, _viewToggleButton });
+        _statusStrip.ShowItemToolTips = true;
+        _validationStatus.Name = "_validationStatus";
+        _validationStatus.ForeColor = Color.FromArgb(139, 79, 19);
+        _validationStatus.AccessibleName = "Avvisi sui segnaposto";
+        _viewToggleButton.Name = "_viewToggleButton";
+        _viewToggleButton.Text = "⏬ Vista estesa";
+        _viewToggleButton.Tag = "ToggleView";
+        _viewToggleButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
+        _viewToggleButton.ToolTipText = "Apri la vista estesa verso il basso";
+        _viewToggleButton.AccessibleName = "Apri vista estesa";
         _status.Spring = true;
         _status.TextAlign = ContentAlignment.MiddleLeft;
         _status.AccessibleName = "Stato delle operazioni";
