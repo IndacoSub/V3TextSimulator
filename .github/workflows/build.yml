@@ -1,0 +1,14 @@
+name: Build v25 rewrite
+on:
+  push:
+  pull_request:
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet build DGRV3TS.sln -c Release --warnaserror
+      - run: dotnet run --project DGRV3TS.Core.Tests -c Release --no-build
