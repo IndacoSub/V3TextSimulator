@@ -147,6 +147,12 @@ internal sealed partial class Operations
         };
         _autoVoiceItem.CheckedChanged += (_, _) => _voiceOnNavigate = _autoVoiceItem.Checked;
         _autoTtsItem.CheckedChanged += (_, _) => _ttsOnNavigate = _autoTtsItem.Checked;
+        _reuseOnOpenItem.CheckedChanged += (_, _) =>
+        {
+            StopAutoplay();
+            _reuseOnOpen = _reuseOnOpenItem.Checked;
+            if (!_reuseOnOpen && _automaticMemoryScan) _memoryScan?.Cancel();
+        };
         _variableQuery.TextChanged += (_, _) => FilterVariables();
         _category.SelectedIndexChanged += (_, _) => FilterVariables();
         _variables.DoubleClick += (_, _) => InsertVariable();

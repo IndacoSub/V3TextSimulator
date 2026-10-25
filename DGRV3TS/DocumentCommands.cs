@@ -33,6 +33,7 @@ internal sealed partial class Operations
             }
             if (Directory.Exists(Path.Combine(_assetRoot, "Graphics"))) ShowPreview();
             _status.Text = $"Aperto {Path.GetFileName(path)} · {_document.FormatName}";
+            _ = ReuseOnOpenAsync(loaded);
         });
     }
 

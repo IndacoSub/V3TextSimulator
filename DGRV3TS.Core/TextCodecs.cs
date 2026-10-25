@@ -5,7 +5,8 @@ namespace DGRV3TS.Core;
 
 public sealed partial class TranslationDocument
 {
-    private sealed record PoRecord(List<string> Lines, int Start, int End, string Context);
+    private sealed record PoMetadata(string Id, string Origin, string Speaker, string Expression, string Voice);
+    private sealed record PoRecord(List<string> Lines, int Start, int End, int ContextStart, int ContextEnd, int OriginalStart, string Context, PoMetadata Metadata);
     private readonly Dictionary<TranslationEntry, PoRecord> poRecords = [];
     private readonly List<string> poHeaders = [];
     private bool txtBraces;
@@ -13,16 +14,16 @@ public sealed partial class TranslationDocument
 
     private void ReadPo(string text)
     {
-        foreach (var block in Regex.Split(text.Replace("\r\n", "\n"), "\n[\\t ]*\n"))
+        foreach (var block in Regex.Split(text.Replace("\r\n", "\n").Replace('\r', '\n'), "\n[\\t ]*\n"))
         {
             var lines = block.Split('\n').ToList();
             while (lines.Count > 0 && lines[^1].Length == 0) lines.RemoveAt(lines.Count - 1);
             if (lines.Count == 0) continue;
             if (lines.Any(l => l.StartsWith("msgid_plural ", StringComparison.Ordinal) || l.StartsWith("msgstr[", StringComparison.Ordinal)))
                 throw new NotSupportedException("PO con plurali non supportato: le traduzioni non verranno scartate.");
-            var original = PoField(lines, "msgid", out _, out _);
+            var original = PoField(lines, "msgid", out var originalStart, out _);
             var translation = PoField(lines, "msgstr", out var start, out var end);
-            var context = PoField(lines, "msgctxt", out _, out _);
+            var context = PoField(lines, "msgctxt", out var contextStart, out var contextEnd);
             if (original is null || start < 0)
             {
                 if (lines.All(l => l.TrimStart().StartsWith('#'))) { poHeaders.Add(string.Join(newline, lines)); continue; }
@@ -49,7 +50,7 @@ public sealed partial class TranslationDocument
                 Expression = expression, Voice = voice, Original = original, Translation = translation ?? ""
             };
             Add(entry);
-            poRecords.Add(entry, new PoRecord(lines, start, end, context ?? ""));
+            poRecords.Add(entry, new PoRecord(lines, start, end, contextStart, contextEnd, originalStart, context ?? "", MetadataOf(entry)));
         }
     }
 
@@ -102,13 +103,18 @@ public sealed partial class TranslationDocument
         .Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t").Replace("\b", "\\b")
         .Replace("\f", "\\f").Replace("\v", "\\v").Replace("\a", "\\a") + "\"";
 
-    private static string EntryContext(TranslationEntry entry)
+    private static PoMetadata MetadataOf(TranslationEntry entry) => new(entry.Id, entry.Origin, entry.Speaker, entry.Expression, entry.Voice);
+
+    private static string EntryContext(TranslationEntry entry, bool preserveContext = true)
     {
-        if (entry.Context.Length > 0) return entry.Context;
+        if (preserveContext && entry.Context.Length > 0) return entry.Context;
         var fields = new List<string> { entry.Id };
         if (entry.Origin.Length > 0 || entry.Speaker.Length > 0 || entry.Expression.Length > 0 || entry.Voice.Length > 0) fields.Add(entry.Origin);
         if (entry.Speaker.Length > 0 || entry.Expression.Length > 0 || entry.Voice.Length > 0) fields.Add(entry.Speaker);
-        if (entry.Expression.Length > 0 || entry.Voice.Length > 0) fields.Add(entry.Expression.Length == 0 ? "None" : entry.Expression);
+        // v25 accepts vic_* as the fourth field. Other voice names need an empty expression field.
+        if (entry.Expression.Length == 0 && entry.Voice.StartsWith("vic", StringComparison.Ordinal))
+        { fields.Add(entry.Voice); return string.Join(" | ", fields); }
+        if (entry.Expression.Length > 0 || entry.Voice.Length > 0) fields.Add(entry.Expression);
         if (entry.Voice.Length > 0) fields.Add(entry.Voice);
         return string.Join(" | ", fields);
     }
@@ -121,9 +127,23 @@ public sealed partial class TranslationDocument
         {
             if (poRecords.TryGetValue(entry, out var raw))
             {
-                var lines = raw.Lines.Take(raw.Start).ToList();
-                lines.Add("msgstr " + Quote(entry.Translation));
-                lines.AddRange(raw.Lines.Skip(raw.End));
+                var lines = raw.Lines.ToList();
+                var replacements = new List<(int Start, int End, string Text)>
+                { (raw.Start, raw.End, "msgstr " + Quote(entry.Translation)) };
+                var metadataChanged = MetadataOf(entry) != raw.Metadata;
+                if (metadataChanged || entry.Context != raw.Context)
+                {
+                    var context = metadataChanged ? EntryContext(entry, preserveContext: false) : entry.Context;
+                    var contextStart = raw.ContextStart >= 0 ? raw.ContextStart : raw.OriginalStart;
+                    var contextEnd = raw.ContextStart >= 0 ? raw.ContextEnd : raw.OriginalStart;
+                    replacements.Add((contextStart, contextEnd, "msgctxt " + Quote(context)));
+                }
+                // Apply edits back-to-front so multiline contexts and translations keep stable offsets.
+                foreach (var replacement in replacements.OrderByDescending(r => r.Start))
+                {
+                    lines.RemoveRange(replacement.Start, replacement.End - replacement.Start);
+                    lines.Insert(replacement.Start, replacement.Text);
+                }
                 blocks.Add(string.Join(newline, lines));
             }
             else blocks.Add("msgctxt " + Quote(EntryContext(entry)) + newline + "msgid " + Quote(entry.Original) + newline + "msgstr " + Quote(entry.Translation));
@@ -133,8 +153,8 @@ public sealed partial class TranslationDocument
 
     private void ReadTxt(string text)
     {
-        txtFinalNewline = text.EndsWith('\n');
-        var lines = text.Replace("\r\n", "\n").Split('\n').ToList();
+        txtFinalNewline = text.EndsWith('\n') || text.EndsWith('\r');
+        var lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n').ToList();
         if (txtFinalNewline) lines.RemoveAt(lines.Count - 1);
         txtBraces = lines.Count >= 2 && lines[0] == "{" && lines[^1] == "}";
         if (txtBraces) { lines.RemoveAt(lines.Count - 1); lines.RemoveAt(0); }

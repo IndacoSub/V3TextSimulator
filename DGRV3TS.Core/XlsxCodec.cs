@@ -39,11 +39,13 @@ public sealed partial class TranslationDocument
         var shared = archive.GetEntry("xl/sharedStrings.xml") is null ? [] : ReadXml(archive, "xl/sharedStrings.xml")
             .Descendants(Spreadsheet + "si").Select(s => string.Concat(s.Descendants(Spreadsheet + "t").Select(t => t.Value))).ToList();
         var worksheet = ReadXml(archive, worksheetPath);
+        var rows = new List<(int Number, Dictionary<int, string> Values)>();
+        var maximum = 3;
         foreach (var row in worksheet.Descendants(Spreadsheet + "row"))
         {
             if (!int.TryParse((string?)row.Attribute("r"), out var number) || number < 1 || number > 1048576) throw new InvalidDataException("Numero riga XLSX non valido.");
-            if (number == 1) continue;
             var values = new Dictionary<int, string>();
+            var hasFormula = false;
             foreach (var cell in row.Elements(Spreadsheet + "c"))
             {
                 var reference = (string?)cell.Attribute("r") ?? throw new InvalidDataException("Riferimento cella mancante.");
@@ -56,9 +58,19 @@ public sealed partial class TranslationDocument
                 }
                 else if (type == "inlineStr") value = string.Concat(cell.Descendants(Spreadsheet + "t").Select(t => t.Value));
                 values[column] = value;
+                var formula = cell.Element(Spreadsheet + "f") is not null;
+                hasFormula |= formula;
+                // A named language exists even when every data cell in that column is empty.
+                // Formatting-only cells (often extending to XFD) are not translation languages.
+                if (value.Length > 0 || formula) maximum = Math.Max(maximum, column);
             }
-            if (values.Count == 0 || values.Values.All(string.IsNullOrEmpty)) continue;
-            var maximum = Math.Max(3, values.Keys.Max());
+            if (number == 1 || values.Count == 0 || values.Values.All(string.IsNullOrEmpty) && !hasFormula) continue;
+            rows.Add((number, values));
+        }
+        // Use the entire sheet's language extent for every row, independent of sparse XML order.
+        minimumLanguageCount = Math.Max(minimumLanguageCount, maximum - 2);
+        foreach (var (number, values) in rows)
+        {
             var translations = Enumerable.Range(3, maximum - 2).Select(c => values.GetValueOrDefault(c, "")).ToList();
             Add(new TranslationEntry { Id = values.GetValueOrDefault(1, number.ToString()), Original = values.GetValueOrDefault(2, ""), Translation = translations[0] }, translations);
             worksheetRows.Add(number); originalCells.Add(translations.ToList());
@@ -116,6 +128,7 @@ public sealed partial class TranslationDocument
                 worksheet = new XDocument(new XElement(Spreadsheet + "worksheet", new XElement(Spreadsheet + "sheetData")));
                 var header = new XElement(Spreadsheet + "row", new XAttribute("r", 1));
                 SetCell(header, 1, 1, "OFFSET"); SetCell(header, 2, 1, "ORIGINAL"); SetCell(header, 3, 1, "TRADUCCIÓN");
+                for (var language = 1; language < LanguageCount; language++) SetCell(header, language + 3, 1, "TRANSLATION " + (language + 1));
                 worksheet.Root!.Element(Spreadsheet + "sheetData")!.Add(header);
             }
             worksheet.Root!.Element(Spreadsheet + "dimension")?.Remove();

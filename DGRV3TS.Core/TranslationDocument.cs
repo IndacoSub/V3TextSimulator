@@ -12,7 +12,8 @@ public sealed partial class TranslationDocument
     public string FormatName { get; private set; } = "Progetto traduzione";
     public bool IsDirty { get; private set; }
     public int SelectedLanguage { get; private set; }
-    public int LanguageCount => Math.Max(1, languages.Count == 0 ? 1 : languages.Max(x => x.Count));
+    public int LanguageCount => Math.Max(minimumLanguageCount, languages.Count == 0 ? 1 : languages.Max(x => x.Count));
+    private int minimumLanguageCount = 1;
     private readonly List<List<string>> languages = [];
     private readonly List<List<bool>> translated = [];
     private string? diskHash;
@@ -89,7 +90,7 @@ public sealed partial class TranslationDocument
         sourceExtension = extension;
         sourceBytes = bytes;
         var text = extension is ".stx" or ".xlsx" ? "" : DecodeText(bytes);
-        newline = text.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+        newline = text.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : text.Contains('\r') ? "\r" : "\n";
         switch (extension)
         {
             case ".po": ReadPo(text); break;
@@ -172,6 +173,7 @@ public sealed partial class TranslationDocument
         public List<TranslationEntry> Entries { get; set; } = [];
         public List<List<string>> Languages { get; set; } = [];
         public int SelectedLanguage { get; set; }
+        public int LanguageCount { get; set; } = 1;
         public List<List<bool>> Translated { get; set; } = [];
         public string? SourceExtension { get; set; }
         public byte[]? SourceBytes { get; set; }
@@ -179,6 +181,14 @@ public sealed partial class TranslationDocument
 
     private void ReadProject(string text)
     {
+        using (var json = JsonDocument.Parse(text))
+        {
+            if (json.RootElement.ValueKind != JsonValueKind.Object
+                || !json.RootElement.TryGetProperty("Version", out _)
+                || !json.RootElement.TryGetProperty("Entries", out var rows)
+                || rows.ValueKind != JsonValueKind.Array)
+                throw new InvalidDataException("Il file JSON non è un progetto V3 Text.");
+        }
         var project = JsonSerializer.Deserialize<Project>(text) ?? throw new InvalidDataException("Progetto vuoto.");
         if (project.SelectedLanguage < 0) throw new InvalidDataException("Indice lingua non valido.");
         if (project.Version != 1) throw new NotSupportedException("Versione del progetto non supportata.");
@@ -188,8 +198,11 @@ public sealed partial class TranslationDocument
             if (project.SourceExtension is null or ".json") throw new InvalidDataException("Sorgente del progetto non valida.");
             ReadSource(project.SourceExtension, project.SourceBytes);
             if (project.Entries.Count < Entries.Count) throw new InvalidDataException("Battute del file sorgente mancanti.");
+            minimumLanguageCount = LanguageCount;
             languages.Clear(); translated.Clear();
         }
+        minimumLanguageCount = Math.Max(minimumLanguageCount, project.LanguageCount);
+        if (minimumLanguageCount is < 1 or > 16382) throw new InvalidDataException("Numero di lingue non valido.");
         for (var i = 0; i < project.Entries.Count; i++)
         {
             var saved = project.Entries[i];
@@ -199,6 +212,7 @@ public sealed partial class TranslationDocument
                 throw new InvalidDataException("Battuta del progetto non valida.");
             var translations = i < project.Languages.Count ? project.Languages[i] : [saved.Translation];
             if (translations is null || translations.Any(t => t is null)) throw new InvalidDataException("Lingue del progetto non valide.");
+            while (translations.Count < minimumLanguageCount) translations.Add("");
             if (i < Entries.Count)
             {
                 var target = Entries[i];
@@ -231,6 +245,7 @@ public sealed partial class TranslationDocument
     private byte[] WriteProject() => JsonSerializer.SerializeToUtf8Bytes(new Project
     {
         Entries = Entries, Languages = languages, Translated = translated, SelectedLanguage = SelectedLanguage,
+        LanguageCount = LanguageCount,
         SourceExtension = sourceExtension, SourceBytes = sourceBytes
     }, new JsonSerializerOptions { WriteIndented = true });
 

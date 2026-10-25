@@ -25,6 +25,8 @@ internal sealed partial class Operations : Form
     private bool _autoplayPaused;
     private bool _voiceOnNavigate;
     private bool _ttsOnNavigate;
+    private bool _reuseOnOpen = true;
+    private bool _automaticMemoryScan;
     private TranslationEntry? Current => _index >= 0 && _index < _document.Entries.Count ? _document.Entries[_index] : null;
 
     public Operations() : this(null) { }

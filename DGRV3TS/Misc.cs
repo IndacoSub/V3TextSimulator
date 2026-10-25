@@ -33,7 +33,7 @@ internal sealed partial class Operations
         if (changedSelection && Current is not null && (_voiceOnNavigate || _ttsOnNavigate))
         {
             if (_preview is null) ShowPreview();
-            if (_voiceOnNavigate && Current.Voice.Length > 0) _preview?.PlayVoice();
+            if (_voiceOnNavigate && _preview?.HasVoiceFile == true) _preview.PlayVoice();
             else if (_ttsOnNavigate) _preview?.SpeakText();
         }
     }
@@ -55,7 +55,8 @@ internal sealed partial class Operations
     private void UpdateChecks()
     {
         if (Current is not { } entry) { _checks.Text = ""; return; }
-        var issues = TranslationTools.Validate(entry.Original, entry.Translation, _catalog.Variables.Select(v => v.Token));
+        var issues = TranslationTools.Validate(TranslationReuse.CandidateText(entry.Original),
+            TranslationReuse.CandidateText(entry.Translation), _catalog.Variables.Select(v => v.Token));
         _checks.Text = issues.Count == 0 ? $"{entry.Translation.EnumerateRunes().Count()} caratteri · nessuna differenza nei segnaposto" : string.Join("  ·  ", issues.Take(3).Select(i => i.Message));
     }
 

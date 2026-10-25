@@ -49,6 +49,7 @@ internal sealed partial class Operations
     private ToolStripStatusLabel _progress;
     private ToolStripMenuItem _autoVoiceItem;
     private ToolStripMenuItem _autoTtsItem;
+    private ToolStripMenuItem _reuseOnOpenItem;
     private ToolStripMenuItem _fileMenu;
     private ToolStripMenuItem _translationMenu;
     private ToolStripMenuItem _toolsMenu;
@@ -166,6 +167,7 @@ internal sealed partial class Operations
         _progress = new ToolStripStatusLabel();
         _autoVoiceItem = new ToolStripMenuItem();
         _autoTtsItem = new ToolStripMenuItem();
+        _reuseOnOpenItem = new ToolStripMenuItem();
         _fileMenu = new ToolStripMenuItem();
         _translationMenu = new ToolStripMenuItem();
         _toolsMenu = new ToolStripMenuItem();
@@ -402,6 +404,11 @@ internal sealed partial class Operations
         _exitItem.AccessibleName = "Esci";
         _translationMenu.Text = "Traduzione";
         _translationMenu.DropDownItems.AddRange(new ToolStripItem[] { _searchItem, _replaceItem, sepTranslation1, _previousItem, _nextItem, _nextUntranslatedItem, _markEmptyItem, _resetItem, _fastReadItem, sepTranslation2, _scanMemoryItem, _suggestItem, _fillMemoryItem });
+        _translationMenu.DropDownItems.Add(_reuseOnOpenItem);
+        _reuseOnOpenItem.Name = "_reuseOnOpenItem";
+        _reuseOnOpenItem.Text = "Riusa traduzioni automaticamente in apertura";
+        _reuseOnOpenItem.CheckOnClick = true;
+        _reuseOnOpenItem.Checked = true;
         _searchItem.Text = "Cerca";
         _searchItem.Tag = "FocusSearch";
         _searchItem.AccessibleName = "Cerca";

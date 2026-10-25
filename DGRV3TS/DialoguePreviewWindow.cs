@@ -6,6 +6,7 @@ using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using DGRV3TS.Core;
 
 namespace DGRV3TS;
 
@@ -16,21 +17,29 @@ internal sealed class DialoguePreviewWindow : Form
     private readonly PictureBox picture = new() { Dock = DockStyle.Fill, SizeMode = PictureBoxSizeMode.Zoom, BackColor = CanvasColor };
     private readonly ComboBox games = new() { Width = 66, DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly ComboBox backgrounds = new() { Width = 190, DropDownStyle = ComboBoxStyle.DropDownList };
-    private readonly NumericUpDown size = new() { Minimum = 8, Maximum = 90, Value = 29, Width = 58 };
+    private readonly NumericUpDown size = new() { Minimum = 1, Maximum = 100, Value = 29, Width = 58 };
     private readonly CheckBox spriteVisible = new() { Text = "Personaggio", Checked = true, AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
     private readonly CheckBox colorTags = new() { Text = "Tag CLT", Checked = true, AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
     private readonly CheckBox adaptiveHeight = new() { Text = "Interlinea adattiva", AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
+    private readonly CheckBox wordWrap = new() { Text = "A capo automatico", AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
     private readonly Label status = new() { Dock = DockStyle.Fill, AutoEllipsis = true, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.DimGray };
     private readonly TextBox language = new() { Text = "it-IT", Width = 64 };
-    private readonly SoundPlayer player = new();
+    private SoundPlayer? activePlayer;
+    private Task? voicePlayback;
+    private CancellationTokenSource? voiceCancellation;
+    private int audioGeneration;
     private readonly System.Windows.Forms.Timer renderTimer = new() { Interval = 90 };
     private PrivateFontCollection? customFont;
     private FontFamily family = FontFamily.GenericSansSerif;
     private bool ownsFamily;
+    private FontStyle selectedStyle = FontStyle.Regular;
+    private bool useOriginalLanguage;
     private MediaAssets assets = new(AppContext.BaseDirectory);
-    private string text = "", speaker = "", expression = "", voice = "";
+    private string text = "", speaker = "", expression = "", voice = "", origin = "", original = "";
     private string? loadedDefaultFont;
+    private string loadedGame = "";
     private object? speech;
+    private object? defaultSpeechVoice;
     private bool binding;
 
     public event Action<string>? GameChanged;
@@ -53,7 +62,7 @@ internal sealed class DialoguePreviewWindow : Form
         controls.Controls.AddRange(new Control[]
         {
             games, backgrounds, Button("Risorse…", ChooseRoot), Button("Ricarica", ReloadAssets), spriteVisible,
-            colorTags, adaptiveHeight, Button("Font…", ChooseFont), Button("TTF/OTF…", LoadFontFile), size,
+            colorTags, adaptiveHeight, wordWrap, Button("Font…", ChooseFont), Button("TTF/OTF…", LoadFontFile), size,
             Button("Voce WAV", PlayVoice), language, Button("Leggi testo", SpeakText), Button("Stop audio", StopAudio),
             Button("Copia immagine", CopyImage), Button("Salva PNG…", SaveImage)
         });
@@ -62,12 +71,19 @@ internal sealed class DialoguePreviewWindow : Form
         layout.Controls.Add(status, 0, 2);
         Controls.Add(layout);
         games.SelectedIndexChanged += (_, _) => { GameChanged?.Invoke(Game); ReloadAssets(); };
-        backgrounds.SelectedIndexChanged += (_, _) => QueueRender();
+        backgrounds.SelectedIndexChanged += (_, _) =>
+        {
+            if (binding) return;
+            if (Game == "AI") size.Value = (decimal)PreviewLayout.Text(Game, (backgrounds.SelectedItem as BackgroundItem)?.ToString()).DefaultFontSize;
+            QueueRender();
+        };
         size.ValueChanged += (_, _) => QueueRender();
         spriteVisible.CheckedChanged += (_, _) => QueueRender();
         colorTags.CheckedChanged += (_, _) => QueueRender();
         adaptiveHeight.CheckedChanged += (_, _) => QueueRender();
+        wordWrap.CheckedChanged += (_, _) => QueueRender();
         renderTimer.Tick += (_, _) => { renderTimer.Stop(); Render(); };
+        SetDefaultFamily();
         ReloadAssets();
     }
 
@@ -75,6 +91,7 @@ internal sealed class DialoguePreviewWindow : Form
     {
         get
         {
+            if (voicePlayback is { IsCompleted: false }) return true;
             if (speech is null) return false;
             object? state = null;
             try { state = ((dynamic)speech).Status; return (int)((dynamic)state).RunningState == 2; }
@@ -94,13 +111,16 @@ internal sealed class DialoguePreviewWindow : Form
         if (games.SelectedIndex != index) games.SelectedIndex = index;
     }
 
-    public void SetDialogue(string text, string speaker, string expression, string voice)
+    public void SetDialogue(string text, string speaker, string expression, string voice, string origin = "", string original = "", bool sourceLanguage = false)
     {
         var changed = this.voice != voice || this.speaker != speaker;
         this.text = text ?? "";
         this.speaker = speaker ?? "";
         this.expression = expression ?? "";
         this.voice = voice ?? "";
+        this.origin = origin ?? "";
+        this.original = original ?? "";
+        useOriginalLanguage = sourceLanguage;
         if (changed) StopAudio();
         QueueRender();
     }
@@ -122,6 +142,10 @@ internal sealed class DialoguePreviewWindow : Form
                 if (backgrounds.SelectedIndex == 0 && backgrounds.Items.Count > 1) backgrounds.SelectedIndex = 1;
             }
             finally { binding = false; }
+            var currentPath = (backgrounds.SelectedItem as BackgroundItem)?.Path;
+            if (loadedGame != Game || Game == "AI" && selected != currentPath)
+                size.Value = (decimal)PreviewLayout.Text(Game, (backgrounds.SelectedItem as BackgroundItem)?.ToString()).DefaultFontSize;
+            loadedGame = Game;
             var defaultFont = assets.DefaultFont();
             if (defaultFont is not null && loadedDefaultFont != defaultFont)
             {
@@ -139,10 +163,34 @@ internal sealed class DialoguePreviewWindow : Form
             StopAudio();
             var file = assets.Voice(Game, voice);
             if (file is null) { status.Text = "Nessun file WAV corrispondente alla voce di questa battuta."; return; }
-            player.SoundLocation = file;
-            player.Play();
+            var player = new SoundPlayer(file);
+            try { player.Load(); }
+            catch { player.Dispose(); throw; }
+            activePlayer = player;
+            voiceCancellation = new CancellationTokenSource();
+            voicePlayback = PlayWaveAsync(player, voiceCancellation, audioGeneration);
             status.Text = "Riproduzione: " + Path.GetFileName(file);
         });
+    }
+
+    public bool HasVoiceFile => assets.Voice(Game, voice) is not null;
+
+    private async Task PlayWaveAsync(SoundPlayer player, CancellationTokenSource cancellation, int generation)
+    {
+        try
+        {
+            await Task.Run(() => { cancellation.Token.ThrowIfCancellationRequested(); player.PlaySync(); }, cancellation.Token);
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
+        catch (Exception error) when (error is IOException or InvalidOperationException or ExternalException)
+        { if (!IsDisposed && generation == audioGeneration) status.Text = "Audio: " + error.Message; }
+        finally
+        {
+            if (ReferenceEquals(activePlayer, player)) activePlayer = null;
+            if (ReferenceEquals(voiceCancellation, cancellation)) voiceCancellation = null;
+            player.Dispose();
+            cancellation.Dispose();
+        }
     }
 
     public void SpeakText()
@@ -151,24 +199,38 @@ internal sealed class DialoguePreviewWindow : Form
         {
             StopAudio();
             var type = Type.GetTypeFromProgID("SAPI.SpVoice") ?? throw new NotSupportedException("Sintesi vocale Windows non disponibile.");
-            speech ??= Activator.CreateInstance(type) ?? throw new NotSupportedException("Impossibile inizializzare la sintesi vocale.");
-            var culture = CultureInfo.GetCultureInfo(language.Text.Trim());
+            if (speech is null)
+            {
+                speech = Activator.CreateInstance(type) ?? throw new NotSupportedException("Impossibile inizializzare la sintesi vocale.");
+                defaultSpeechVoice = ((dynamic)speech).Voice;
+            }
+            var culture = CultureInfo.GetCultureInfo(useOriginalLanguage ? "en-US" : language.Text.Trim());
             dynamic synthesizer = speech;
-            // Let installed SAPI voices determine availability; do not invent gender/age metadata.
-            dynamic voices = synthesizer.GetVoices("Language=" + culture.LCID.ToString("X", CultureInfo.InvariantCulture), "");
+            var preferred = Game == "DR" ? VoiceProfile.ForSpeaker(speaker, origin) : null;
+            var attributes = "Language=" + culture.LCID.ToString("X", CultureInfo.InvariantCulture);
+            dynamic voices = synthesizer.GetVoices(attributes,
+                preferred is null ? "" : "Gender=" + preferred.Gender + ";Age=" + preferred.Age);
             try
             {
                 if ((int)voices.Count > 0) synthesizer.Voice = voices.Item(0);
-                else status.Text = "Voce per " + culture.Name + " non installata: uso della voce predefinita.";
+                else
+                {
+                    if (defaultSpeechVoice is not null) synthesizer.Voice = defaultSpeechVoice;
+                    status.Text = "Voce per " + culture.Name + " non installata: uso della voce predefinita.";
+                }
             }
             finally { if (Marshal.IsComObject(voices)) Marshal.FinalReleaseComObject(voices); }
-            synthesizer.Speak(PlainText(text), 1);
+            synthesizer.Speak(PreviewTextRules.Speech(text), 1);
         });
     }
 
     public void StopAudio()
     {
-        player.Stop();
+        audioGeneration++;
+        voiceCancellation?.Cancel();
+        try { activePlayer?.Stop(); }
+        catch (ObjectDisposedException) { }
+        activePlayer = null;
         if (speech is null) return;
         try { ((dynamic)speech).Speak("", 2); }
         catch (COMException) { /* An unavailable audio device must not affect the translation editor. */ }
@@ -216,7 +278,8 @@ internal sealed class DialoguePreviewWindow : Form
             ClearFamily();
             family = new FontFamily(dialog.Font.FontFamily.Name);
             ownsFamily = true;
-            size.Value = Math.Clamp((decimal)dialog.Font.SizeInPoints * 96 / 72, size.Minimum, size.Maximum);
+            selectedStyle = dialog.Font.Style;
+            size.Value = Math.Clamp((decimal)dialog.Font.SizeInPoints, size.Minimum, size.Maximum);
             QueueRender();
         });
     }
@@ -248,12 +311,19 @@ internal sealed class DialoguePreviewWindow : Form
         customFont?.Dispose();
         customFont = null;
         family = FontFamily.GenericSansSerif;
+        selectedStyle = FontStyle.Regular;
     }
 
-    private Font NewFont(float pixels)
+    private void SetDefaultFamily()
     {
-        var style = family.IsStyleAvailable(FontStyle.Regular) ? FontStyle.Regular : family.IsStyleAvailable(FontStyle.Bold) ? FontStyle.Bold : FontStyle.Italic;
-        return new Font(family, Math.Clamp(pixels, 8, 120), style, GraphicsUnit.Pixel);
+        try { family = new FontFamily("Calibri"); ownsFamily = true; }
+        catch (ArgumentException) { family = FontFamily.GenericSansSerif; ownsFamily = false; }
+    }
+
+    private Font NewFont(float points)
+    {
+        var style = family.IsStyleAvailable(selectedStyle) ? selectedStyle : family.IsStyleAvailable(FontStyle.Regular) ? FontStyle.Regular : family.IsStyleAvailable(FontStyle.Bold) ? FontStyle.Bold : FontStyle.Italic;
+        return new Font(family, Math.Clamp(points, 1, 120), style, GraphicsUnit.Point);
     }
 
     private void QueueRender()
@@ -281,23 +351,9 @@ internal sealed class DialoguePreviewWindow : Form
                     using var background = MediaAssets.LoadImage(backgroundPath);
                     graphics.DrawImage(background, new Rectangle(0, 0, 1280, 720));
                 }
-                if (spriteVisible.Checked)
-                {
-                    var path = assets.Sprite(Game, speaker, expression);
-                    if (path is not null)
-                    {
-                        using var sprite = MediaAssets.LoadImage(path);
-                        var ratio = Math.Min(440f / sprite.Width, 680f / sprite.Height);
-                        var width = sprite.Width * ratio;
-                        var height = sprite.Height * ratio;
-                        graphics.DrawImage(sprite, new RectangleF(0, 720 - height, width, height));
-                    }
-                }
-                var isAiTutorial = Game == "AI" && Path.GetFileNameWithoutExtension(backgroundPath)?.Contains("Tutorial", StringComparison.OrdinalIgnoreCase) == true;
-                var isToWitter = Game == "AI" && Path.GetFileNameWithoutExtension(backgroundPath)?.Equals("ToWitter", StringComparison.OrdinalIgnoreCase) == true;
-                var bounds = isAiTutorial ? new RectangleF(335, 280, 850, 390) :
-                    isToWitter ? new RectangleF(830, 175, 400, 470) :
-                    Game == "AI" ? new RectangleF(355, 560, 880, 150) : new RectangleF(260, 575, 980, 140);
+                var backgroundName = Path.GetFileNameWithoutExtension(backgroundPath) ?? "";
+                var profile = PreviewLayout.Text(Game, backgroundName);
+                var bounds = new RectangleF(profile.X, profile.Y, 1280 - profile.X, 720 - profile.Y);
                 if (backgroundPath is null)
                 {
                     using var box = new SolidBrush(Color.FromArgb(225, 14, 21, 32));
@@ -306,7 +362,20 @@ internal sealed class DialoguePreviewWindow : Form
                     using var nameBrush = new SolidBrush(Color.FromArgb(103, 224, 206));
                     graphics.DrawString(speaker, nameFont, nameBrush, 260, 530);
                 }
-                DrawText(graphics, text, bounds, isToWitter ? Color.Black : Color.White);
+                var content = PreviewTextRules.Prepare(text, Game, backgroundName);
+                DrawText(graphics, content.Text, bounds, profile.DarkText ? Color.Black : Color.White,
+                    profile.NewlineHeight, content.AutoTranslated);
+                // v25 composes text first and overlays the sprite in game coordinates last.
+                if (spriteVisible.Checked)
+                {
+                    var path = assets.Sprite(Game, speaker, expression);
+                    if (path is not null)
+                    {
+                        using var sprite = MediaAssets.LoadImage(path);
+                        var placement = PreviewLayout.Sprite(speaker, expression, sprite.Width, sprite.Height);
+                        graphics.DrawImage(sprite, new Rectangle(placement.X, placement.Y, placement.Width, placement.Height));
+                    }
+                }
                 var old = picture.Image;
                 picture.Image = image;
                 old?.Dispose();
@@ -318,20 +387,19 @@ internal sealed class DialoguePreviewWindow : Form
         });
     }
 
-    private void DrawText(Graphics graphics, string input, RectangleF bounds, Color initialColor)
+    private void DrawText(Graphics graphics, string input, RectangleF bounds, Color initialColor,
+        int fixedLineHeight, bool automatic)
     {
-        // CLT changes are display-only. The source strings and raw tags remain in the document.
-        input = ExpandNewlines(input);
+        // v25 uses point-sized fonts, explicit line breaks and no automatic reflow by default.
         var matches = Regex.Matches(input, @"</?CLT(?:=[^<>\r\n]*)?>|<PLATFORM_(?:PC|CONSOLE)>|<SIGNAL_[^<>\r\n]+>", RegexOptions.CultureInvariant);
         var position = 0;
         var x = bounds.Left;
         var y = bounds.Top;
         var fontSize = (float)size.Value;
         var color = initialColor;
-        var lineHeight = adaptiveHeight.Checked ? fontSize * 1.42f : 41;
+        var lineHeight = (float)fixedLineHeight;
         var state = graphics.Save();
         graphics.SetClip(bounds);
-        using var format = new StringFormat(StringFormat.GenericTypographic) { FormatFlags = StringFormatFlags.MeasureTrailingSpaces };
         try
         {
             foreach (Match match in matches)
@@ -357,65 +425,42 @@ internal sealed class DialoguePreviewWindow : Form
                 "<CLT=cltWEAK>" => Color.Gold,
                 _ => color
             };
-            if (tag.StartsWith("<CLT=size", StringComparison.Ordinal) &&
-                float.TryParse(tag[9..^1], NumberStyles.Float, CultureInfo.InvariantCulture, out var extra))
-                fontSize = (float)size.Value + (extra switch
-                {
-                    1 => 0, 1.1f => .5f, 1.2f => .7f, 1.5f => 1,
-                    _ => Math.Clamp(extra, 0, 60)
-                });
+            if (tag.StartsWith("<CLT=size", StringComparison.Ordinal))
+                fontSize = PreviewTextRules.FontSize(tag, (float)size.Value);
         }
 
         void DrawRun(string run)
         {
             using var font = NewFont(fontSize);
-            using var brush = new SolidBrush(color);
-            foreach (Match word in Regex.Matches(run, @"\n|[^\S\n]+|[^\s]+", RegexOptions.CultureInvariant))
+            using var brush = new SolidBrush(automatic ? Color.HotPink : color);
+            var lines = run.Split('\n');
+            for (int i = 0; i < lines.Length; i++)
             {
-                var token = word.Value;
-                if (token == "\n") { NewLine(); continue; }
-                var width = graphics.MeasureString(token, font, int.MaxValue, format).Width;
-                if (x > bounds.Left && x + width > bounds.Right) NewLine();
-                if (width <= bounds.Width)
+                if (i > 0) NewLine(font);
+                if (lines[i].Length == 0) continue;
+                if (!wordWrap.Checked)
                 {
-                    graphics.DrawString(token, font, brush, new PointF(x, y), format);
-                    x += width;
-                    if (adaptiveHeight.Checked) lineHeight = Math.Max(lineHeight, font.GetHeight(graphics));
+                    graphics.DrawString(lines[i], font, brush, new PointF(x, y));
+                    x += graphics.MeasureString(lines[i], font).Width;
                     continue;
                 }
-                var elements = StringInfo.GetTextElementEnumerator(token);
-                while (elements.MoveNext())
+                foreach (Match part in Regex.Matches(lines[i], @"\s+|\S+", RegexOptions.CultureInvariant))
                 {
-                    var glyph = elements.GetTextElement();
-                    var glyphWidth = graphics.MeasureString(glyph, font, int.MaxValue, format).Width;
-                    if (x > bounds.Left && x + glyphWidth > bounds.Right) NewLine();
-                    graphics.DrawString(glyph, font, brush, new PointF(x, y), format);
-                    x += glyphWidth;
-                    if (adaptiveHeight.Checked) lineHeight = Math.Max(lineHeight, font.GetHeight(graphics));
+                    var width = graphics.MeasureString(part.Value, font).Width;
+                    if (x > bounds.Left && x + width > bounds.Right) NewLine(font);
+                    graphics.DrawString(part.Value, font, brush, new PointF(x, y));
+                    x += width;
                 }
             }
         }
 
-        void NewLine() { x = bounds.Left; y += lineHeight; lineHeight = adaptiveHeight.Checked ? fontSize * 1.42f : 41; }
-    }
-
-    private static string ExpandNewlines(string text)
-    {
-        var output = new StringBuilder(text.Length);
-        for (var i = 0; i < text.Length; i++)
+        void NewLine(Font font)
         {
-            if (text[i] == '\\' && i + 1 < text.Length)
-            {
-                if (text[i + 1] == '\\') { output.Append('\\'); i++; continue; }
-                if (text[i + 1] == 'n') { output.Append('\n'); i++; continue; }
-                if (text[i + 1] == '"') { output.Append('"'); i++; continue; }
-            }
-            output.Append(text[i]);
+            lineHeight = adaptiveHeight.Checked ? graphics.MeasureString("\n", font).Height : fixedLineHeight;
+            x = bounds.Left;
+            y += lineHeight;
         }
-        return output.ToString().Replace("\r\n", "\n").Replace('\r', '\n');
     }
-
-    private static string PlainText(string text) => Regex.Replace(ExpandNewlines(text), @"<[^<>\r\n]+>", "");
 
     private void Safe(Action action)
     {
@@ -436,10 +481,11 @@ internal sealed class DialoguePreviewWindow : Form
             renderTimer.Stop();
             renderTimer.Dispose();
             StopAudio();
-            player.Dispose();
             picture.Image?.Dispose();
             picture.Image = null;
             ClearFamily();
+            if (defaultSpeechVoice is not null && Marshal.IsComObject(defaultSpeechVoice)) Marshal.FinalReleaseComObject(defaultSpeechVoice);
+            defaultSpeechVoice = null;
             if (speech is not null && Marshal.IsComObject(speech)) Marshal.FinalReleaseComObject(speech);
             speech = null;
         }

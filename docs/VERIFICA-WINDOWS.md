@@ -17,5 +17,9 @@ Questa è una checklist da eseguire su Windows, non l'elenco di test già svolti
 13. Avvia con un percorso inesistente: la textbox deve restare disabilitata fino all'apertura di un documento valido. Seleziona due volte la stessa scheda: cursore, selezione e annullamento devono rimanere intatti.
 14. Indicizza una cartella estesa e premi Stop: deve rimanere disponibile la memoria precedente. Ripeti chiudendo la finestra principale: prima si annulla la scansione, poi viene gestito il salvataggio delle modifiche.
 15. Apri due documenti con `VARS_BAK` diversi accanto ai file: ciascuno deve caricare il proprio dizionario automatico. Se scegli un dizionario esplicitamente, deve rimanere selezionato passando all'altro documento.
+16. Confronta `v25` e `Update` con gli stessi PNG: personaggio normale, ogni Monokub, Maki, sprite `_kak`, ritratto senza espressione e animazione assente. Scala e ritaglio devono seguire le regole originali, indipendentemente dalle dimensioni della finestra.
+17. Verifica AIBlank, AITutorial e ToWitter: posizione, dimensioni font in punti, altezza di riga e selezione del solo messaggio. Disattiva l'a capo automatico per il confronto con `v25`.
+18. Apri un PO con battute vuote e una traduzione corrispondente nella cartella: deve essere proposta/riutilizzata senza un comando extra, con marker AutoTL e testo rosa in anteprima. I conflitti richiedono scelta; annullare o scrivere durante l'indicizzazione non deve sovrascrivere modifiche manuali.
+19. Usa un WAV più lungo dell'intervallo di autoplay: il cambio battuta deve attendere la fine senza bloccare l'interfaccia. Prova Stop prima e durante la riproduzione, chiusura/riapertura dell'anteprima e riproduzione TTS con personaggi di età/genere diversi.
 
 Limiti espliciti: rendering indicativo; PO senza plurali/non-UTF8; STX a tabella singola; `.xls` non supportato; formule di traduzione XLSX protette. Opcode WRD non riconosciuti vengono rifiutati senza applicare metadati parziali.

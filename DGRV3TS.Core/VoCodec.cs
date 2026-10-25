@@ -7,7 +7,7 @@ public sealed partial class TranslationDocument
 
     private void ReadVo(string text)
     {
-        var lines = text.Replace("\r\n", "\n").Split('\n');
+        var lines = text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
         var position = Array.FindIndex(lines, l => l.StartsWith("Lines: ", StringComparison.Ordinal));
         if (position < 0) throw new InvalidDataException("Nessuna battuta VO trovata.");
         voHeader = string.Join(newline, lines.Take(position)).TrimEnd('\r', '\n');

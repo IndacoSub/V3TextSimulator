@@ -47,8 +47,9 @@ internal sealed partial class Operations
         if (_preview is null || _preview.IsDisposed) return;
         var entry = Current;
         var text = entry?.DisplayText(_previewOriginal.Checked) ?? "";
+        var sourceLanguage = text.Length >= 5 && text == entry?.Original;
         if (_resolve.Checked) text = _catalog.Resolve(text, _alternate.Checked);
-        _preview.SetDialogue(text, entry?.Speaker ?? "", entry?.Expression ?? "", entry?.Voice ?? "");
+        _preview.SetDialogue(text, entry?.Speaker ?? "", entry?.Expression ?? "", entry?.Voice ?? "", entry?.Origin ?? "", entry?.Original ?? "", sourceLanguage);
     }
 
     private void ChooseAssetRoot()

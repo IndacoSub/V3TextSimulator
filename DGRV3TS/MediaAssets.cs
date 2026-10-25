@@ -37,7 +37,9 @@ internal sealed class MediaAssets
         var direct = Existing(Path.Combine(folder, name));
         if (direct is not null) return direct;
         return Enumerate(folder, ".wav").FirstOrDefault(path =>
-            string.Equals(Path.GetFileName(path), name, StringComparison.OrdinalIgnoreCase));
+            string.Equals(Path.GetFileName(path), name, StringComparison.OrdinalIgnoreCase))
+            ?? Enumerate(Root, ".wav").FirstOrDefault(path =>
+                string.Equals(Path.GetFileName(path), name, StringComparison.OrdinalIgnoreCase));
     }
 
     public string? DefaultFont() => Existing(Path.Combine(Root, "font.otf")) ?? Existing(Path.Combine(Root, "font.ttf"));

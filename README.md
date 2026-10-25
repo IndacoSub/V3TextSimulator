@@ -60,13 +60,15 @@ Open PO, VO, TXT, STX, XLSX or a JSON project. Write in the **Translation** text
 
 Warnings compare tag, variable and .NET/printf placeholder counts between the original and translation; they do not assess linguistic quality. Re-selecting the same dialogue preserves the textbox's caret, selection and undo history.
 
-Autoplay uses a UI timer with pause, resume and stop. Manual editing, navigation and modal operations stop autoplay to keep edits attached to the intended dialogue. WAV and text-to-speech playback on dialogue changes can be enabled from the menu. WAV advancement uses the selected interval rather than the audio file's duration.
+Autoplay uses a UI timer with pause, resume and stop. Manual editing, navigation and modal operations stop autoplay to keep edits attached to the intended dialogue. WAV and text-to-speech playback on dialogue changes can be enabled from the menu. Navigation waits for active WAV/TTS playback to finish; WAV playback runs outside the UI thread. TTS restores v25's speaker age/gender preferences and chapter-dependent narrator hints, within the voices installed on Windows.
 
 ### Translation memory
 
-**Index memory from folder** (`Indicizza memoria da cartella`) recursively reads PO/VO/XLSX/JSON translations without modifying their files. It excludes the current document, build directories, game assets and symbolic links. Suggestions match the exact original and translation-language index, preferring the same speaker.
+Opening PO, VO or XLSX automatically searches the document's folder and subfolders for reusable translations, matching v25's default workflow. Turn **Reuse translations automatically on open** (`Riusa traduzioni automaticamente in apertura`) off to use only explicit indexing. Existing manual translations and intentionally empty rows are never replaced.
 
-**Suggestions** shows conflicting candidates and their source files. **Fill untranslated from memory** applies only unambiguous candidates and does not overwrite completed translations. This reuses existing local translations; it does not call an online machine-translation service or require API keys.
+**Index memory from folder** (`Indicizza memoria da cartella`) explicitly selects a different folder. Both paths recursively read PO/VO/XLSX/JSON translations without modifying their files. They exclude the current document, build directories, game assets and symbolic links. Suggestions match the exact original and translation-language index, preferring the same speaker. Automatic reuse checks protected placeholders before applying a candidate; manually reviewed suggestions can be accepted after a warning.
+
+**Suggestions** shows conflicting candidates and their source files. **Fill untranslated from memory** applies only unambiguous candidates and does not overwrite completed translations. Reused translations receive one `<SIGNAL_AutoTL>` marker: the preview hides the marker and provenance suffix and shows the reused text in pink, as in v25. This reuses existing local translations; it does not call an online machine-translation service or require API keys.
 
 **Stop** also cancels indexing and retains the previous memory. Commands that change the document or its filename are disabled during indexing, while text editing remains available. Closing the editor cancels the scan before handling unsaved changes normally.
 
@@ -80,7 +82,7 @@ Autoplay uses a UI timer with pause, resume and stop. Manual editing, navigation
 | VO | Legacy metadata, comments, the final record without a trailing blank line, multiple languages and reversible escapes. Legacy `"(blank)"` means empty; that exact literal cannot be exported unambiguously. |
 | TXT | One dialogue per line, with optional enclosing `{` / `}`. Newlines inside a dialogue are exported as `\n`. |
 | STX | Single-table UTF-16LE files, nonsequential IDs, empty source strings and preserved headers. Pointers and string terminators are validated; multiple tables are rejected. |
-| XLSX | First worksheet: headers in row 1, A = ID/OFFSET, B = original, C onward = translations. Other worksheets and imported workbook parts are preserved. Changed translation formula cells cannot be overwritten. Legacy `.xls` is not supported. |
+| XLSX | First worksheet: headers in row 1, A = ID/OFFSET, B = original, C onward = translations. Languages defined only in headers remain selectable even if every translation is blank; older JSON projects recover these columns from their embedded workbook. Other worksheets and imported workbook parts are preserved. Changed translation formula cells cannot be overwritten. Legacy `.xls` is not supported. |
 
 TXT and STX store only final text: untranslated rows retain the source; intentionally empty rows are cleared. Keep a JSON project to preserve the original/translation comparison. Exporting originals produces a copy without changing the open document.
 
@@ -127,7 +129,9 @@ By default, all paths below are relative to the executable. To use another asset
 
 Each character's sprite folder should also contain a **`default.png`** for use when no matching animation or expression is available. Background images should ideally be **1280×720**; sprite images should ideally be **no wider than 1024 pixels**. A default custom font can be supplied as `font.ttf` or `font.otf` in the asset root.
 
-The separate graphics preview provides backgrounds, optional sprites, V3/AI selection, installed fonts and external TTF/OTF files, font sizes, CLT tags, fixed/adaptive line spacing, WAV playback, Windows text-to-speech with language selection, image copying and PNG screenshots. Rendering is indicative; identical in-game layout has not been established. Missing assets or unavailable audio do not prevent translation.
+The separate graphics preview provides backgrounds, optional sprites, V3/AI selection, installed fonts and external TTF/OTF files, font sizes, CLT tags, fixed/adaptive line spacing, WAV playback, Windows text-to-speech with language selection, image copying and PNG screenshots. Composition stays in 1280×720 coordinates regardless of window zoom. Sprite scale, negative offsets and clipping follow v25's separate rules for regular characters, Monokubs, Maki, flashbacks and default portraits. Text is drawn before sprites, as in v25.
+
+The default font is Calibri when available, measured in points. The game/background profiles restore DR, AI, tutorial and ToWitter origins, font defaults and line spacing; ToWitter also restores its message-only text selection. Automatic word wrapping is off by default, so existing explicit game line breaks retain their layout; wrapping remains an optional preview setting. AutoTL and signal-delimited hidden suffixes are not read aloud. Missing assets or unavailable audio do not prevent translation. These rules are regression-tested, but actual pixel output, installed fonts, audio devices and UI still need comparison on Windows with the same game assets.
 
 Sprite import retains the v25 character mapping and does not overwrite existing files. Exporting voiced dialogues supports all speakers rather than only the original hardcoded Monokuma filter. The original **Setup Voicelines** menu item was explicitly unimplemented; voice files use the documented directories.
 

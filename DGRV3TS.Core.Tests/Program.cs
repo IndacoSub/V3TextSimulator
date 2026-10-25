@@ -25,6 +25,13 @@ void Test(string name, Action body)
 }
 try
 {
+    Test("v25 sprite coordinates and DR/AI text profiles", PreviewLayoutTests.Run);
+    Test("v25 signal tails, AutoTL preview and spoken text", PreviewTextTests.Run);
+    Test("v25 character and narrator voice preferences", VoiceProfileTests.Run);
+    Test("XLSX blank language columns and sparse worksheet preservation", () => XlsxLanguageTests.Run(folder));
+    Test("Legacy line endings, native-project validation and language migration", () => DocumentCompatibilityTests.Run(folder));
+    Test("PO metadata edits and WRD imports survive PO/JSON export", () => PoMetadataTests.Run(folder));
+    Test("v25 automatic translation reuse and marker safety", () => TranslationReuseTests.Run(folder));
     Test("v25 PO context: arbitrary line IDs, origin, speaker, expression and voice at EOF", () =>
     {
         var path = Write("source.po", "msgid \"\"\nmsgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n\n#. context note\n#: chapter:9\nmsgctxt \"107 | c00_001 | C000_Saiha | anim005 | vic_Saiha_001\"\nmsgid \"\"\n\"Hello \\\"world\\\"\\n\"\n\"<NAME> \\\\ end\"\nmsgstr \"Ciao\"\n\nmsgctxt \"55555 | AI_intro | AI_Aiba | vic_Aiba_001\"\nmsgid \"Second\"\nmsgstr \"\"");
