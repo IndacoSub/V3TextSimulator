@@ -10,7 +10,7 @@ public sealed record VariableDefinition(string Token, string Value, string Categ
 }
 
 /// <summary>The external v25 variable vocabulary; raw tokens remain the identity of every row.</summary>
-public sealed class VariableCatalog
+public sealed partial class VariableCatalog
 {
     public static VariableCatalog Empty { get; } = new(null, [], []);
     public IReadOnlyList<VariableDefinition> Variables { get; }
@@ -25,7 +25,11 @@ public sealed class VariableCatalog
         Variables = variables.AsReadOnly();
         Warnings = warnings.AsReadOnly();
         byToken = variables.ToDictionary(v => v.Token, StringComparer.Ordinal);
-        candidates = variables.GroupBy(v => v.Token[0]).ToDictionary(g => g.Key,
+        foreach (var row in variables)
+            if (TryParseMacroSignature(row.Token, out var name, out var parameter))
+                macros.Add(name, new Macro(row, name, parameter));
+        candidates = variables.Where(v => !TryParseMacroSignature(v.Token, out _, out _))
+            .GroupBy(v => v.Token[0]).ToDictionary(g => g.Key,
             g => g.OrderByDescending(v => v.Token.Length).ToArray());
     }
 
@@ -48,6 +52,10 @@ public sealed class VariableCatalog
                 if (heading.Length > 0) category = heading;
                 continue;
             }
+            // Notes can accompany bare controls too, and can themselves contain commas.
+            var comment = "";
+            var pipe = line.IndexOf(" | ", StringComparison.Ordinal);
+            if (pipe >= 0) { comment = line[(pipe + 3)..].Trim(); line = line[..pipe].TrimEnd(); }
             var comma = line.IndexOf(',');
             var token = (comma < 0 ? line : line[..comma]).Trim();
             if (token.Length == 0 || token.Any(char.IsWhiteSpace))
@@ -55,15 +63,19 @@ public sealed class VariableCatalog
                 warnings.Add($"Riga {lineNumber}: token vuoto o contenente spazi; riga ignorata.");
                 continue;
             }
-            if (!tokens.Add(token))
+            var macroName = "";
+            if (token.StartsWith("MAKE_", StringComparison.Ordinal) && token.Contains('(')
+                && !TryParseMacroSignature(token, out macroName, out _))
+            {
+                warnings.Add($"Riga {lineNumber}: definizione MAKE non valida; atteso MAKE_NOME(PARAMETRO).");
+                continue;
+            }
+            if (!tokens.Add(macroName.Length > 0 ? macroName : token))
             {
                 warnings.Add($"Riga {lineNumber}: token duplicato '{token}'; mantenuta la prima definizione.");
                 continue;
             }
             var value = comma < 0 ? token : line[(comma + 1)..].Trim();
-            var comment = "";
-            var pipe = value.IndexOf(" | ", StringComparison.Ordinal);
-            if (pipe >= 0) { comment = value[(pipe + 3)..].Trim(); value = value[..pipe].Trim(); }
             string? alternate = null;
             var colon = value.IndexOf(" : ", StringComparison.Ordinal);
             if (colon >= 0) { alternate = value[(colon + 3)..].Trim(); value = value[..colon].Trim(); }
@@ -75,7 +87,7 @@ public sealed class VariableCatalog
         }
         var catalog = new VariableCatalog(Path.GetFullPath(path), rows, warnings);
         foreach (var row in rows)
-            if (catalog.HasCycle(row.Token, new HashSet<string>(StringComparer.Ordinal), 0))
+            if (catalog.HasCycle(row.Token))
                 warnings.Add($"Riferimento ciclico nella variabile '{row.Token}'; l'anteprima mantiene visibili i token non risolti.");
         return catalog;
     }
@@ -105,13 +117,15 @@ public sealed class VariableCatalog
     public string Resolve(string text, bool alternate = false)
     {
         ArgumentNullException.ThrowIfNull(text);
-        return ResolveText(text, alternate, new HashSet<string>(StringComparer.Ordinal), 0);
+        return ResolveText(text, alternate, new ResolutionState(), 0);
     }
 
     /// <summary>Restores v25's session-only case variants without editing the external dictionary.</summary>
     public (VariableCatalog Catalog, VariableDefinition Variant, bool Created) WithCaseVariant(string token, bool uppercase)
     {
         if (!byToken.TryGetValue(token, out var source)) throw new ArgumentException("Variabile non trovata.", nameof(token));
+        if (TryParseMacroSignature(token, out _, out _))
+            throw new NotSupportedException("Crea la variante della variabile da passare al MAKE, oppure definisci un MAKE separato nel dizionario.");
         var suffix = uppercase ? "_MS" : "_MN";
         // Prefer exact external definitions, including the bracketed convention accepted by the rewrite.
         if (token.EndsWith(suffix, StringComparison.Ordinal)) return (this, source, false);
@@ -120,80 +134,14 @@ public sealed class VariableCatalog
         if (token.EndsWith(suffix + ">", StringComparison.Ordinal)) return (this, source, false);
 
         string ChangeCase(string value) => uppercase ? value.ToUpperInvariant() : value.ToLowerInvariant();
-        var variant = new VariableDefinition(token + suffix, ChangeCase(Resolve(token)), source.Category,
-            source.AlternateValue is null ? null : ChangeCase(Resolve(token, alternate: true)))
+        var resolved = Resolve(token);
+        var alternateResolved = Resolve(token, alternate: true);
+        var variant = new VariableDefinition(token + suffix, ChangeCase(resolved), source.Category,
+            alternateResolved == resolved ? null : ChangeCase(alternateResolved))
         { Comment = source.Comment, IsTemporary = true };
         var rows = Variables.ToList();
         rows.Add(variant);
         return (new VariableCatalog(FilePath, rows, Warnings.ToList()), variant, true);
-    }
-
-    private string ResolveText(string text, bool alternate, HashSet<string> visiting, int depth)
-    {
-        var result = new StringBuilder(text.Length);
-        for (var position = 0; position < text.Length;)
-        {
-            VariableDefinition? matched = null;
-            if (candidates.TryGetValue(text[position], out var options))
-                foreach (var option in options)
-                {
-                    var end = position + option.Token.Length;
-                    if (end > text.Length || !text.AsSpan(position, option.Token.Length).SequenceEqual(option.Token.AsSpan())) continue;
-                    if (IsWord(option.Token[0]) && position > 0 && IsWord(text[position - 1])) continue;
-                    if (IsWord(option.Token[^1]) && end < text.Length && IsWord(text[end])) continue;
-                    matched = option;
-                    break;
-                }
-            if (matched is null) { result.Append(text[position++]); continue; }
-            var replacement = alternate ? matched.AlternateValue ?? matched.Value : matched.Value;
-            // Resolve known nested references only; missing _MN/_MS variants are never invented.
-            if (replacement != matched.Token && depth < 2)
-            {
-                if (!visiting.Add(matched.Token)) replacement = matched.Token;
-                else
-                {
-                    replacement = ResolveText(replacement, alternate, visiting, depth + 1);
-                    visiting.Remove(matched.Token);
-                }
-            }
-            result.Append(replacement);
-            position += matched.Token.Length;
-        }
-        return result.ToString();
-    }
-
-    private bool HasCycle(string token, HashSet<string> visiting, int depth)
-    {
-        if (!visiting.Add(token)) return true;
-        // The preview expands at most three nested definitions, so deeper chains stay literal.
-        if (depth >= 3) { visiting.Remove(token); return false; }
-        var row = byToken[token];
-        foreach (var value in new[] { row.Value, row.AlternateValue }.OfType<string>())
-        {
-            if (value == token) continue;
-            foreach (var target in References(value))
-                if (HasCycle(target, visiting, depth + 1)) { visiting.Remove(token); return true; }
-        }
-        visiting.Remove(token);
-        return false;
-    }
-
-    private IEnumerable<string> References(string text)
-    {
-        for (var position = 0; position < text.Length; position++)
-        {
-            if (!candidates.TryGetValue(text[position], out var choices)) continue;
-            foreach (var choice in choices)
-            {
-                var end = position + choice.Token.Length;
-                if (end > text.Length || !text.AsSpan(position, choice.Token.Length).SequenceEqual(choice.Token.AsSpan())) continue;
-                if (IsWord(choice.Token[0]) && position > 0 && IsWord(text[position - 1])) continue;
-                if (IsWord(choice.Token[^1]) && end < text.Length && IsWord(text[end])) continue;
-                yield return choice.Token;
-                position = end - 1;
-                break;
-            }
-        }
     }
 
     internal static bool IsWord(char value) => char.IsLetterOrDigit(value) || char.IsSurrogate(value) || value == '_'

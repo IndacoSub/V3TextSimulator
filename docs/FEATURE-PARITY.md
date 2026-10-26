@@ -33,8 +33,8 @@ These are open parity items, not features to silently remove:
 
 The v25 **Setup Voicelines from Folder** command explicitly displays “Currently unimplemented!”. It is not evidence of a working original importer. The original `OpenFile` extension check accepts `.xlsx` but not `.xls`; the underlying Excel library's broader capability is not a separate accepted-file workflow.
 
-The original `MAKE_(...)` branch is not counted as demonstrated functionality: `AddVariables` filters out `MAKE_` definitions before the replacement code can use them. A future implementation may add it, but parity should be based on a reproducible original workflow rather than unreachable code or TODO labels.
+The original `MAKE_(...)` branch was unreachable because `AddVariables` filtered out `MAKE_` definitions. The rewrite now implements single-argument MAKE templates, balanced nested calls (including the same template inside itself), recursive variable expansion and alternate values. `VariableExpansionTests.Run` verifies these additions using invented dictionary entries, including cycles, token boundaries and expansion limits. This is implemented functionality beyond that unreachable original branch.
 
 ## Acceptance evidence
 
-Run the core regression runner and build described in the [README](../README.md). Then execute the [Windows checklist](VERIFICA-WINDOWS.md) and compare both versions using the same real translation files, dictionaries, fonts, backgrounds, sprites and voices. Record unresolved differences here; do not label the rewrite feature-complete solely because its build passes.
+Run the core regression runner and build described in the [README](../README.md). Then execute the [Windows checklist](WINDOWS-VERIFICATION.md) and compare both versions using the same real translation files, dictionaries, fonts, backgrounds, sprites and voices. Record unresolved differences here; do not label the rewrite feature-complete solely because its build passes.

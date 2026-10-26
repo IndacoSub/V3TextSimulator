@@ -9,7 +9,7 @@ public sealed record TranslationIssue(string Message);
 public static class TranslationTools
 {
     private static readonly Regex Tokens = new(
-        @"<[^<>\r\n]+>|(?<!\{)\{(?:[0-9]+|[\p{L}_][\p{L}\p{N}_]*)(?:,-?[0-9]+)?(?::[^{}\r\n]+)?\}(?!\})|%%|%(?:[0-9]+\$)?[-+#0 ']*(?:\*|[0-9]+)?(?:\.(?:\*|[0-9]+))?(?:hh|ll|[hlLjzt])?[diuoxXfFeEgGaAcspn]",
+        @"<[^<>\r\n]+>|(?<![\p{L}\p{N}_])MAKE_[\p{L}\p{N}_]+(?=\()|(?<!\{)\{(?:[0-9]+|[\p{L}_][\p{L}\p{N}_]*)(?:,-?[0-9]+)?(?::[^{}\r\n]+)?\}(?!\})|%%|%(?:[0-9]+\$)?[-+#0 ']*(?:\*|[0-9]+)?(?:\.(?:\*|[0-9]+))?(?:hh|ll|[hlLjzt])?[diuoxXfFeEgGaAcspn]",
         RegexOptions.CultureInvariant, TimeSpan.FromSeconds(1));
     private static readonly Regex PreviewControls = new(
         @"</?CLT(?:=[^<>\r\n]*)?>|<PLATFORM_(?:PC|CONSOLE)>|<SIGNAL_(?:NDR|ALT|NOSWAP|CBL|OE|AutoTL)>",
@@ -35,11 +35,9 @@ public static class TranslationTools
     {
         var counts = new Dictionary<string, int>(StringComparer.Ordinal);
         var occupied = new bool[text.Length];
-        foreach (Match match in Tokens.Matches(text))
-        {
-            if (match.Value != "%%") Add(match.Value);
-            Array.Fill(occupied, true, match.Index, match.Length);
-        }
+        var matches = Tokens.Matches(text).Cast<Match>().ToArray();
+        // Reserve complete dictionary tokens first, including v25's <NAME>_MS suffixes.
+        // A shorter dictionary word inside a game tag must never consume that tag.
         foreach (var token in variables)
             for (var index = 0; index <= text.Length - token.Length;)
             {
@@ -48,13 +46,17 @@ public static class TranslationTools
                 var end = found + token.Length;
                 if ((!VariableCatalog.IsWord(token[0]) || found == 0 || !VariableCatalog.IsWord(text[found - 1]))
                     && (!VariableCatalog.IsWord(token[^1]) || end == text.Length || !VariableCatalog.IsWord(text[end]))
-                    && !occupied.AsSpan(found, token.Length).Contains(true))
+                    && !occupied.AsSpan(found, token.Length).Contains(true)
+                    && !matches.Any(match => match.Index < end && match.Index + match.Length > found
+                        && (match.Index < found || match.Index + match.Length > end)))
                 {
                     Add(token);
                     Array.Fill(occupied, true, found, token.Length);
                 }
                 index = end;
             }
+        foreach (var match in matches)
+            if (match.Value != "%%" && !occupied.AsSpan(match.Index, match.Length).Contains(true)) Add(match.Value);
         return counts;
         void Add(string token) => counts[token] = counts.GetValueOrDefault(token) + 1;
     }

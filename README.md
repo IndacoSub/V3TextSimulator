@@ -20,11 +20,11 @@ The vertical summary opens when a document is loaded. It can be closed and reope
 
 ### Simple and extended views
 
-`Operations` starts in **simple view**, designed around a 240-pixel client height at 96 DPI so the three independent windows can be placed together. Use **⏬ Extended view** (`Vista estesa`) at the bottom to expand downward; **⏫ Simple view** (`Vista semplice`) collapses it again. Each mode remembers its own height, while the width, document, selection and textbox undo state are retained.
+`Operations` starts in **simple view**, designed around a 240-pixel client height at 96 DPI so the three independent windows can be placed together. Use **⏬ Extended view** at the bottom to expand downward; **⏫ Simple view** collapses it again. Each mode remembers its own height, while the width, document, selection and textbox undo state are retained.
 
 Simple view hides the original pane, variable Insert/Load/Reload buttons, Copy Original, Suggestions and the search/autoplay toolbar (query, Find Next, untranslated filter, Replace, Play/Resume, Pause, Stop and seconds). The variable list, its filter and categories remain visible; double-click and its context menu remain available. Hidden commands are still accessible through menus or extended view. `Ctrl+F` opens extended view before focusing text search. Placeholder warnings remain available in the status bar; clicking the warning count expands their details.
 
-The main window's **Dialogues** (`Dialoghi`) and **Preview** (`Anteprima`) buttons reopen the respective secondary windows. The preview opens smaller and can be resized down to 480×300; its zoom does not change the 1280×720 rendering/screenshot canvas.
+The main window's **Dialogues** and **Preview** buttons reopen the respective secondary windows. The preview opens smaller and can be resized down to 480×300; its zoom does not change the 1280×720 rendering/screenshot canvas.
 
 Some Windows UI labels are currently in Italian; the commands below describe their function.
 
@@ -54,12 +54,12 @@ A Windows build is produced under `DGRV3TS/bin/Release/net8.0-windows/win-x64/`.
 
 ## Translation workflow
 
-Open PO, VO, TXT, STX, XLSX or a JSON project. Write in the **Translation** textbox (`Traduzione`). Edits stay in memory when changing dialogue or translation language, while the original remains separate. Inserted variable tokens remain raw tokens in saved files; resolving them affects only the preview.
+Open PO, VO, TXT, STX, XLSX or a JSON project. Write in the **Translation** textbox. Edits stay in memory when changing dialogue or translation language, while the original remains separate. Inserted variable tokens remain raw tokens in saved files; resolving them affects only the preview.
 
 | Shortcut or command | Action |
 | --- | --- |
 | `Ctrl+O`, `Ctrl+S`, `Ctrl+Shift+S` | Open, save, save as / convert format. |
-| `Ctrl+Up` / `Ctrl+Down` | Previous / next dialogue. Use the dialogue number and **Go** (`Vai`) to jump directly. |
+| `Ctrl+Up` / `Ctrl+Down` | Previous / next dialogue. Use the dialogue number and **Go** to jump directly. |
 | `Ctrl+F`, `Ctrl+H` | Search and replace. Replace-all affects the selected language and requires confirmation. |
 | `F8` | Next untranslated dialogue. |
 | **Mark intentionally empty** | Explicitly export an empty string rather than leaving a dialogue untranslated. |
@@ -72,9 +72,9 @@ Autoplay uses a UI timer with pause, resume and stop. Manual editing, navigation
 
 ### Translation memory
 
-Opening PO, VO or XLSX automatically searches the document's folder and subfolders for reusable translations, matching v25's default workflow. Turn **Reuse translations automatically on open** (`Riusa traduzioni automaticamente in apertura`) off to use only explicit indexing. Existing manual translations and intentionally empty rows are never replaced.
+Opening PO, VO or XLSX automatically searches the document's folder and subfolders for reusable translations, matching v25's default workflow. Turn **Reuse translations automatically on open** off to use only explicit indexing. Existing manual translations and intentionally empty rows are never replaced.
 
-**Index memory from folder** (`Indicizza memoria da cartella`) explicitly selects a different folder. Both paths recursively read PO/VO/XLSX/JSON translations without modifying their files. They exclude the current document, build directories, game assets and symbolic links. Suggestions match the exact original and translation-language index, preferring the same speaker. Automatic reuse checks protected placeholders before applying a candidate; manually reviewed suggestions can be accepted after a warning.
+**Index memory from folder** explicitly selects a different folder. Both paths recursively read PO/VO/XLSX/JSON translations without modifying their files. They exclude the current document, build directories, game assets and symbolic links. Suggestions match the exact original and translation-language index, preferring the same speaker. Automatic reuse checks protected placeholders before applying a candidate; manually reviewed suggestions can be accepted after a warning.
 
 **Suggestions** shows conflicting candidates and their source files. **Fill untranslated from memory** applies only unambiguous candidates and does not overwrite completed translations. Reused translations receive one `<SIGNAL_AutoTL>` marker: the preview hides the marker and provenance suffix and shows the reused text in pink, as in v25. This reuses existing local translations; it does not call an online machine-translation service or require API keys.
 
@@ -107,18 +107,23 @@ The V3/AI selector uses `VARS_BAK` / `vars_bak.txt` and `vars_ai.txt`, respectiv
 Automatically discovered dictionaries are looked up again when opening another document. An explicitly chosen dictionary stays selected until another is chosen or the game is changed.
 
 ```text
-// Characters
-<HERO>, Kaede Akamatsu | Note displayed in the editor
-// Glossary
-<ACADEMY>, Accademia per talenti : Ultimate Academy | Main and alternate values
-<ACADEMY_MN>, accademia per talenti
+// Imaginary glossary
+VAR_ORCHARD_ITEM, apricot : plum | Note displayed in the editor
+VAR_ORCHARD_LABEL, Sweet VAR_ORCHARD_ITEM : Fresh VAR_ORCHARD_ITEM
+// Imaginary templates
+MAKE_BORDER(MY_ARG), [MY_ARG]
+MAKE_REPEAT(MY_ARG), MY_ARG / MY_ARG
 ```
 
 `//` starts a category; entries before the first category are accepted. The first `,` separates token and value, ` : ` separates an alternate value and ` | ` introduces a comment. The main editor provides categories, search, hover notes and entry information. A single left-click copies the raw token for V3 or the displayed value for AI; double-click inserts the corresponding token or AI value at the caret.
 
 The context menu can copy tokens and values, show alternate values and entry information, and copy or insert lowercase (`_MN`) and uppercase (`_MS`) variants. Existing external definitions take precedence. When no definition exists, a variant can be generated for the current session, preserving the original v25 convenience. Generated variants do not change the external dictionary and are cleared on reload. **Remove from list** hides an entry from the current list without deleting its file definition.
 
-Nested substitutions are limited to three levels, respect token boundaries and report cycles. Duplicate tokens and malformed lines produce warnings instead of preventing startup. The external dictionary is not rewritten automatically.
+Variables are resolved recursively, including variables inside other definitions. The selected main/alternate convention applies throughout the expansion, even when an outer variable only has one value. Whole-token matching prevents a short variable name from changing a longer one.
+
+`MAKE_NAME(PARAMETER), template` defines a template with one text argument. The parameter is replaced as a whole identifier. Arguments may contain variables, commas, ordinary balanced parentheses and other MAKE calls, including another call to the same MAKE. In the invented example above, `MAKE_BORDER(MAKE_REPEAT(VAR_ORCHARD_LABEL))` displays `[Sweet apricot / Sweet apricot]`. Templates can also appear inside variable definitions and can have alternate values using ` : `. For case variants, pass the desired `_MN`/`_MS` variable as the MAKE argument.
+
+Cycles are reported and unresolved expressions remain visible. Depth, expansion-count and output-size guards prevent runaway definitions from freezing the editor. Unknown tokens remain visible; an incomplete known MAKE call is left unexpanded. Duplicate tokens and malformed definitions produce warnings instead of preventing startup. Notes after ` | ` also work on bare tokens without a comma. Expansion only affects displayed values and the preview: the translation retains its raw tokens and MAKE calls, and the external dictionary is not rewritten automatically.
 
 ## Folders, files and preview assets
 
@@ -150,8 +155,8 @@ Sprite import retains the v25 character mapping and does not overwrite existing 
 - `DGRV3TS.Core.Tests`: regression runner that also works on Linux.
 - [Feature parity](docs/FEATURE-PARITY.md): comparison with v25 and remaining validation requirements.
 - [Actual bug fixes](docs/BUG-FIXES.md): defects with triggers and evidence, distinguished from restored features and defects introduced during the rewrite.
-- [Rewrite map](docs/RISCRITTURA-V25.md): correspondence with original v25 files and source ZIP contents; currently in Italian.
-- [Windows verification](docs/VERIFICA-WINDOWS.md): manual visual/audio checklist; currently in Italian. These checks are not run by the Linux test runner.
+- [Rewrite map](docs/V25-REWRITE.md): correspondence with original v25 files and source ZIP contents.
+- [Windows verification](docs/WINDOWS-VERIFICATION.md): manual visual/audio checklist. These checks are not run by the Linux test runner.
 
 CI is configured to build Release with warnings treated as errors and run the regression suite. A successful Linux build does not establish Windows GUI, SAPI or audio-device behavior.
 

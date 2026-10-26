@@ -39,12 +39,17 @@ public static class TranslationReuse
         var comparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
         var excludedPath = excludedFile is null ? null : Path.GetFullPath(excludedFile);
         var source = CandidateText(entry.Original);
-        return memory.Find(entry.Original, entry.Speaker, language)
-            .Where(s => excludedPath is null || !string.Equals(Path.GetFullPath(s.SourceFile), excludedPath, comparison))
+        // Filter before speaker preference and deduplication: unusable/current-file rows
+        // must not hide a usable translation from another donor.
+        return memory.Find(entry.Original, entry.Speaker, language, s =>
+            {
+                if (excludedPath is not null && string.Equals(Path.GetFullPath(s.SourceFile), excludedPath, comparison)) return false;
+                var text = CandidateText(s.Text);
+                return !string.IsNullOrWhiteSpace(text) && !text.Contains("[EMPTY_LINE]", StringComparison.Ordinal)
+                    && !string.Equals(source, text, StringComparison.Ordinal)
+                    && (!requireCompatible || TranslationTools.Validate(source, text, tokens).Count == 0);
+            })
             .Select(s => s with { Text = CandidateText(s.Text) })
-            .Where(s => !string.IsNullOrWhiteSpace(s.Text) && !s.Text.Contains("[EMPTY_LINE]", StringComparison.Ordinal)
-                && !string.Equals(source, s.Text, StringComparison.Ordinal))
-            .Where(s => !requireCompatible || TranslationTools.Validate(source, s.Text, tokens).Count == 0)
             .DistinctBy(s => s.Text, StringComparer.Ordinal).ToArray();
     }
 }

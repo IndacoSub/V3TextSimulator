@@ -32,6 +32,8 @@ try
     Test("Legacy line endings, native-project validation and language migration", () => DocumentCompatibilityTests.Run(folder));
     Test("PO metadata edits and WRD imports survive PO/JSON export", () => PoMetadataTests.Run(folder));
     Test("v25 automatic translation reuse and marker safety", () => TranslationReuseTests.Run(folder));
+    Test("AutoTL donor filtering, speaker fallback and whole-token case variants", () => AutoTlRegressionTests.Run(folder));
+    Test("Recursive variables, nested MAKE calls, alternate values and expansion safety", () => VariableExpansionTests.Run(folder));
     Test("v25 PO context: arbitrary line IDs, origin, speaker, expression and voice at EOF", () =>
     {
         var path = Write("source.po", "msgid \"\"\nmsgstr \"Content-Type: text/plain; charset=UTF-8\\n\"\n\n#. context note\n#: chapter:9\nmsgctxt \"107 | c00_001 | C000_Saiha | anim005 | vic_Saiha_001\"\nmsgid \"\"\n\"Hello \\\"world\\\"\\n\"\n\"<NAME> \\\\ end\"\nmsgstr \"Ciao\"\n\nmsgctxt \"55555 | AI_intro | AI_Aiba | vic_Aiba_001\"\nmsgid \"Second\"\nmsgstr \"\"");

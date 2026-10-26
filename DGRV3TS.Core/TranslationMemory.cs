@@ -91,8 +91,9 @@ public sealed class TranslationMemory
                             if (string.IsNullOrWhiteSpace(entry.Original) || string.IsNullOrWhiteSpace(entry.Translation)) continue;
                             var key = (entry.Original, language);
                             if (!entries.TryGetValue(key, out var candidates)) entries[key] = candidates = new();
-                            // Keep speaker variants until Find can select the relevant speaker.
-                            if (candidates.Any(candidate => candidate.Text == entry.Translation && candidate.Speaker == entry.Speaker)) continue;
+                            // Keep donor identities until exclusions and speaker preference are applied.
+                            if (candidates.Any(candidate => candidate.Text == entry.Translation
+                                && candidate.Speaker == entry.Speaker && comparer.Equals(candidate.SourceFile, path))) continue;
                             candidates.Add(new TranslationSuggestion(entry.Translation, path, entry.Speaker));
                         }
                     }
@@ -112,16 +113,20 @@ public sealed class TranslationMemory
     /// Returns all distinct translations for this exact original and language. When possible,
     /// the same speaker takes precedence. Multiple different texts remain explicit choices.
     /// </summary>
-    public IReadOnlyList<TranslationSuggestion> Find(string original, string speaker = "", int language = 0)
+    public IReadOnlyList<TranslationSuggestion> Find(string original, string speaker = "", int language = 0) =>
+        Find(original, speaker, language, static _ => true);
+
+    internal IReadOnlyList<TranslationSuggestion> Find(string original, string speaker, int language,
+        Func<TranslationSuggestion, bool> eligible)
     {
         ArgumentNullException.ThrowIfNull(original);
         ArgumentNullException.ThrowIfNull(speaker);
         if (language < 0) throw new ArgumentOutOfRangeException(nameof(language));
         if (!suggestions.TryGetValue((original, language), out var candidates)) return Array.Empty<TranslationSuggestion>();
-        IEnumerable<TranslationSuggestion> matches = candidates;
+        IEnumerable<TranslationSuggestion> matches = candidates.Where(eligible).ToArray();
         if (speaker.Length != 0)
         {
-            var sameSpeaker = candidates.Where(candidate => string.Equals(candidate.Speaker, speaker, StringComparison.Ordinal)).ToArray();
+            var sameSpeaker = matches.Where(candidate => string.Equals(candidate.Speaker, speaker, StringComparison.Ordinal)).ToArray();
             if (sameSpeaker.Length != 0) matches = sameSpeaker;
         }
         return matches.OrderBy(candidate => candidate.SourceFile, StringComparer.Ordinal)
