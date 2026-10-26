@@ -90,7 +90,7 @@ Opening PO, VO or XLSX automatically searches the document's folder and subfolde
 
 | Format | Support and current limits |
 | --- | --- |
-| PO | `msgid`, `msgstr`, comments, multiline strings, escapes and v25 contexts: `ID \| origin \| speaker \| expression \| voice`. Plurals, declared non-UTF-8 charsets and unknown escapes are rejected explicitly. Exports one translation language. |
+| PO | `msgid`, `msgstr`, comments, multiline strings, escapes and optional v25 contexts: `ID \| origin \| speaker \| expression \| voice`. Speaker, expression and voice may be absent; ordinary PO entries without context are supported too. Missing metadata stays absent. Plurals, declared non-UTF-8 charsets and unknown escapes are rejected explicitly. Exports one translation language. |
 | VO — deprecated for new work | Still useful for legacy metadata, comments, multiple languages and translation-memory donors. The final record and reversible escapes are retained. Legacy `"(blank)"` means empty; that exact literal cannot be exported unambiguously. Prefer PO for new single-language work. |
 | TXT | One dialogue per line, with optional enclosing `{` / `}`. Newlines inside a dialogue are exported as `\n`. |
 | STX | Single-table UTF-16LE files, nonsequential IDs, empty source strings and preserved headers. Pointers and string terminators are validated; multiple tables are rejected. |

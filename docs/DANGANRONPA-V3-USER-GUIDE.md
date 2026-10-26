@@ -267,6 +267,22 @@ ID | origin | speaker | expression | voice
 
 The speaker and expression identify asset names. The origin identifies the source scene/file; the optional voice identifies a WAV. Preserve the IDs and metadata supplied by your translation pipeline.
 
+**Character, expression and recorded-voice metadata are all optional.** A PO can contain only some of them, or none at all; a standard PO without `msgctxt` is also valid input. Unavailable information stays unknown. Editing or saving a translation does not invent these fields or copy them from the preceding dialogue.
+
+These invented contexts illustrate different combinations:
+
+```text
+1 | demo_scene
+2 | demo_scene | ACTOR_DEMO
+3 | demo_scene | ACTOR_DEMO | anim_demo
+4 | demo_scene | ACTOR_DEMO | vic_demo
+5 | demo_scene |  |  | custom_demo_voice
+```
+
+The fourth example uses the legacy `vic` voice-name convention in the fourth field, with no animation. For another voice naming convention, retain an empty expression field and put the voice in the fifth field, as in the last example. Empty intermediate fields preserve the meaning of later positions.
+
+With no speaker, the preview has no character sprite to request. With a speaker but no expression, an available default portrait may be shown; that visual fallback does not add animation metadata to the PO. With no voice, recorded playback is unavailable, while optional text-to-speech can still be used. These are normal cases and do not prevent translation, saving or text/background screenshots.
+
 For a small character screenshot, create a UTF-8 PO like this invented dialogue:
 
 ```po

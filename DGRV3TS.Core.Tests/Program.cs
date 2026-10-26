@@ -31,6 +31,7 @@ try
     Test("XLSX blank language columns and sparse worksheet preservation", () => XlsxLanguageTests.Run(folder));
     Test("Legacy line endings, native-project validation and language migration", () => DocumentCompatibilityTests.Run(folder));
     Test("PO metadata edits and WRD imports survive PO/JSON export", () => PoMetadataTests.Run(folder));
+    Test("PO optional metadata stays absent across translation edits and PO/JSON exports", () => PoOptionalMetadataTests.Run(folder));
     Test("v25 automatic translation reuse and marker safety", () => TranslationReuseTests.Run(folder));
     Test("AutoTL donor filtering, speaker fallback and whole-token case variants", () => AutoTlRegressionTests.Run(folder));
     Test("Recursive variables, nested MAKE calls, alternate values and expansion safety", () => VariableExpansionTests.Run(folder));
