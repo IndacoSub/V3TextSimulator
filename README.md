@@ -1,74 +1,210 @@
-# V3TextSimulator / DGRV3TS 
+# V3TextSimulator / DGRV3TS
 
-Danganronpa V3 Text Simulator.
+Danganronpa V3 Text Simulator and translation editor. The program previews Danganronpa V3 conversations and helps translate and review the game's text. Translation is its primary purpose; graphics and audio are optional aids.
 
-Simulates Danganronpa V3 conversations and makes translating the game slightly easier.
+**Start with the [complete Danganronpa V3 user guide](docs/DANGANRONPA-V3-USER-GUIDE.md)** for translation, proofreading, screenshot creation, asset setup and troubleshooting. **PO is the recommended translation format. VO is deprecated for new work**, while remaining useful for legacy files and translation reuse. **Variables are optional**: ordinary text works without a dictionary.
 
-Supports AI: The Somnium Files, as well (W.I.P)!
+**AI: The Somnium Files support remains a work in progress.** The project was originally based on the Fire Emblem If / Fates Text Simulator ("FEFTS" or "FEITS") by [SciresM](https://github.com/SciresM): [SciresM/FEITS](https://github.com/SciresM/FEITS).
 
-Originally based on Fire Emblem If / Fates Text Simulator ("FEFTS" or "FEITS") by SciresM: https://github.com/SciresM/FEITS
+This rewrite is based exclusively on **`v25`, commit `6601709c85e48cc17376fd700f40f58a47f02e4c`**. At least 100% feature parity with that version is a requirement, not a claim that every feature has already been verified. See the [feature-parity checklist](docs/FEATURE-PARITY.md) for coverage, remaining gaps and validation status. In particular, Windows UI, audio and exact preview rendering still need Windows validation.
 
-This tool is licensed under the GNU General Public License v3.0 ("GPL v3.0").
+The project is licensed under the **GNU General Public License v3.0 (GPL v3.0)**. Contributions, bug reports and issue reports are welcome and appreciated.
 
-Contributions and bug/issue-reporting are welcome and appreciated.
+## The three windows
 
-Yes, the code is *very* messy and sometimes just... confusing.
+| Window | Purpose |
+| --- | --- |
+| **Main editor (`Operations`)** | A compact simple view by default, with the translation textbox, navigation, languages and visible variable list. Expand it for the read-only original, search and extra actions. The dialogue list is not embedded in this window. |
+| **Separate vertical summary (`F6`)** | A scrollable overview of every dialogue in the file, showing its ID, speaker, original and translation together. Click a card to select that dialogue in the editor; right-click to copy or paste a translation. |
+| **Separate graphics preview (`F7`)** | A landscape window with backgrounds, sprites, text styling, fonts, audio and screenshots. Game assets are not required to translate. |
 
-More documentation coming in the near future.
+The vertical summary opens when a document is loaded. It can be closed and reopened, follows the selected translation language, updates while you type and preserves the scroll position. Cards distinguish an intentionally empty translation from an untranslated dialogue.
 
-# Folders and files
+### Simple and extended views
 
-This repository does not contain any image or sound file.
+`Operations` starts in **simple view**, designed around a 240-pixel client height at 96 DPI so the three independent windows can be placed together. Use **⏬ Extended view** at the bottom to expand downward; **⏫ Simple view** collapses it again. Each mode remembers its own height, while the width, document, selection and textbox undo state are retained.
 
-You must provide those yourself.
+Simple view hides the original pane, variable Insert/Load/Reload buttons, Copy Original, Suggestions and the search/autoplay toolbar (query, Find Next, untranslated filter, Replace, Play/Resume, Pause, Stop and seconds). The variable list, its filter and categories remain visible; double-click and its context menu remain available. Hidden commands are still accessible through menus or extended view. `Ctrl+F` opens extended view before focusing text search. Placeholder warnings remain available in the status bar; clicking the warning count expands their details.
 
-Here are the folders where you should put your files:
+The main window's **Dialogues** and **Preview** buttons reopen the respective secondary windows. The preview opens smaller and can be resized down to 480×300; its zoom does not change the 1280×720 rendering/screenshot canvas.
 
-All paths below are relative to the executable file.
+The preview image is the bottommost content of its window, with controls and status above it. It keeps its proportions and aligns to the bottom when resized; any unused vertical space appears above the image.
 
-	AI Backgrounds: Graphics\Backgrounds\AI (ex. Graphics\Backgrounds\AI\AIBlank.png)
-	(TODO) AI Sprites: Graphics\Sprites\AI
-	(TODO) AI Voicelines: Sound\Voices\AI
+Some Windows UI labels are currently in Italian; the commands below describe their function.
 
-	DR Backgrounds: Graphics\Backgrounds\Danganronpa (ex. Graphics\Backgrounds\Danganronpa\default_background.png)
-	DR Sprites: Graphics\Sprites\DR (ex. Graphics\Sprites\DR\C000_Saiha\anim000.png)
-	DR Voicelines: Sound\Voices\DR (ex. Sound\Voices\DR\vic_Akama\vic_Akama_01_001.wav)
+## Build and run
 
-Each sprite folder *should* also contain a "default.png" file related to the character from the sprite(s) (will be used when no animation/expression is found).
+Install the **.NET 8 SDK, version 8.0.400 or a later .NET 8 SDK feature band**. The desktop application requires Windows. The format-handling core and regression runner can also run on Linux. The rewrite does not require third-party NuGet packages beyond the Microsoft SDK and framework components.
 
-Ideally, background images *should* be in 1280x720.
+From the directory containing `DGRV3TS.sln`:
 
-Ideally, sprites *shouldn't* have a width over 1024 pixels.
+```sh
+dotnet build DGRV3TS.sln -c Release --warnaserror
+dotnet run --project DGRV3TS.Core.Tests -c Release --no-build
+```
 
-## Why it's internally called "DGRV3TS"?
+The second command runs the repository's executable regression suite and returns a nonzero exit code on failure. `dotnet test` is not the runner for this suite.
 
-The name was chosen early on in development (Early 2021) and it was never changed since then.
+On Windows:
 
-# License
+```sh
+dotnet run --project DGRV3TS
+dotnet run --project DGRV3TS -- examples/dialoghi.po
+```
 
-This tool is licensed under the GPL v3.0 License.
+The initial file argument preserves v25's command-line / "Open with" workflow. The sample has an adjacent `VARS_BAK` dictionary and speaker, expression and voice metadata; no game images or sounds are included.
 
-# Credits
+A Windows build is produced under `DGRV3TS/bin/Release/net8.0-windows/win-x64/`. Running that build requires the .NET 8 Windows Desktop Runtime x64 and its adjacent application files; using `dotnet run` requires the SDK.
 
-    “DANGANRONPA” is a registered trademark of Spike Chunsoft Co., Ltd., Too Kyo Games, LLC and NIS America Inc.
-	“AI: THE SOMNIUM FILES” is a registered trademark of Spike Chunsoft Co., Ltd.
-	We are not in any way affiliated or associated with them.
-	
-	Thanks to SciresM (https://github.com/SciresM) for creating FEITS (https://github.com/SciresM/FEITS)!
-		FEITS is licensed under the GNU General Public License v3.0 ("GPL v3.0"): https://github.com/SciresM/FEITS/blob/master/LICENSE.txt
-	
-	This tool makes use of the following NuGet Packages:
-		EPPlus 6.1.3 (https://www.epplussoftware.com), licensed under the PolyForm Noncommercial License 1.0.0: https://polyformproject.org/licenses/noncommercial/1.0.0/
-		ExcelDataReader 3.6.0 (https://github.com/ExcelDataReader/ExcelDataReader), ExcelDataReader.DataSet 3.6.0 and System.Speech 7.0.0 (https://dot.net), all licensed under the MIT license: https://licenses.nuget.org/MIT
-	
-	The licenses related to those tools have been placed inside the ThirdParty folder.
-	
-	The aforementioned projects have been really useful for the development of this tool.
-	
-	Thanks to Liquid S! (https://github.com/Liquid-S) for creating DRV3-STX-TOOL (https://github.com/Liquid-S/DRV3-STX-TOOL).
-	
-	Some code from DRV3-STX-TOOL can be found inside StxInternal.cs and WRDInternal.cs, so the license for DRV3-STX-TOOL, the MIT license, is also included.
-	
-	Thanks to the members of the "SPIRAL" Discord server and the Spiral Framework project (https://spiralframework.info/ -- source code here: https://github.com/SpiralFramework/Spiral).
-	
-	Thanks to all of our collaborators and reviewers.
+## Translation workflow
+
+Open PO, VO, TXT, STX, XLSX or a JSON project. Write in the **Translation** textbox. Edits stay in memory when changing dialogue or translation language, while the original remains separate. Inserted variable tokens remain raw tokens in saved files; resolving them affects only the preview.
+
+| Shortcut or command | Action |
+| --- | --- |
+| `Ctrl+O`, `Ctrl+S`, `Ctrl+Shift+S` | Open, save, save as / convert format. |
+| `Ctrl+Up` / `Ctrl+Down` | Previous / next dialogue. Use the dialogue number and **Go** to jump directly. |
+| `Ctrl+F`, `Ctrl+H` | Search and replace. Replace-all affects the selected language and requires confirmation. |
+| `F8` | Next untranslated dialogue. |
+| **Mark intentionally empty** | Explicitly export an empty string rather than leaving a dialogue untranslated. |
+| `Ctrl+Z` / `Ctrl+Y` | Undo / redo in the current textbox. Its undo history is cleared when switching to another dialogue or language. |
+| **Reset reading progress** / **Fast-read** | Return to the first dialogue / jump to the final dialogue. |
+
+Warnings compare tag, variable and .NET/printf placeholder counts between the original and translation; they do not assess linguistic quality. Re-selecting the same dialogue preserves the textbox's caret, selection and undo history.
+
+Autoplay uses a UI timer with pause, resume and stop. Manual editing, navigation and modal operations stop autoplay to keep edits attached to the intended dialogue. WAV and text-to-speech playback on dialogue changes can be enabled from the menu. Navigation waits for active WAV/TTS playback to finish; WAV playback runs outside the UI thread. TTS restores v25's speaker age/gender preferences and chapter-dependent narrator hints, within the voices installed on Windows.
+
+### Translation memory
+
+Opening PO, VO or XLSX automatically searches the document's folder and subfolders for reusable translations, matching v25's default workflow. Turn **Reuse translations automatically on open** off to use only explicit indexing. Existing manual translations and intentionally empty rows are never replaced.
+
+**Index memory from folder** explicitly selects a different folder. Both paths recursively read PO/VO/XLSX/JSON translations without modifying their files. They exclude the current document, build directories, game assets and symbolic links. Suggestions match the exact original and translation-language index, preferring the same speaker. Automatic reuse checks protected placeholders before applying a candidate; manually reviewed suggestions can be accepted after a warning.
+
+**Suggestions** shows conflicting candidates and their source files. **Fill untranslated from memory** applies only unambiguous candidates and does not overwrite completed translations. Reused translations receive one `<SIGNAL_AutoTL>` marker: the preview hides the marker and provenance suffix and shows the reused text in pink, as in v25. This reuses existing local translations; it does not call an online machine-translation service or require API keys.
+
+**Stop** also cancels indexing and retains the previous memory. Commands that change the document or its filename are disabled during indexing, while text editing remains available. Closing the editor cancels the scan before handling unsaved changes normally.
+
+## Documents and saving
+
+**PO is recommended for regular V3 translation and exchange. JSON is an optional complete project snapshot.** JSON preserves separate originals, all translation languages, intentionally empty completion states and the imported source template so metadata and structures can survive re-export. Save As currently proposes JSON; explicitly select Gettext PO for a PO working file.
+
+| Format | Support and current limits |
+| --- | --- |
+| PO | `msgid`, `msgstr`, comments, multiline strings, escapes and optional v25 contexts: `ID \| origin \| speaker \| expression \| voice`. Speaker, expression and voice may be absent; ordinary PO entries without context are supported too. Missing metadata stays absent. Plurals, declared non-UTF-8 charsets and unknown escapes are rejected explicitly. Exports one translation language. |
+| VO — deprecated for new work | Still useful for legacy metadata, comments, multiple languages and translation-memory donors. The final record and reversible escapes are retained. Legacy `"(blank)"` means empty; that exact literal cannot be exported unambiguously. Prefer PO for new single-language work. |
+| TXT | One dialogue per line, with optional enclosing `{` / `}`. Newlines inside a dialogue are exported as `\n`. |
+| STX | Single-table UTF-16LE files, nonsequential IDs, empty source strings and preserved headers. Pointers and string terminators are validated; multiple tables are rejected. |
+| XLSX | First worksheet: headers in row 1, A = ID/OFFSET, B = original, C onward = translations. Languages defined only in headers remain selectable even if every translation is blank; older JSON projects recover these columns from their embedded workbook. Other worksheets and imported workbook parts are preserved. Changed translation formula cells cannot be overwritten. Legacy `.xls` is not supported. |
+
+TXT and STX store only final text: untranslated rows retain the source; intentionally empty rows are cleared. Keep a JSON project to preserve the original/translation comparison. Exporting originals produces a copy without changing the open document.
+
+Saving writes a temporary file first and keeps the previous version as `<filename>.bak`. If another program changes or removes the open file, saving refuses to overwrite it: save under another name and compare the versions. There is no automatic disk save, and `.bak` retains only one previous version. Opening or closing a modified document offers save, discard or cancel.
+
+### STX and WRD
+
+Opening an STX also loads an adjacent WRD with the same basename when present. A WRD can be selected manually from the menu. Metadata is associated by numeric LOC IDs, with bounds and supported-opcode checks, and supplies speaker, expression and voice information to the summaries, graphics preview and PO conversion. Importing metadata marks the project as modified; save JSON to retain it with the translation work.
+
+Only IDs actually referenced by a WRD LOC receive metadata. An unreferenced STX string stays unknown rather than inheriting a nearby character or expression, and no character is assumed before the script selects one. The command reader handles five-operand CHR instructions and stops before the first metadata table, including sublabel offsets.
+
+## External variables: VARS_BAK and VARS_AI
+
+**Dictionaries and variables are optional.** You can open, translate, save and create screenshots with ordinary text. A dictionary is useful when a script already contains tokens or your team wants reusable terminology and templates.
+
+The V3/AI selector uses `VARS_BAK` / `vars_bak.txt` and `vars_ai.txt`, respectively. Automatic lookup checks the document directory first, followed by the asset directory, executable directory and working directory. A dictionary can also be selected explicitly or reloaded after an external edit.
+
+Automatically discovered dictionaries are looked up again when opening another document. An explicitly chosen dictionary stays selected until another is chosen or the game is changed.
+
+```text
+// Imaginary glossary
+VAR_ORCHARD_ITEM, apricot : plum | Note displayed in the editor
+VAR_ORCHARD_LABEL, Sweet VAR_ORCHARD_ITEM : Fresh VAR_ORCHARD_ITEM
+// Imaginary templates
+MAKE_BORDER(MY_ARG), [MY_ARG]
+MAKE_REPEAT(MY_ARG), MY_ARG / MY_ARG
+```
+
+`//` starts a category; entries before the first category are accepted. The first `,` separates token and value, ` : ` separates an alternate value and ` | ` introduces a comment. The main editor provides categories, search, hover notes and entry information. A single left-click copies the raw token for V3 or the displayed value for AI; double-click inserts the corresponding token or AI value at the caret.
+
+The context menu can copy tokens and values, show alternate values and entry information, and copy or insert lowercase (`_MN`) and uppercase (`_MS`) variants. Existing external definitions take precedence. When no definition exists, a variant can be generated for the current session, preserving the original v25 convenience. Generated variants do not change the external dictionary and are cleared on reload. **Remove from list** hides an entry from the current list without deleting its file definition.
+
+Variables are resolved recursively, including variables inside other definitions. The selected main/alternate convention applies throughout the expansion, even when an outer variable only has one value. Whole-token matching prevents a short variable name from changing a longer one.
+
+`MAKE_NAME(PARAMETER), template` defines a template with one text argument. The parameter is replaced as a whole identifier. Arguments may contain variables, commas, ordinary balanced parentheses and other MAKE calls, including another call to the same MAKE. In the invented example above, `MAKE_BORDER(MAKE_REPEAT(VAR_ORCHARD_LABEL))` displays `[Sweet apricot / Sweet apricot]`. Templates can also appear inside variable definitions and can have alternate values using ` : `. For case variants, pass the desired `_MN`/`_MS` variable as the MAKE argument.
+
+Cycles are reported and unresolved expressions remain visible. Depth, expansion-count and output-size guards prevent runaway definitions from freezing the editor. Unknown tokens remain visible; an incomplete known MAKE call is left unexpanded. Duplicate tokens and malformed definitions produce warnings instead of preventing startup. Notes after ` | ` also work on bare tokens without a comma. Expansion only affects displayed values and the preview: the translation retains its raw tokens and MAKE calls, and the external dictionary is not rewritten automatically.
+
+## Folders, files and preview assets
+
+**This repository does not contain game image or sound files. You must provide those yourself.**
+
+By default, all paths below are relative to the executable. To use another asset location, choose the folder containing `Graphics` and `Sound` from the windows/assets menu.
+
+| Asset | Folder and example |
+| --- | --- |
+| AI backgrounds | `Graphics/Backgrounds/AI`, e.g. `Graphics/Backgrounds/AI/AIBlank.png`. |
+| AI sprites | `Graphics/Sprites/AI`. AI support was marked TODO/WIP in the original; complete game-specific behavior is not yet verified. |
+| AI voice lines | `Sound/Voices/AI`. AI support was marked TODO/WIP in the original; complete game-specific behavior is not yet verified. |
+| DR backgrounds | `Graphics/Backgrounds/Danganronpa`, e.g. `Graphics/Backgrounds/Danganronpa/default_background.png`. The v25 `Graphics/Backgrounds/DR` convention is also supported. |
+| DR sprites | `Graphics/Sprites/DR`, e.g. `Graphics/Sprites/DR/C000_Saiha/anim000.png`. |
+| DR voice lines | `Sound/Voices/DR`, e.g. `Sound/Voices/DR/vic_Akama/vic_Akama_01_001.wav`. |
+
+Each character's sprite folder should also contain a **`default.png`** for use when no matching animation or expression is available. Background images should ideally be **1280×720**; sprite images should ideally be **no wider than 1024 pixels**. A default custom font can be supplied as `font.ttf` or `font.otf` in the asset root.
+
+The separate graphics preview provides backgrounds, optional sprites, V3/AI selection, installed fonts and external TTF/OTF files, font sizes, CLT tags, fixed/adaptive line spacing, WAV playback, Windows text-to-speech with language selection, image copying and PNG screenshots. Composition stays in 1280×720 coordinates regardless of window zoom.
+
+**Automatic framing is enabled by default for V3.** It uses visible artwork rather than transparent canvas margins, frames tall full-body sprites as busts and keeps them in a left portrait area with a gap before the text. Existing portraits and icons retain their complete visible artwork. Source PNGs and dialogue metadata are unchanged. Disable Automatic Framing to use the historical v25 scale/offset rules. In both modes, dialogue text is drawn after artwork so a sprite cannot paint over the letters.
+
+The V3 reference font is **FOT-HummingStd at 22 points**, with Light (L), Medium (M) and Bold (B) faces. Medium is preferred by default. The Humming weight selector loads the corresponding external file or installed family instead of assuming that every face exposes a standard Bold style. Matching files can be placed in the asset root or its `Fonts` directory; loading one explicitly also makes sibling face files available. An explicit root-level `font.otf`/`font.ttf` still takes precedence. Calibri is a fallback when no matching font is available, and the status line shows the active family and size. Font files are not bundled.
+
+The game/background profiles retain DR, AI, tutorial and ToWitter origins and line spacing; ToWitter also restores its message-only text selection. Automatic word wrapping is off by default, so existing explicit game line breaks retain their layout; wrapping remains an optional preview setting. AutoTL and signal-delimited hidden suffixes are not read aloud. Missing assets or unavailable audio do not prevent translation. These rules are regression-tested, but actual pixel output, installed fonts, audio devices and UI still need comparison on Windows with the same game assets.
+
+Sprite import retains the v25 character mapping and does not overwrite existing files. Exporting voiced dialogues supports all speakers rather than only the original hardcoded Monokuma filter. The original **Setup Voicelines** menu item was explicitly unimplemented; voice files use the documented directories.
+
+## Project structure and validation
+
+- `DGRV3TS`: `Operations.cs` owns the main window's state and lifecycle; `Operations.Designer.cs` defines its layout; `Init.cs` connects events and initialization; `Misc.cs` handles navigation and editor state. File, variable and translation commands and secondary windows have separate files.
+- `DGRV3TS.Core`: documents, file formats, translation memory, variables, WRD metadata and text checks.
+- `DGRV3TS.Core.Tests`: regression runner that also works on Linux.
+- [Danganronpa V3 user guide](docs/DANGANRONPA-V3-USER-GUIDE.md): detailed workflows for translators, reviewers and screenshot creators, with optional variables and nested MAKE examples.
+- [Feature parity](docs/FEATURE-PARITY.md): comparison with v25 and remaining validation requirements.
+- [Actual bug fixes](docs/BUG-FIXES.md): defects with triggers and evidence, distinguished from restored features and defects introduced during the rewrite.
+- [Rewrite map](docs/V25-REWRITE.md): correspondence with original v25 files and source ZIP contents.
+- [Windows verification](docs/WINDOWS-VERIFICATION.md): manual visual/audio checklist. These checks are not run by the Linux test runner.
+
+CI is configured to build Release with warnings treated as errors and run the regression suite. A successful Linux build does not establish Windows GUI, SAPI or audio-device behavior.
+
+To create a source ZIP without caches, build outputs or personal game assets:
+
+```sh
+python3 tools/package_source.py
+```
+
+The script writes the archive to an `artifacts` directory beside the checkout and prints its path. The ZIP contains the solution, projects, tests, examples, documentation and licenses; the .NET 8 SDK is needed to build it.
+
+## Project history
+
+The internal name **DGRV3TS** was chosen early in development, in **early 2021**, and was never changed. The original README described the older code as "very messy and sometimes just... confusing" and announced further documentation. The historical changelog is retained in `CHANGELOG.txt`.
+
+## License and credits
+
+This tool is licensed under the GNU General Public License v3.0: see [LICENSE](LICENSE).
+
+“DANGANRONPA” is a registered trademark of **Spike Chunsoft Co., Ltd., Too Kyo Games, LLC and NIS America Inc.** “AI: THE SOMNIUM FILES” is a registered trademark of **Spike Chunsoft Co., Ltd.** We are not affiliated or associated with these companies.
+
+Thanks to:
+
+- **[SciresM](https://github.com/SciresM)** for creating [FEITS](https://github.com/SciresM/FEITS), the original basis of this project. FEITS is licensed under [GPL v3.0](https://github.com/SciresM/FEITS/blob/master/LICENSE.txt).
+- **[Liquid S!](https://github.com/Liquid-S)** for [DRV3-STX-TOOL](https://github.com/Liquid-S/DRV3-STX-TOOL). The original `StxInternal.cs` and `WRDInternal.cs` incorporated code from that MIT-licensed project; its license remains in `ThirdParty`.
+- Members of the **SPIRAL Discord server** and the **[Spiral Framework project](https://spiralframework.info/)**, whose source is at [SpiralFramework/Spiral](https://github.com/SpiralFramework/Spiral).
+- All collaborators and reviewers.
+
+### Historical dependencies
+
+The original application used the following NuGet packages, which were useful during its development. Their licenses remain in `ThirdParty` for attribution and project history. **They are not active dependencies of this rewrite**; the current TTS implementation uses Windows SAPI.
+
+| Original package | Version | License |
+| --- | --- | --- |
+| [EPPlus](https://www.epplussoftware.com) | 6.1.3 | [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0/). |
+| [ExcelDataReader](https://github.com/ExcelDataReader/ExcelDataReader) | 3.6.0 | [MIT](https://licenses.nuget.org/MIT). |
+| ExcelDataReader.DataSet | 3.6.0 | [MIT](https://licenses.nuget.org/MIT). |
+| [System.Speech](https://dot.net) | 7.0.0 | [MIT](https://licenses.nuget.org/MIT). |

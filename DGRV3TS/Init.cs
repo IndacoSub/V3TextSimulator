@@ -1,272 +1,223 @@
-﻿namespace DGRV3TS
+using System.Text;
+using DGRV3TS.Core;
+
+namespace DGRV3TS;
+
+internal sealed partial class Operations
 {
-	public enum GameIndex
-	{
-		V3,
-		AI,
+    private void InitializeWorkspace(string? initialPath)
+    {
+        BindCommands();
+        BindEvents();
+        InitializeViewModes();
+        ShowDocument();
+        Shown += (_, _) =>
+        {
+            if (!string.IsNullOrWhiteSpace(initialPath)) OpenPath(initialPath);
+            else FindVariables();
+        };
+    }
 
-		Count,
-	};
+    private void BindCommands()
+    {
+        var commands = new Dictionary<string, Action>(StringComparer.Ordinal)
+        {
+            ["Open"] = OpenFile, ["New"] = NewProject, ["Save"] = () => Save(false),
+            ["SaveAs"] = () => Save(true), ["AddEntry"] = AddEntry, ["LoadWrd"] = LoadWrd,
+            ["ExportOriginal"] = ExportOriginal, ["Exit"] = Close,
+            ["FocusSearch"] = () => { SetExtendedView(true); _query.Focus(); },
+            ["Replace"] = Replace, ["Previous"] = () => Navigate(-1), ["Next"] = () => Navigate(1),
+            ["NextUntranslated"] = NextUntranslated, ["MarkEmpty"] = MarkEmpty,
+            ["Reset"] = () => SelectIndex(0), ["FastRead"] = () => SelectIndex(_document.Entries.Count - 1),
+            ["ScanMemory"] = ScanMemory, ["Suggest"] = Suggest, ["FillMemory"] = FillFromMemory,
+            ["ShowVertical"] = ShowVertical, ["ShowPreview"] = ShowPreview,
+            ["ChooseAssetRoot"] = ChooseAssetRoot, ["ImportSprites"] = ImportSprites,
+            ["ChooseVariables"] = ChooseVariables, ["ReloadVariables"] = ReloadVariables,
+            ["ExportVoiced"] = ExportVoiced,
+            ["PlayVoice"] = () => { ShowPreview(); _preview?.PlayVoice(); },
+            ["Speak"] = () => { ShowPreview(); _preview?.SpeakText(); },
+            ["CopyImage"] = () => { ShowPreview(); _preview?.CopyImage(); },
+            ["SaveImage"] = () => { ShowPreview(); _preview?.SaveImage(); },
+            ["Help"] = ShowHelp, ["GoToLine"] = () => SelectIndex((int)_line.Value - 1),
+            ["FindNext"] = FindNext, ["StartAutoplay"] = StartAutoplay,
+            ["PauseAutoplay"] = PauseAutoplay, ["StopAutoplay"] = StopActivities,
+            ["CopySource"] = CopySource, ["UpdatePreview"] = UpdatePreview,
+            ["InsertVariable"] = InsertVariable, ["CopyVariableToken"] = () => CopyVariable(""),
+            ["CopyVariableValue"] = () =>
+            {
+                if (_variables.SelectedItem is VariableItem v && v.DisplayValue.Length > 0)
+                    Clipboard.SetText(v.DisplayValue);
+            },
+            ["InsertLowerVariant"] = () => InsertVariant("_MN"),
+            ["InsertUpperVariant"] = () => InsertVariant("_MS"),
+            ["HideVariable"] = HideVariable, ["VariableInfo"] = ShowVariableInfo,
+            ["AlternateVariable"] = ShowAlternateVariable,
+            ["ToggleView"] = () => SetExtendedView(!_extendedView)
+        };
 
-	partial class Operations
-	{
-		GameIndex CurrentGameIndex = GameIndex.V3;
+        void Dispatch(object? sender, EventArgs args)
+        {
+            var command = sender switch { Control c => c.Tag as string, ToolStripItem i => i.Tag as string, _ => null };
+            if (command is null || !commands.TryGetValue(command, out var action)) return;
+            if (_busy && ChangesDocument(command))
+            {
+                _status.Text = "Indicizzazione in corso. Premi Stop per annullarla prima di cambiare documento.";
+                return;
+            }
+            // One route for manual actions: modal dialogs and navigation cannot race autoplay.
+            if (command is not "StartAutoplay" and not "PauseAutoplay") StopAutoplay();
+            Safe(action);
+        }
 
-		private bool AutoPlayOn;
-		private bool AltVars;
-		public bool DEBUG_ON = false;
-		private bool FastReading;
+        void BindItems(ToolStripItemCollection items)
+        {
+            foreach (ToolStripItem item in items)
+            {
+                if (item.Tag is string) item.Click += Dispatch;
+                if (item is ToolStripDropDownItem dropdown) BindItems(dropdown.DropDownItems);
+            }
+        }
 
-		public FileManager fi;
-		private FontManager fm = new FontManager("Arial");
-		private ImageManager im;
+        void BindControls(Control parent)
+        {
+            foreach (Control control in parent.Controls)
+            {
+                if (control is Button && control.Tag is string) control.Click += Dispatch;
+                if (control is ToolStrip strip) BindItems(strip.Items);
+                BindControls(control);
+            }
+        }
 
-		private bool LoadedFile;
-		private SoundManager sm;
+        BindControls(this);
+        BindItems(_variableMenu.Items);
+    }
 
-		private TranslationManager tm = new TranslationManager();
-		private VariableManager vm = new VariableManager(false, GameIndex.V3);
+    private static bool ChangesDocument(string command) => command is
+        "Open" or "New" or "Save" or "SaveAs" or "AddEntry" or "LoadWrd" or "ScanMemory";
 
-		private void InitWindow()
-		{
-			// DR is default
-			if (im.BackgroundImagesDR.Count <= 0)
-			{
-				return;
-			}
-			if (dialogue_window.DisplayedImage.Image != null) dialogue_window.DisplayedImage.Image.Dispose();
-			dialogue_window.DisplayedImage.Image = new Bitmap(new Bitmap(im.BackgroundImagesDR[CB_TB.SelectedIndex]),
-				new Size(dialogue_window.DisplayedImage.Width, dialogue_window.DisplayedImage.Height));
-			dialogue_window.DisplayedImage.Refresh();
-		}
-		private void Init()
-		{
-			CreateListBoxMenu();
+    private void RefreshCommandState()
+    {
+        void RefreshItems(ToolStripItemCollection items)
+        {
+            foreach (ToolStripItem item in items)
+            {
+                if (item.Tag is string command && ChangesDocument(command)) item.Enabled = !_busy;
+                if (item is ToolStripDropDownItem dropdown) RefreshItems(dropdown.DropDownItems);
+            }
+        }
 
-			listbox_tooltip = new ToolTip
-			{
-				AutoPopDelay = 0,
-				InitialDelay = 0,
-				ReshowDelay = 0,
-				UseFading = false,
-				UseAnimation = false,
-				AutomaticDelay = 0,
-				ShowAlways = true
-			};
+        void RefreshControls(Control parent)
+        {
+            foreach (Control control in parent.Controls)
+            {
+                if (control is Button && control.Tag is string command && ChangesDocument(command)) control.Enabled = !_busy;
+                if (control is ToolStrip strip) RefreshItems(strip.Items);
+                RefreshControls(control);
+            }
+        }
 
-			LoadedFile = new bool();
-			LoadedFile = false;
+        RefreshControls(this);
+    }
 
-			AutoPlayOn = new bool();
-			AutoPlayOn = false;
+    private void BindEvents()
+    {
+        _translation.Enter += (_, _) => StopAutoplay();
+        _translation.KeyDown += (_, _) => StopAutoplay();
+        _translation.MouseDown += (_, _) => StopAutoplay();
+        _translation.TextChanged += (_, _) =>
+        {
+            if (_binding || Current is not { } entry) return;
+            _document.UpdateTranslation(entry, Normalize(_translation.Text));
+            _vertical?.RefreshEntry(entry);
+            UpdateChecks(); UpdatePreview(); UpdateStatus();
+        };
+        _language.SelectedIndexChanged += (_, _) =>
+        {
+            if (_binding || _language.SelectedIndex < 0) return;
+            StopAutoplay();
+            _document.SelectLanguage(_language.SelectedIndex);
+            _vertical?.SetDocument(_document, Current);
+            SelectIndex(_index);
+        };
+        _game.SelectedIndex = 0;
+        _game.SelectedIndexChanged += (_, _) =>
+        {
+            StopAutoplay();
+            _catalogIsExplicit = false;
+            FindVariables(true);
+            _preview?.SetGame(_game.SelectedIndex == 0 ? "DR" : "AI");
+            UpdatePreview();
+        };
+        _autoVoiceItem.CheckedChanged += (_, _) => _voiceOnNavigate = _autoVoiceItem.Checked;
+        _autoTtsItem.CheckedChanged += (_, _) => _ttsOnNavigate = _autoTtsItem.Checked;
+        _reuseOnOpenItem.CheckedChanged += (_, _) =>
+        {
+            StopAutoplay();
+            _reuseOnOpen = _reuseOnOpenItem.Checked;
+            if (!_reuseOnOpen && _automaticMemoryScan) _memoryScan?.Cancel();
+        };
+        _variableQuery.TextChanged += (_, _) => FilterVariables();
+        _category.SelectedIndexChanged += (_, _) => FilterVariables();
+        _variables.DoubleClick += (_, _) => InsertVariable();
+        _variables.SelectedIndexChanged += (_, _) => _variableNote.Text = _variables.SelectedItem is VariableItem item
+            ? $"{item.Definition.Token}\n{item.Definition.Comment}" : $"{_catalog.Variables.Count} variabili · {_catalog.Warnings.Count} avvisi";
+        _variableMenu.Opening += (_, e) => { StopAutoplay(); e.Cancel = _variables.SelectedIndex < 0; };
+        _variables.MouseDown += (_, e) =>
+        {
+            StopAutoplay();
+            if (e.Button == MouseButtons.Right) _variables.SelectedIndex = _variables.IndexFromPoint(e.Location);
+        };
+        _variables.MouseUp += (_, e) =>
+        {
+            if (e.Button == MouseButtons.Left && _variables.IndexFromPoint(e.Location) >= 0) CopyVariable("");
+        };
+        _variables.MouseMove += (_, e) =>
+        {
+            var index = _variables.IndexFromPoint(e.Location);
+            var text = index >= 0 && _variables.Items[index] is VariableItem v
+                ? $"{v.Definition.Token} | {v.Definition.Comment}" + (v.Definition.IsTemporary ? " · variante temporanea" : "")
+                : "";
+            if (_variableToolTip.GetToolTip(_variables) != text) _variableToolTip.SetToolTip(_variables, text);
+        };
+        _variables.MouseLeave += (_, _) => _variableToolTip.SetToolTip(_variables, "");
+        _resolve.CheckedChanged += (_, _) => UpdatePreview();
+        _alternate.CheckedChanged += (_, _) => { FilterVariables(); UpdatePreview(); };
+        _previewOriginal.CheckedChanged += (_, _) => UpdatePreview();
+        _query.KeyDown += (_, e) => { if (e.KeyCode == Keys.Enter) { FindNext(); e.SuppressKeyPress = true; } };
+        _line.Enter += (_, _) => StopAutoplay();
+        _query.Enter += (_, _) => StopAutoplay();
+        _line.KeyDown += (_, e) =>
+        {
+            if (e.KeyCode != Keys.Enter) return;
+            StopAutoplay(); SelectIndex((int)_line.Value - 1); e.SuppressKeyPress = true;
+        };
+        _autoplay.Tick += (_, _) =>
+        {
+            if (_preview is { IsDisposed: false, IsSpeaking: true }) return;
+            if (_index + 1 >= _document.Entries.Count) { StopAutoplay(); return; }
+            SelectIndex(_index + 1);
+        };
+        FormClosing += (_, e) =>
+        {
+            StopAutoplay();
+            if (_busy)
+            {
+                _closeWhenScanStops = true;
+                _memoryScan?.Cancel();
+                _status.Text = "Annullamento dell'indicizzazione prima della chiusura…";
+                e.Cancel = true;
+            }
+            else if (!ConfirmChanges()) e.Cancel = true;
+        };
+    }
 
-			FastReading = new bool();
-			FastReading = false;
-
-			AltVars = new bool();
-			AltVars = false;
-
-			CB_Game.Items.Clear();
-			CB_Game.Items.Add("V3");
-			CB_Game.Items.Add("AI");
-
-			CB_Game.SelectedIndex = 0;
-
-			// Check if the executable name is DGRV3TEST
-			// If so, enable some debug functionalities
-			// TODO: Such as...?
-			if (AppDomain.CurrentDomain.FriendlyName.Contains("DGRV3TEST"))
-			{
-				DEBUG_ON = true;
-			}
-#if DEBUG
-            DEBUG_ON = true;
-#endif
-
-			translationModeToolStripMenuItem.Checked = true;
-			replaceVariablesToolStripMenuItem.Checked = true;
-			CheckboxDisplayOriginalText.Enabled = false;
-			CheckboxPauseAutoplay.Enabled = false;
-			CheckboxStartAutoplay.Enabled = false;
-			useAlternateVarsToolStripMenuItem.Enabled = false;
-			LabelVoiceline.Visible = false;
-			LabelCharacterName.Visible = false;
-			LabelCurrentAnimation.Visible = false;
-			LabelLineNumber.Visible = false;
-			LabelOriginFile.Visible = false;
-			LabelCurrentTranslation.Visible = false;
-			ButtonBackLanguage.Visible = false;
-			ButtonBackText.Visible = false;
-			ButtonNextLanguage.Visible = false;
-			ButtonNextText.Visible = false;
-			LabelCurrentAnimation.Text = "";
-			LabelVoiceline.Text = "";
-
-			im = new ImageManager(CurrentGameIndex);
-
-			InitCBTB(CurrentGameIndex);
-
-			ReloadListboxes();
-
-			tm = new TranslationManager();
-
-			fm = new FontManager("");
-
-			NumericUpDownFontSize.Value = (int)fm.CurrentFontSize;
-
-			NumericUpDownFontSize.ValueChanged += NumericUpDownFontSize_ValueChanged;
-
-			fi = new FileManager();
-
-			fi.FMGameIndex = CurrentGameIndex;
-
-			CB_TB.SelectedIndexChanged += CB_TB_SelectedIndexChanged;
-
-			TextboxCurrentLanguage.Text = "en-US";
-
-			sm = new SoundManager();
-
-			ButtonReloadText_Click(null, null);
-
-			// Create the ToolTip and associate with the Form container.
-			ListBoxToolTip = new ToolTip();
-
-			// Set up the delays for the ToolTip.
-			ListBoxToolTip.AutoPopDelay = 5000;
-			ListBoxToolTip.InitialDelay = 1000;
-			ListBoxToolTip.ReshowDelay = 500;
-			// Force the ToolTip text to be displayed whether or not the form is active.
-			ListBoxToolTip.ShowAlways = true;
-
-			foreach(var toolstrips in this.Controls)
-			{
-				var menustrips = (toolstrips) as MenuStrip;
-				if(menustrips == null)
-				{
-					continue;
-				}
-				foreach (ToolStripMenuItem children in menustrips.Items)
-				{
-					if (children == null)
-					{
-						continue;
-					}
-					bool any_children_with_check = false;
-					if (children.HasDropDownItems)
-					{
-						foreach (ToolStripMenuItem child in children.DropDownItems)
-						{
-							if (child == null)
-							{
-								continue;
-							}
-
-							if (child.HasDropDownItems)
-							{
-								foreach (ToolStripMenuItem superchild in child.DropDownItems)
-								{
-									if (superchild == null)
-									{
-										continue;
-									}
-									if (superchild.CheckOnClick)
-									{
-										superchild.DropDown.Closing += DropDown_Closing;
-										any_children_with_check |= true;
-									}
-								}
-							}
-
-							if (child.CheckOnClick || any_children_with_check)
-							{
-								child.DropDown.Closing += DropDown_Closing;
-							}
-						}
-					}
-
-					if(children.CheckOnClick || any_children_with_check)
-					{
-						children.DropDown.Closing += DropDown_Closing;
-					}
-				}
-			}
-
-			// Collect garbage from initialization?
-			GC.Collect();
-		}
-
-		private void DropDown_Closing(object? sender, ToolStripDropDownClosingEventArgs e)
-		{
-			var tsdd = sender as ToolStripDropDown;
-			if(tsdd == null)
-			{
-				return;
-			}
-			Point p = tsdd.PointToClient(Control.MousePosition);
-			if (tsdd.ClientRectangle.Contains(p))
-			{
-				e.Cancel = true;
-			}
-		}
-
-		private void ReloadListboxes()
-		{
-			if (AutoPlayOn || FastReading)
-			{
-				return;
-			}
-
-			vm = new VariableManager(AltVars, CurrentGameIndex);
-
-			ListBoxMenuIndex.Items.Clear();
-			ListBoxMenuElements.Items.Clear();
-
-			foreach (string ms in vm.Menu.Items)
-			{
-				ListBoxMenuIndex.Items.Add(ms);
-			}
-			bool has_vars = ListBoxMenuIndex.Items.Count > 0;
-			ListBoxMenuIndex.Enabled = has_vars;
-			ListBoxMenuElements.Enabled = has_vars;
-			ListBoxMenuIndex.BackColor = ListBoxMenuIndex.Enabled ? Color.White : Color.Gainsboro;
-			ListBoxMenuElements.BackColor = ListBoxMenuElements.Enabled ? Color.White : Color.Gainsboro;
-			ListBoxMenuElements.DrawMode = DrawMode.OwnerDrawFixed;
-			ListBoxMenuIndex.DrawMode = DrawMode.OwnerDrawFixed;
-			//ListBoxMenuElements.DrawMode = DrawMode.Normal;
-
-			useAlternateVarsToolStripMenuItem.Enabled = has_vars;
-		}
-
-		private void InitCBTB(GameIndex index)
-		{
-			// Add the backgrounds from /Graphics/Backgrounds/ and assign them a name
-
-			List<string> backgrounds = new List<string>();
-
-			switch (index)
-			{
-				case GameIndex.V3:
-					backgrounds = im.BackgroundImagesDR;
-					break;
-				case GameIndex.AI:
-					backgrounds = im.BackgroundImagesAI;
-					break;
-			}
-
-			CB_TB.Items.Clear();
-
-			if (backgrounds.Count <= 0)
-			{
-				return;
-			}
-
-			foreach (string file in backgrounds)
-			{
-				string fn = Path.GetFileNameWithoutExtension(file);
-				CB_TB.Items.Add(fn);
-			}
-
-			CB_TB.SelectedIndex = 0;
-		}
-	}
+    private void ShowHelp() => MessageBox.Show(this,
+        "V3 Text — riscrittura della versione v25\n\n" +
+        "La finestra principale serve per tradurre: originale, textbox e variabili esterne.\n" +
+        "F6 apre il riepilogo verticale separato: originale e traduzione di tutte le battute. Clic per selezionare, tasto destro per copia/incolla.\n" +
+        "F7 apre l'anteprima grafica separata con sfondi, sprite, font, audio e screenshot.\n\n" +
+        "Ctrl+S salva; il file precedente viene conservato in .bak. JSON mantiene il progetto completo.\n" +
+        "Ctrl+↑/↓ cambia battuta; F8 cerca la prossima da tradurre. Ctrl+Z/Ctrl+Y agiscono nella textbox corrente.\n" +
+        "La memoria riusa traduzioni esistenti, senza servizi esterni. I conflitti vengono mostrati per scegliere.\n\n" +
+        "Le risorse del gioco non sono incluse. Puoi tradurre senza averle installate.", "Guida", MessageBoxButtons.OK, MessageBoxIcon.Information);
 }

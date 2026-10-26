@@ -1,16 +1,11 @@
-﻿namespace DGRV3TS
+namespace DGRV3TS;
+
+internal static class Program
 {
-	internal static class Program
-	{
-		/// <summary>
-		///     The main entry point for the application.
-		/// </summary>
-		[STAThread]
-		private static void Main(string[] args)
-		{
-			Application.EnableVisualStyles();
-			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new Operations(args));
-		}
-	}
+    [STAThread]
+    private static void Main(string[] args)
+    {
+        ApplicationConfiguration.Initialize();
+        Application.Run(new Operations(args.FirstOrDefault()));
+    }
 }

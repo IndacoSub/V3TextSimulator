@@ -1,0 +1,19 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: V3 Text v25 rewrite\n"
+"Language: it\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+
+#. Conservare il token del nome.
+msgctxt "0001 | esempio | C015_Akama | anim000 | vic_Akama_01_001"
+msgid "My name is <HERO>."
+msgstr "Mi chiamo <HERO>."
+
+#. I tag CLT sono necessari anche nella traduzione.
+msgctxt "0002 | esempio | C000_Saiha | anim000"
+msgid "Welcome to <CLT=cltSTRONG><ACADEMY><CLT>."
+msgstr ""
+
+msgctxt "0003 | esempio | C015_Akama"
+msgid "Let's translate together.\nOne dialogue at a time."
+msgstr "Traduciamo insieme.\nUn dialogo alla volta."

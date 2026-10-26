@@ -1,671 +1,1173 @@
-﻿namespace DGRV3TS
+#nullable disable
+
+namespace DGRV3TS;
+
+internal sealed partial class Operations
 {
-	partial class Operations
-	{
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.IContainer components = null;
+    private System.ComponentModel.IContainer components;
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-		protected override void Dispose(bool disposing)
-		{
-			if (disposing && (components != null))
-			{
-				components.Dispose();
-			}
-			base.Dispose(disposing);
-		}
+    private MenuStrip _mainMenu;
+    private TableLayoutPanel _rootLayout;
+    private FlowLayoutPanel _navigation;
+    private FlowLayoutPanel _searchBar;
+    private SplitContainer _contentSplit;
+    private TableLayoutPanel _editorLayout;
+    private SplitContainer _textSplit;
+    private TableLayoutPanel _sourceLayout;
+    private TableLayoutPanel _translationLayout;
+    private Label _sourceTitle;
+    private Label _translationTitle;
+    private FlowLayoutPanel _textActions;
+    private FlowLayoutPanel _previewOptions;
+    private TableLayoutPanel _variableLayout;
+    private Label _variableTitle;
+    private FlowLayoutPanel _variableActions;
+    private Label _variableHint;
+    private Label _secondsLabel;
+    private Label _lineLabel;
+    private Label _languageLabel;
+    private Label _gameLabel;
+    private RichTextBox _source;
+    private RichTextBox _translation;
+    private Label _metadata;
+    private Label _checks;
+    private Label _variableNote;
+    private TextBox _query;
+    private TextBox _variableQuery;
+    private ComboBox _category;
+    private ComboBox _language;
+    private ComboBox _game;
+    private NumericUpDown _line;
+    private NumericUpDown _interval;
+    private ListBox _variables;
+    private CheckBox _resolve;
+    private CheckBox _alternate;
+    private CheckBox _previewOriginal;
+    private CheckBox _untranslated;
+    private StatusStrip _statusStrip;
+    private ToolStripStatusLabel _status;
+    private ToolStripStatusLabel _progress;
+    private ToolStripStatusLabel _validationStatus;
+    private ToolStripButton _viewToggleButton;
+    private ToolStripMenuItem _autoVoiceItem;
+    private ToolStripMenuItem _autoTtsItem;
+    private ToolStripMenuItem _reuseOnOpenItem;
+    private ToolStripMenuItem _fileMenu;
+    private ToolStripMenuItem _translationMenu;
+    private ToolStripMenuItem _toolsMenu;
+    private ToolStripMenuItem _helpMenu;
+    private Button _openButton;
+    private Button _saveButton;
+    private Button _previousButton;
+    private Button _nextButton;
+    private Button _goButton;
+    private Button _verticalButton;
+    private Button _previewButton;
+    private Button _findButton;
+    private Button _replaceButton;
+    private Button _playButton;
+    private Button _pauseButton;
+    private Button _stopButton;
+    private Button _copySourceButton;
+    private Button _suggestButton;
+    private Button _refreshPreviewButton;
+    private Button _insertVariableButton;
+    private Button _loadVariablesButton;
+    private Button _reloadVariablesButton;
+    private ToolStripMenuItem _openItem;
+    private ToolStripMenuItem _newItem;
+    private ToolStripMenuItem _saveItem;
+    private ToolStripMenuItem _saveAsItem;
+    private ToolStripSeparator sepFile1;
+    private ToolStripMenuItem _addEntryItem;
+    private ToolStripMenuItem _loadWrdItem;
+    private ToolStripMenuItem _exportOriginalItem;
+    private ToolStripSeparator sepFile2;
+    private ToolStripMenuItem _exitItem;
+    private ToolStripMenuItem _searchItem;
+    private ToolStripMenuItem _replaceItem;
+    private ToolStripSeparator sepTranslation1;
+    private ToolStripMenuItem _previousItem;
+    private ToolStripMenuItem _nextItem;
+    private ToolStripMenuItem _nextUntranslatedItem;
+    private ToolStripMenuItem _markEmptyItem;
+    private ToolStripMenuItem _resetItem;
+    private ToolStripMenuItem _fastReadItem;
+    private ToolStripSeparator sepTranslation2;
+    private ToolStripMenuItem _scanMemoryItem;
+    private ToolStripMenuItem _suggestItem;
+    private ToolStripMenuItem _fillMemoryItem;
+    private ToolStripMenuItem _verticalItem;
+    private ToolStripMenuItem _previewItem;
+    private ToolStripSeparator sepTools1;
+    private ToolStripMenuItem _assetRootItem;
+    private ToolStripMenuItem _importSpritesItem;
+    private ToolStripMenuItem _variablesItem;
+    private ToolStripMenuItem _reloadVariablesItem;
+    private ToolStripMenuItem _exportVoicedItem;
+    private ToolStripSeparator sepTools2;
+    private ToolStripMenuItem _voiceItem;
+    private ToolStripMenuItem _speakItem;
+    private ToolStripMenuItem _copyImageItem;
+    private ToolStripMenuItem _saveImageItem;
+    private ToolStripMenuItem _helpItem;
+    private ToolStripMenuItem _copyVariableTokenItem;
+    private ToolStripMenuItem _copyVariableValueItem;
+    private ToolStripSeparator sepVariables1;
+    private ToolStripMenuItem _insertLowerItem;
+    private ToolStripMenuItem _insertUpperItem;
+    private ToolStripMenuItem _hideVariableItem;
+    private ToolStripMenuItem _variableInfoItem;
+    private ToolStripMenuItem _alternateVariableItem;
+    private ContextMenuStrip _variableMenu;
+    private ToolTip _variableToolTip;
 
-		#region Windows Form Designer generated code
+    /// <summary>Visual layout only. Runtime behavior is connected in Init.cs.</summary>
+    private void InitializeComponent()
+    {
+        components = new System.ComponentModel.Container();
+        _mainMenu = new MenuStrip();
+        _rootLayout = new TableLayoutPanel();
+        _navigation = new FlowLayoutPanel();
+        _searchBar = new FlowLayoutPanel();
+        _contentSplit = new SplitContainer();
+        _editorLayout = new TableLayoutPanel();
+        _textSplit = new SplitContainer();
+        _sourceLayout = new TableLayoutPanel();
+        _translationLayout = new TableLayoutPanel();
+        _sourceTitle = new Label();
+        _translationTitle = new Label();
+        _textActions = new FlowLayoutPanel();
+        _previewOptions = new FlowLayoutPanel();
+        _variableLayout = new TableLayoutPanel();
+        _variableTitle = new Label();
+        _variableActions = new FlowLayoutPanel();
+        _variableHint = new Label();
+        _secondsLabel = new Label();
+        _lineLabel = new Label();
+        _languageLabel = new Label();
+        _gameLabel = new Label();
+        _source = new RichTextBox();
+        _translation = new RichTextBox();
+        _metadata = new Label();
+        _checks = new Label();
+        _variableNote = new Label();
+        _query = new TextBox();
+        _variableQuery = new TextBox();
+        _category = new ComboBox();
+        _language = new ComboBox();
+        _game = new ComboBox();
+        _line = new NumericUpDown();
+        _interval = new NumericUpDown();
+        _variables = new ListBox();
+        _resolve = new CheckBox();
+        _alternate = new CheckBox();
+        _previewOriginal = new CheckBox();
+        _untranslated = new CheckBox();
+        _statusStrip = new StatusStrip();
+        _status = new ToolStripStatusLabel();
+        _progress = new ToolStripStatusLabel();
+        _validationStatus = new ToolStripStatusLabel();
+        _viewToggleButton = new ToolStripButton();
+        _autoVoiceItem = new ToolStripMenuItem();
+        _autoTtsItem = new ToolStripMenuItem();
+        _reuseOnOpenItem = new ToolStripMenuItem();
+        _fileMenu = new ToolStripMenuItem();
+        _translationMenu = new ToolStripMenuItem();
+        _toolsMenu = new ToolStripMenuItem();
+        _helpMenu = new ToolStripMenuItem();
+        _openButton = new Button();
+        _saveButton = new Button();
+        _previousButton = new Button();
+        _nextButton = new Button();
+        _goButton = new Button();
+        _verticalButton = new Button();
+        _previewButton = new Button();
+        _findButton = new Button();
+        _replaceButton = new Button();
+        _playButton = new Button();
+        _pauseButton = new Button();
+        _stopButton = new Button();
+        _copySourceButton = new Button();
+        _suggestButton = new Button();
+        _refreshPreviewButton = new Button();
+        _insertVariableButton = new Button();
+        _loadVariablesButton = new Button();
+        _reloadVariablesButton = new Button();
+        _openItem = new ToolStripMenuItem();
+        _newItem = new ToolStripMenuItem();
+        _saveItem = new ToolStripMenuItem();
+        _saveAsItem = new ToolStripMenuItem();
+        sepFile1 = new ToolStripSeparator();
+        _addEntryItem = new ToolStripMenuItem();
+        _loadWrdItem = new ToolStripMenuItem();
+        _exportOriginalItem = new ToolStripMenuItem();
+        sepFile2 = new ToolStripSeparator();
+        _exitItem = new ToolStripMenuItem();
+        _searchItem = new ToolStripMenuItem();
+        _replaceItem = new ToolStripMenuItem();
+        sepTranslation1 = new ToolStripSeparator();
+        _previousItem = new ToolStripMenuItem();
+        _nextItem = new ToolStripMenuItem();
+        _nextUntranslatedItem = new ToolStripMenuItem();
+        _markEmptyItem = new ToolStripMenuItem();
+        _resetItem = new ToolStripMenuItem();
+        _fastReadItem = new ToolStripMenuItem();
+        sepTranslation2 = new ToolStripSeparator();
+        _scanMemoryItem = new ToolStripMenuItem();
+        _suggestItem = new ToolStripMenuItem();
+        _fillMemoryItem = new ToolStripMenuItem();
+        _verticalItem = new ToolStripMenuItem();
+        _previewItem = new ToolStripMenuItem();
+        sepTools1 = new ToolStripSeparator();
+        _assetRootItem = new ToolStripMenuItem();
+        _importSpritesItem = new ToolStripMenuItem();
+        _variablesItem = new ToolStripMenuItem();
+        _reloadVariablesItem = new ToolStripMenuItem();
+        _exportVoicedItem = new ToolStripMenuItem();
+        sepTools2 = new ToolStripSeparator();
+        _voiceItem = new ToolStripMenuItem();
+        _speakItem = new ToolStripMenuItem();
+        _copyImageItem = new ToolStripMenuItem();
+        _saveImageItem = new ToolStripMenuItem();
+        _helpItem = new ToolStripMenuItem();
+        _copyVariableTokenItem = new ToolStripMenuItem();
+        _copyVariableValueItem = new ToolStripMenuItem();
+        sepVariables1 = new ToolStripSeparator();
+        _insertLowerItem = new ToolStripMenuItem();
+        _insertUpperItem = new ToolStripMenuItem();
+        _hideVariableItem = new ToolStripMenuItem();
+        _variableInfoItem = new ToolStripMenuItem();
+        _alternateVariableItem = new ToolStripMenuItem();
+        _variableMenu = new ContextMenuStrip(components);
+        _variableToolTip = new ToolTip(components);
+        _mainMenu.SuspendLayout();
+        _rootLayout.SuspendLayout();
+        _navigation.SuspendLayout();
+        _searchBar.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)_contentSplit).BeginInit();
+        _contentSplit.Panel1.SuspendLayout();
+        _contentSplit.Panel2.SuspendLayout();
+        _contentSplit.SuspendLayout();
+        _editorLayout.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)_textSplit).BeginInit();
+        _textSplit.Panel1.SuspendLayout();
+        _textSplit.Panel2.SuspendLayout();
+        _textSplit.SuspendLayout();
+        _sourceLayout.SuspendLayout();
+        _translationLayout.SuspendLayout();
+        _textActions.SuspendLayout();
+        _previewOptions.SuspendLayout();
+        _variableLayout.SuspendLayout();
+        _variableActions.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)_line).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)_interval).BeginInit();
+        _statusStrip.SuspendLayout();
+        _variableMenu.SuspendLayout();
+        SuspendLayout();
 
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
-			components = new System.ComponentModel.Container();
-			Textbox = new RichTextBox();
-			CB_Game = new ComboBox();
-			LabelUnsupportedWarning = new Label();
-			CB_TB = new ComboBox();
-			LabelTextboxStyle = new Label();
-			ButtonReloadText = new Button();
-			ListBoxMenuElements = new ListBox();
-			ListBoxMenuIndex = new ListBox();
-			ButtonNextLanguage = new Button();
-			ButtonBackLanguage = new Button();
-			ButtonNextText = new Button();
-			ButtonBackText = new Button();
-			LabelVoiceline = new Label();
-			LabelCurrentAnimation = new Label();
-			LabelCurrentTranslation = new Label();
-			LabelOriginFile = new Label();
-			LabelCharacterName = new Label();
-			LabelLineNumber = new Label();
-			CheckboxPauseAutoplay = new CheckBox();
-			CheckboxStartAutoplay = new CheckBox();
-			CheckboxDisplayOriginalText = new CheckBox();
-			TextboxCurrentLanguage = new TextBox();
-			LabelFontSize = new Label();
-			NumericUpDownFontSize = new NumericUpDown();
-			ListBoxRightClickCMS = new ContextMenuStrip(components);
-			ListBoxToolTip = new ToolTip(components);
-			MainMenuStrip = new MenuStrip();
-			fileToolStripMenuItem = new ToolStripMenuItem();
-			openFileToolStripMenuItem = new ToolStripMenuItem();
-			saveFileToolStripMenuItem = new ToolStripMenuItem();
-			saveScreenshotToolStripMenuItem = new ToolStripMenuItem();
-			copyScreenshotToolStripMenuItem = new ToolStripMenuItem();
-			editToolStripMenuItem = new ToolStripMenuItem();
-			fastReadToolStripMenuItem = new ToolStripMenuItem();
-			resetToolStripMenuItem = new ToolStripMenuItem();
-			reloadVariablesToolStripMenuItem = new ToolStripMenuItem();
-			maximizeWindowToolStripMenuItem = new ToolStripMenuItem();
-			settingsToolStripMenuItem = new ToolStripMenuItem();
-			translationModeToolStripMenuItem = new ToolStripMenuItem();
-			autoTranslationToolStripMenuItem = new ToolStripMenuItem();
-			replaceVariablesToolStripMenuItem = new ToolStripMenuItem();
-			useAlternateVarsToolStripMenuItem = new ToolStripMenuItem();
-			displayCharacterToolStripMenuItem = new ToolStripMenuItem();
-			enableTTSVoicelinesToolStripMenuItem = new ToolStripMenuItem();
-			experimentalToolStripMenuItem = new ToolStripMenuItem();
-			sizeadjustedHeightToolStripMenuItem = new ToolStripMenuItem();
-			toolsToolStripMenuItem = new ToolStripMenuItem();
-			openGraphicsWinToolStripMenuItem = new ToolStripMenuItem();
-			reopenVerticalViewToolStripMenuItem = new ToolStripMenuItem();
-			setupSpritesFromFolderToolStripMenuItem = new ToolStripMenuItem();
-			setupVoicelinesFromFolderToolStripMenuItem = new ToolStripMenuItem();
-			dumpVoicelinesToolStripMenuItem = new ToolStripMenuItem();
-			aboutToolStripMenuItem = new ToolStripMenuItem();
-			tODOToolStripMenuItem = new ToolStripMenuItem();
-			((System.ComponentModel.ISupportInitialize)NumericUpDownFontSize).BeginInit();
-			MainMenuStrip.SuspendLayout();
-			SuspendLayout();
-			// 
-			// Textbox
-			// 
-			Textbox.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Regular, GraphicsUnit.Point);
-			Textbox.Location = new Point(12, 32);
-			Textbox.Margin = new Padding(4, 3, 4, 3);
-			Textbox.Name = "Textbox";
-			Textbox.Size = new Size(520, 78);
-			Textbox.TabIndex = 3;
-			Textbox.Text = "This is an example\\nmessage.";
-			Textbox.TextChanged += Textbox_TextChanged;
-			// 
-			// CB_Game
-			// 
-			CB_Game.FormattingEnabled = true;
-			CB_Game.Location = new Point(13, 119);
-			CB_Game.Margin = new Padding(4, 3, 4, 3);
-			CB_Game.Name = "CB_Game";
-			CB_Game.Size = new Size(72, 23);
-			CB_Game.TabIndex = 67;
-			CB_Game.Text = "Game";
-			CB_Game.SelectedIndexChanged += CB_Game_SelectedIndexChanged;
-			// 
-			// LabelUnsupportedWarning
-			// 
-			LabelUnsupportedWarning.AutoSize = true;
-			LabelUnsupportedWarning.ForeColor = Color.Red;
-			LabelUnsupportedWarning.Location = new Point(10, 153);
-			LabelUnsupportedWarning.Margin = new Padding(4, 0, 4, 0);
-			LabelUnsupportedWarning.Name = "LabelUnsupportedWarning";
-			LabelUnsupportedWarning.Size = new Size(155, 15);
-			LabelUnsupportedWarning.TabIndex = 63;
-			LabelUnsupportedWarning.Text = "Unsupported character(s): {}";
-			LabelUnsupportedWarning.Visible = false;
-			// 
-			// CB_TB
-			// 
-			CB_TB.DropDownStyle = ComboBoxStyle.DropDownList;
-			CB_TB.FormattingEnabled = true;
-			CB_TB.Location = new Point(131, 119);
-			CB_TB.Margin = new Padding(4, 3, 4, 3);
-			CB_TB.Name = "CB_TB";
-			CB_TB.Size = new Size(173, 23);
-			CB_TB.TabIndex = 62;
-			CB_TB.SelectedIndexChanged += CB_TB_SelectedIndexChanged;
-			// 
-			// LabelTextboxStyle
-			// 
-			LabelTextboxStyle.AutoSize = true;
-			LabelTextboxStyle.Location = new Point(90, 124);
-			LabelTextboxStyle.Margin = new Padding(4, 0, 4, 0);
-			LabelTextboxStyle.Name = "LabelTextboxStyle";
-			LabelTextboxStyle.Size = new Size(35, 15);
-			LabelTextboxStyle.TabIndex = 61;
-			LabelTextboxStyle.Text = "Style:";
-			// 
-			// ButtonReloadText
-			// 
-			ButtonReloadText.Font = new Font("Microsoft Sans Serif", 8F, FontStyle.Regular, GraphicsUnit.Point);
-			ButtonReloadText.Location = new Point(312, 114);
-			ButtonReloadText.Margin = new Padding(4, 3, 4, 3);
-			ButtonReloadText.Name = "ButtonReloadText";
-			ButtonReloadText.Size = new Size(79, 32);
-			ButtonReloadText.TabIndex = 60;
-			ButtonReloadText.Text = "Refresh";
-			ButtonReloadText.UseVisualStyleBackColor = true;
-			ButtonReloadText.Click += ButtonReloadText_Click;
-			// 
-			// ListBoxMenuElements
-			// 
-			ListBoxMenuElements.FormattingEnabled = true;
-			ListBoxMenuElements.ItemHeight = 15;
-			ListBoxMenuElements.Location = new Point(766, 32);
-			ListBoxMenuElements.Margin = new Padding(4, 3, 4, 3);
-			ListBoxMenuElements.Name = "ListBoxMenuElements";
-			ListBoxMenuElements.Size = new Size(342, 79);
-			ListBoxMenuElements.TabIndex = 73;
-			ListBoxMenuElements.DrawItem += DrawListbox;
-			ListBoxMenuElements.MeasureItem += ListboxMeasure;
-			ListBoxMenuElements.SelectedIndexChanged += ListBoxMenuElements_SelectedIndexChanged;
-			ListBoxMenuElements.MouseMove += ListBoxOnMouseMove;
-			ListBoxMenuElements.MouseUp += ListBoxMenuElements_RightClick;
-			// 
-			// ListBoxMenuIndex
-			// 
-			ListBoxMenuIndex.FormattingEnabled = true;
-			ListBoxMenuIndex.ItemHeight = 15;
-			ListBoxMenuIndex.Location = new Point(540, 32);
-			ListBoxMenuIndex.Margin = new Padding(4, 3, 4, 3);
-			ListBoxMenuIndex.Name = "ListBoxMenuIndex";
-			ListBoxMenuIndex.Size = new Size(218, 79);
-			ListBoxMenuIndex.TabIndex = 72;
-			ListBoxMenuIndex.DrawItem += DrawListbox;
-			ListBoxMenuIndex.MeasureItem += ListboxMeasure;
-			ListBoxMenuIndex.SelectedIndexChanged += ListBoxMenuIndex_SelectedIndexChanged;
-			// 
-			// ButtonNextLanguage
-			// 
-			ButtonNextLanguage.Location = new Point(467, 149);
-			ButtonNextLanguage.Margin = new Padding(4, 3, 4, 3);
-			ButtonNextLanguage.Name = "ButtonNextLanguage";
-			ButtonNextLanguage.Size = new Size(65, 23);
-			ButtonNextLanguage.TabIndex = 71;
-			ButtonNextLanguage.Text = "Lang ++";
-			ButtonNextLanguage.UseVisualStyleBackColor = true;
-			ButtonNextLanguage.Click += ButtonNextLanguage_Click;
-			// 
-			// ButtonBackLanguage
-			// 
-			ButtonBackLanguage.Location = new Point(399, 149);
-			ButtonBackLanguage.Margin = new Padding(4, 3, 4, 3);
-			ButtonBackLanguage.Name = "ButtonBackLanguage";
-			ButtonBackLanguage.Size = new Size(60, 23);
-			ButtonBackLanguage.TabIndex = 70;
-			ButtonBackLanguage.Text = "Lang --";
-			ButtonBackLanguage.UseVisualStyleBackColor = true;
-			ButtonBackLanguage.Click += ButtonBackLanguage_Click;
-			// 
-			// ButtonNextText
-			// 
-			ButtonNextText.Location = new Point(467, 114);
-			ButtonNextText.Margin = new Padding(4, 3, 4, 3);
-			ButtonNextText.Name = "ButtonNextText";
-			ButtonNextText.Size = new Size(65, 32);
-			ButtonNextText.TabIndex = 69;
-			ButtonNextText.Text = "Line ++";
-			ButtonNextText.UseVisualStyleBackColor = true;
-			ButtonNextText.Click += ButtonNextText_Click;
-			// 
-			// ButtonBackText
-			// 
-			ButtonBackText.Location = new Point(399, 114);
-			ButtonBackText.Margin = new Padding(4, 3, 4, 3);
-			ButtonBackText.Name = "ButtonBackText";
-			ButtonBackText.Size = new Size(60, 32);
-			ButtonBackText.TabIndex = 68;
-			ButtonBackText.Text = "Line --";
-			ButtonBackText.UseVisualStyleBackColor = true;
-			ButtonBackText.Click += ButtonBackText_Click;
-			// 
-			// LabelVoiceline
-			// 
-			LabelVoiceline.AutoSize = true;
-			LabelVoiceline.Location = new Point(766, 129);
-			LabelVoiceline.Margin = new Padding(4, 0, 4, 0);
-			LabelVoiceline.Name = "LabelVoiceline";
-			LabelVoiceline.Size = new Size(57, 15);
-			LabelVoiceline.TabIndex = 80;
-			LabelVoiceline.Text = "Voiceline:";
-			// 
-			// LabelCurrentAnimation
-			// 
-			LabelCurrentAnimation.AutoSize = true;
-			LabelCurrentAnimation.Location = new Point(766, 114);
-			LabelCurrentAnimation.Margin = new Padding(4, 0, 4, 0);
-			LabelCurrentAnimation.Name = "LabelCurrentAnimation";
-			LabelCurrentAnimation.Size = new Size(66, 15);
-			LabelCurrentAnimation.TabIndex = 79;
-			LabelCurrentAnimation.Text = "Animation:";
-			// 
-			// LabelCurrentTranslation
-			// 
-			LabelCurrentTranslation.AutoSize = true;
-			LabelCurrentTranslation.Font = new Font("Microsoft Sans Serif", 8F, FontStyle.Regular, GraphicsUnit.Point);
-			LabelCurrentTranslation.Location = new Point(538, 159);
-			LabelCurrentTranslation.Margin = new Padding(4, 0, 4, 0);
-			LabelCurrentTranslation.Name = "LabelCurrentTranslation";
-			LabelCurrentTranslation.Size = new Size(67, 13);
-			LabelCurrentTranslation.TabIndex = 77;
-			LabelCurrentTranslation.Text = "Translations:";
-			// 
-			// LabelOriginFile
-			// 
-			LabelOriginFile.AutoSize = true;
-			LabelOriginFile.Font = new Font("Microsoft Sans Serif", 8F, FontStyle.Regular, GraphicsUnit.Point);
-			LabelOriginFile.Location = new Point(538, 145);
-			LabelOriginFile.Margin = new Padding(4, 0, 4, 0);
-			LabelOriginFile.Name = "LabelOriginFile";
-			LabelOriginFile.Size = new Size(53, 13);
-			LabelOriginFile.TabIndex = 76;
-			LabelOriginFile.Text = "Origin file:";
-			// 
-			// LabelCharacterName
-			// 
-			LabelCharacterName.AutoSize = true;
-			LabelCharacterName.Font = new Font("Microsoft Sans Serif", 8F, FontStyle.Regular, GraphicsUnit.Point);
-			LabelCharacterName.Location = new Point(538, 130);
-			LabelCharacterName.Margin = new Padding(4, 0, 4, 0);
-			LabelCharacterName.Name = "LabelCharacterName";
-			LabelCharacterName.Size = new Size(56, 13);
-			LabelCharacterName.TabIndex = 75;
-			LabelCharacterName.Text = "Character:";
-			// 
-			// LabelLineNumber
-			// 
-			LabelLineNumber.AutoSize = true;
-			LabelLineNumber.Font = new Font("Microsoft Sans Serif", 8F, FontStyle.Regular, GraphicsUnit.Point);
-			LabelLineNumber.Location = new Point(538, 116);
-			LabelLineNumber.Margin = new Padding(4, 0, 4, 0);
-			LabelLineNumber.Name = "LabelLineNumber";
-			LabelLineNumber.Size = new Size(30, 13);
-			LabelLineNumber.TabIndex = 74;
-			LabelLineNumber.Text = "Line:";
-			// 
-			// CheckboxPauseAutoplay
-			// 
-			CheckboxPauseAutoplay.AutoSize = true;
-			CheckboxPauseAutoplay.Location = new Point(963, 153);
-			CheckboxPauseAutoplay.Margin = new Padding(4, 3, 4, 3);
-			CheckboxPauseAutoplay.Name = "CheckboxPauseAutoplay";
-			CheckboxPauseAutoplay.Size = new Size(108, 19);
-			CheckboxPauseAutoplay.TabIndex = 86;
-			CheckboxPauseAutoplay.Text = "Pause Autoplay";
-			CheckboxPauseAutoplay.UseVisualStyleBackColor = true;
-			CheckboxPauseAutoplay.CheckedChanged += CheckboxPauseAutoplay_CheckedChanged;
-			// 
-			// CheckboxStartAutoplay
-			// 
-			CheckboxStartAutoplay.AutoSize = true;
-			CheckboxStartAutoplay.Location = new Point(963, 135);
-			CheckboxStartAutoplay.Margin = new Padding(4, 3, 4, 3);
-			CheckboxStartAutoplay.Name = "CheckboxStartAutoplay";
-			CheckboxStartAutoplay.Size = new Size(148, 19);
-			CheckboxStartAutoplay.TabIndex = 84;
-			CheckboxStartAutoplay.Text = "Start/Resume AutoPlay";
-			CheckboxStartAutoplay.UseVisualStyleBackColor = true;
-			CheckboxStartAutoplay.CheckedChanged += CheckboxStartAutoplay_CheckedChanged;
-			// 
-			// CheckboxDisplayOriginalText
-			// 
-			CheckboxDisplayOriginalText.AutoSize = true;
-			CheckboxDisplayOriginalText.Location = new Point(963, 116);
-			CheckboxDisplayOriginalText.Margin = new Padding(4, 3, 4, 3);
-			CheckboxDisplayOriginalText.Name = "CheckboxDisplayOriginalText";
-			CheckboxDisplayOriginalText.Size = new Size(133, 19);
-			CheckboxDisplayOriginalText.TabIndex = 81;
-			CheckboxDisplayOriginalText.Text = "Display Original Text";
-			CheckboxDisplayOriginalText.UseVisualStyleBackColor = true;
-			CheckboxDisplayOriginalText.CheckedChanged += CheckboxDisplayOriginalText_CheckedChanged;
-			// 
-			// TextboxCurrentLanguage
-			// 
-			TextboxCurrentLanguage.Location = new Point(312, 148);
-			TextboxCurrentLanguage.Margin = new Padding(4, 3, 4, 3);
-			TextboxCurrentLanguage.Name = "TextboxCurrentLanguage";
-			TextboxCurrentLanguage.PlaceholderText = "TTSLanguage";
-			TextboxCurrentLanguage.Size = new Size(79, 23);
-			TextboxCurrentLanguage.TabIndex = 97;
-			TextboxCurrentLanguage.TextAlign = HorizontalAlignment.Center;
-			// 
-			// LabelFontSize
-			// 
-			LabelFontSize.AutoSize = true;
-			LabelFontSize.Location = new Point(766, 153);
-			LabelFontSize.Margin = new Padding(4, 0, 4, 0);
-			LabelFontSize.Name = "LabelFontSize";
-			LabelFontSize.Size = new Size(57, 15);
-			LabelFontSize.TabIndex = 95;
-			LabelFontSize.Text = "Font Size:";
-			// 
-			// NumericUpDownFontSize
-			// 
-			NumericUpDownFontSize.Location = new Point(831, 149);
-			NumericUpDownFontSize.Margin = new Padding(4, 3, 4, 3);
-			NumericUpDownFontSize.Name = "NumericUpDownFontSize";
-			NumericUpDownFontSize.Size = new Size(59, 23);
-			NumericUpDownFontSize.TabIndex = 94;
-			NumericUpDownFontSize.TextAlign = HorizontalAlignment.Center;
-			NumericUpDownFontSize.ValueChanged += NumericUpDownFontSize_ValueChanged;
-			// 
-			// ListBoxRightClickCMS
-			// 
-			ListBoxRightClickCMS.Name = "contextMenuStrip1";
-			ListBoxRightClickCMS.Size = new Size(61, 4);
-			// 
-			// MainMenuStrip
-			// 
-			MainMenuStrip.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, editToolStripMenuItem, settingsToolStripMenuItem, toolsToolStripMenuItem, aboutToolStripMenuItem });
-			MainMenuStrip.Location = new Point(0, 0);
-			MainMenuStrip.Name = "MainMenuStrip";
-			MainMenuStrip.Size = new Size(1119, 24);
-			MainMenuStrip.TabIndex = 102;
-			MainMenuStrip.Text = "menuStrip1";
-			// 
-			// fileToolStripMenuItem
-			// 
-			fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openFileToolStripMenuItem, saveFileToolStripMenuItem, saveScreenshotToolStripMenuItem, copyScreenshotToolStripMenuItem });
-			fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-			fileToolStripMenuItem.Size = new Size(37, 20);
-			fileToolStripMenuItem.Text = "File";
-			// 
-			// openFileToolStripMenuItem
-			// 
-			openFileToolStripMenuItem.Name = "openFileToolStripMenuItem";
-			openFileToolStripMenuItem.Size = new Size(163, 22);
-			openFileToolStripMenuItem.Text = "Open File/Font";
-			openFileToolStripMenuItem.Click += openFileToolStripMenuItem_Click;
-			// 
-			// saveFileToolStripMenuItem
-			// 
-			saveFileToolStripMenuItem.Name = "saveFileToolStripMenuItem";
-			saveFileToolStripMenuItem.Size = new Size(163, 22);
-			saveFileToolStripMenuItem.Text = "Save File As...";
-			saveFileToolStripMenuItem.Click += saveFileToolStripMenuItem_Click;
-			// 
-			// saveScreenshotToolStripMenuItem
-			// 
-			saveScreenshotToolStripMenuItem.Name = "saveScreenshotToolStripMenuItem";
-			saveScreenshotToolStripMenuItem.Size = new Size(163, 22);
-			saveScreenshotToolStripMenuItem.Text = "Save Screenshot";
-			saveScreenshotToolStripMenuItem.Click += saveScreenshotToolStripMenuItem_Click;
-			// 
-			// copyScreenshotToolStripMenuItem
-			// 
-			copyScreenshotToolStripMenuItem.Name = "copyScreenshotToolStripMenuItem";
-			copyScreenshotToolStripMenuItem.Size = new Size(163, 22);
-			copyScreenshotToolStripMenuItem.Text = "Copy Screenshot";
-			copyScreenshotToolStripMenuItem.Click += copyScreenshotToolStripMenuItem_Click;
-			// 
-			// editToolStripMenuItem
-			// 
-			editToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { fastReadToolStripMenuItem, resetToolStripMenuItem, reloadVariablesToolStripMenuItem, maximizeWindowToolStripMenuItem });
-			editToolStripMenuItem.Name = "editToolStripMenuItem";
-			editToolStripMenuItem.Size = new Size(39, 20);
-			editToolStripMenuItem.Text = "Edit";
-			// 
-			// fastReadToolStripMenuItem
-			// 
-			fastReadToolStripMenuItem.Name = "fastReadToolStripMenuItem";
-			fastReadToolStripMenuItem.Size = new Size(193, 22);
-			fastReadToolStripMenuItem.Text = "Fast-Read";
-			fastReadToolStripMenuItem.Click += fastReadToolStripMenuItem_Click;
-			// 
-			// resetToolStripMenuItem
-			// 
-			resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-			resetToolStripMenuItem.Size = new Size(193, 22);
-			resetToolStripMenuItem.Text = "Reset reading progress";
-			resetToolStripMenuItem.Click += resetToolStripMenuItem_Click;
-			// 
-			// reloadVariablesToolStripMenuItem
-			// 
-			reloadVariablesToolStripMenuItem.Name = "reloadVariablesToolStripMenuItem";
-			reloadVariablesToolStripMenuItem.Size = new Size(193, 22);
-			reloadVariablesToolStripMenuItem.Text = "Reload Variables";
-			reloadVariablesToolStripMenuItem.Click += reloadVariablesToolStripMenuItem_Click;
-			// 
-			// maximizeWindowToolStripMenuItem
-			// 
-			maximizeWindowToolStripMenuItem.CheckOnClick = true;
-			maximizeWindowToolStripMenuItem.Name = "maximizeWindowToolStripMenuItem";
-			maximizeWindowToolStripMenuItem.Size = new Size(193, 22);
-			maximizeWindowToolStripMenuItem.Text = "Maximize Window";
-			maximizeWindowToolStripMenuItem.Click += maximizeWindowToolStripMenuItem_Click;
-			// 
-			// settingsToolStripMenuItem
-			// 
-			settingsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { translationModeToolStripMenuItem, replaceVariablesToolStripMenuItem, displayCharacterToolStripMenuItem, enableTTSVoicelinesToolStripMenuItem, experimentalToolStripMenuItem });
-			settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-			settingsToolStripMenuItem.Size = new Size(61, 20);
-			settingsToolStripMenuItem.Text = "Settings";
-			// 
-			// translationModeToolStripMenuItem
-			// 
-			translationModeToolStripMenuItem.CheckOnClick = true;
-			translationModeToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { autoTranslationToolStripMenuItem });
-			translationModeToolStripMenuItem.Name = "translationModeToolStripMenuItem";
-			translationModeToolStripMenuItem.Size = new Size(187, 22);
-			translationModeToolStripMenuItem.Text = "Translation Mode";
-			translationModeToolStripMenuItem.CheckedChanged += TranslationModeToolStripMenuItem_CheckedChanged;
-			translationModeToolStripMenuItem.Click += translationModeToolStripMenuItem_Click;
-			// 
-			// autoTranslationToolStripMenuItem
-			// 
-			autoTranslationToolStripMenuItem.CheckOnClick = true;
-			autoTranslationToolStripMenuItem.Name = "autoTranslationToolStripMenuItem";
-			autoTranslationToolStripMenuItem.Size = new Size(157, 22);
-			autoTranslationToolStripMenuItem.Text = "AutoTranslation";
-			// 
-			// replaceVariablesToolStripMenuItem
-			// 
-			replaceVariablesToolStripMenuItem.Checked = true;
-			replaceVariablesToolStripMenuItem.CheckOnClick = true;
-			replaceVariablesToolStripMenuItem.CheckState = CheckState.Checked;
-			replaceVariablesToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { useAlternateVarsToolStripMenuItem });
-			replaceVariablesToolStripMenuItem.Name = "replaceVariablesToolStripMenuItem";
-			replaceVariablesToolStripMenuItem.Size = new Size(187, 22);
-			replaceVariablesToolStripMenuItem.Text = "Replace Variables";
-			replaceVariablesToolStripMenuItem.Click += replaceVariablesToolStripMenuItem_Click;
-			// 
-			// useAlternateVarsToolStripMenuItem
-			// 
-			useAlternateVarsToolStripMenuItem.CheckOnClick = true;
-			useAlternateVarsToolStripMenuItem.Name = "useAlternateVarsToolStripMenuItem";
-			useAlternateVarsToolStripMenuItem.Size = new Size(168, 22);
-			useAlternateVarsToolStripMenuItem.Text = "Use Alternate Vars";
-			useAlternateVarsToolStripMenuItem.Click += useAlternateVarsToolStripMenuItem_Click;
-			// 
-			// displayCharacterToolStripMenuItem
-			// 
-			displayCharacterToolStripMenuItem.CheckOnClick = true;
-			displayCharacterToolStripMenuItem.Name = "displayCharacterToolStripMenuItem";
-			displayCharacterToolStripMenuItem.Size = new Size(187, 22);
-			displayCharacterToolStripMenuItem.Text = "Display Character";
-			displayCharacterToolStripMenuItem.Click += displayCharacterToolStripMenuItem_Click;
-			// 
-			// enableTTSVoicelinesToolStripMenuItem
-			// 
-			enableTTSVoicelinesToolStripMenuItem.CheckOnClick = true;
-			enableTTSVoicelinesToolStripMenuItem.Name = "enableTTSVoicelinesToolStripMenuItem";
-			enableTTSVoicelinesToolStripMenuItem.Size = new Size(187, 22);
-			enableTTSVoicelinesToolStripMenuItem.Text = "Enable TTS/Voicelines";
-			// 
-			// experimentalToolStripMenuItem
-			// 
-			experimentalToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { sizeadjustedHeightToolStripMenuItem });
-			experimentalToolStripMenuItem.Name = "experimentalToolStripMenuItem";
-			experimentalToolStripMenuItem.Size = new Size(187, 22);
-			experimentalToolStripMenuItem.Text = "Experimental";
-			// 
-			// sizeadjustedHeightToolStripMenuItem
-			// 
-			sizeadjustedHeightToolStripMenuItem.CheckOnClick = true;
-			sizeadjustedHeightToolStripMenuItem.Name = "sizeadjustedHeightToolStripMenuItem";
-			sizeadjustedHeightToolStripMenuItem.Size = new Size(183, 22);
-			sizeadjustedHeightToolStripMenuItem.Text = "Size-adjusted Height";
-			// 
-			// toolsToolStripMenuItem
-			// 
-			toolsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openGraphicsWinToolStripMenuItem, reopenVerticalViewToolStripMenuItem, setupSpritesFromFolderToolStripMenuItem, setupVoicelinesFromFolderToolStripMenuItem, dumpVoicelinesToolStripMenuItem });
-			toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
-			toolsToolStripMenuItem.Size = new Size(46, 20);
-			toolsToolStripMenuItem.Text = "Tools";
-			// 
-			// openGraphicsWinToolStripMenuItem
-			// 
-			openGraphicsWinToolStripMenuItem.Name = "openGraphicsWinToolStripMenuItem";
-			openGraphicsWinToolStripMenuItem.Size = new Size(224, 22);
-			openGraphicsWinToolStripMenuItem.Text = "Reopen Graphics Window";
-			openGraphicsWinToolStripMenuItem.Click += openGraphicsWinToolStripMenuItem_Click;
-			// 
-			// reopenVerticalViewToolStripMenuItem
-			// 
-			reopenVerticalViewToolStripMenuItem.Name = "reopenVerticalViewToolStripMenuItem";
-			reopenVerticalViewToolStripMenuItem.Size = new Size(224, 22);
-			reopenVerticalViewToolStripMenuItem.Text = "Reopen Vertical View";
-			reopenVerticalViewToolStripMenuItem.Click += reopenVerticalViewToolStripMenuItem_Click;
-			// 
-			// setupSpritesFromFolderToolStripMenuItem
-			// 
-			setupSpritesFromFolderToolStripMenuItem.Name = "setupSpritesFromFolderToolStripMenuItem";
-			setupSpritesFromFolderToolStripMenuItem.Size = new Size(224, 22);
-			setupSpritesFromFolderToolStripMenuItem.Text = "Setup Sprites from Folder";
-			setupSpritesFromFolderToolStripMenuItem.Click += setupSpritesFromFolderToolStripMenuItem_Click;
-			// 
-			// setupVoicelinesFromFolderToolStripMenuItem
-			// 
-			setupVoicelinesFromFolderToolStripMenuItem.Name = "setupVoicelinesFromFolderToolStripMenuItem";
-			setupVoicelinesFromFolderToolStripMenuItem.Size = new Size(224, 22);
-			setupVoicelinesFromFolderToolStripMenuItem.Text = "Setup Voicelines from Folder";
-			setupVoicelinesFromFolderToolStripMenuItem.Click += setupVoicelinesFromFolderToolStripMenuItem_Click;
-			// 
-			// dumpVoicelinesToolStripMenuItem
-			// 
-			dumpVoicelinesToolStripMenuItem.Name = "dumpVoicelinesToolStripMenuItem";
-			dumpVoicelinesToolStripMenuItem.Size = new Size(224, 22);
-			dumpVoicelinesToolStripMenuItem.Text = "Dump Voicelines";
-			dumpVoicelinesToolStripMenuItem.Click += dumpVoicelinesToolStripMenuItem_Click;
-			// 
-			// aboutToolStripMenuItem
-			// 
-			aboutToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { tODOToolStripMenuItem });
-			aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-			aboutToolStripMenuItem.Size = new Size(52, 20);
-			aboutToolStripMenuItem.Text = "About";
-			// 
-			// tODOToolStripMenuItem
-			// 
-			tODOToolStripMenuItem.Name = "tODOToolStripMenuItem";
-			tODOToolStripMenuItem.Size = new Size(180, 22);
-			tODOToolStripMenuItem.Text = "TODO";
-			// 
-			// Operations
-			// 
-			AutoScaleMode = AutoScaleMode.None;
-			ClientSize = new Size(1119, 179);
-			Controls.Add(MainMenuStrip);
-			Controls.Add(TextboxCurrentLanguage);
-			Controls.Add(LabelFontSize);
-			Controls.Add(NumericUpDownFontSize);
-			Controls.Add(CheckboxPauseAutoplay);
-			Controls.Add(CheckboxStartAutoplay);
-			Controls.Add(CheckboxDisplayOriginalText);
-			Controls.Add(LabelVoiceline);
-			Controls.Add(LabelCurrentAnimation);
-			Controls.Add(LabelCurrentTranslation);
-			Controls.Add(LabelOriginFile);
-			Controls.Add(LabelCharacterName);
-			Controls.Add(LabelLineNumber);
-			Controls.Add(ListBoxMenuElements);
-			Controls.Add(ListBoxMenuIndex);
-			Controls.Add(ButtonNextLanguage);
-			Controls.Add(ButtonBackLanguage);
-			Controls.Add(ButtonNextText);
-			Controls.Add(ButtonBackText);
-			Controls.Add(CB_Game);
-			Controls.Add(LabelUnsupportedWarning);
-			Controls.Add(CB_TB);
-			Controls.Add(LabelTextboxStyle);
-			Controls.Add(ButtonReloadText);
-			Controls.Add(Textbox);
-			Margin = new Padding(4, 3, 4, 3);
-			MaximizeBox = false;
-			MaximumSize = new Size(1135, 218);
-			MinimumSize = new Size(1135, 218);
-			Name = "Operations";
-			Text = "Operations (v2.5)";
-			Load += Operations_Load;
-			((System.ComponentModel.ISupportInitialize)NumericUpDownFontSize).EndInit();
-			MainMenuStrip.ResumeLayout(false);
-			MainMenuStrip.PerformLayout();
-			ResumeLayout(false);
-			PerformLayout();
-		}
-		#endregion
+        _mainMenu.Name = "_mainMenu";
+        _rootLayout.Name = "_rootLayout";
+        _navigation.Name = "_navigation";
+        _searchBar.Name = "_searchBar";
+        _contentSplit.Name = "_contentSplit";
+        _editorLayout.Name = "_editorLayout";
+        _textSplit.Name = "_textSplit";
+        _sourceLayout.Name = "_sourceLayout";
+        _translationLayout.Name = "_translationLayout";
+        _sourceTitle.Name = "_sourceTitle";
+        _translationTitle.Name = "_translationTitle";
+        _textActions.Name = "_textActions";
+        _previewOptions.Name = "_previewOptions";
+        _variableLayout.Name = "_variableLayout";
+        _variableTitle.Name = "_variableTitle";
+        _variableActions.Name = "_variableActions";
+        _variableHint.Name = "_variableHint";
+        _secondsLabel.Name = "_secondsLabel";
+        _lineLabel.Name = "_lineLabel";
+        _languageLabel.Name = "_languageLabel";
+        _gameLabel.Name = "_gameLabel";
+        _source.Name = "_source";
+        _translation.Name = "_translation";
+        _metadata.Name = "_metadata";
+        _checks.Name = "_checks";
+        _variableNote.Name = "_variableNote";
+        _query.Name = "_query";
+        _variableQuery.Name = "_variableQuery";
+        _category.Name = "_category";
+        _language.Name = "_language";
+        _game.Name = "_game";
+        _line.Name = "_line";
+        _interval.Name = "_interval";
+        _variables.Name = "_variables";
+        _resolve.Name = "_resolve";
+        _alternate.Name = "_alternate";
+        _previewOriginal.Name = "_previewOriginal";
+        _untranslated.Name = "_untranslated";
+        _statusStrip.Name = "_statusStrip";
+        _status.Name = "_status";
+        _progress.Name = "_progress";
+        _autoVoiceItem.Name = "_autoVoiceItem";
+        _autoTtsItem.Name = "_autoTtsItem";
+        _fileMenu.Name = "_fileMenu";
+        _translationMenu.Name = "_translationMenu";
+        _toolsMenu.Name = "_toolsMenu";
+        _helpMenu.Name = "_helpMenu";
+        _openButton.Name = "_openButton";
+        _saveButton.Name = "_saveButton";
+        _previousButton.Name = "_previousButton";
+        _nextButton.Name = "_nextButton";
+        _goButton.Name = "_goButton";
+        _verticalButton.Name = "_verticalButton";
+        _previewButton.Name = "_previewButton";
+        _findButton.Name = "_findButton";
+        _replaceButton.Name = "_replaceButton";
+        _playButton.Name = "_playButton";
+        _pauseButton.Name = "_pauseButton";
+        _stopButton.Name = "_stopButton";
+        _copySourceButton.Name = "_copySourceButton";
+        _suggestButton.Name = "_suggestButton";
+        _refreshPreviewButton.Name = "_refreshPreviewButton";
+        _insertVariableButton.Name = "_insertVariableButton";
+        _loadVariablesButton.Name = "_loadVariablesButton";
+        _reloadVariablesButton.Name = "_reloadVariablesButton";
+        _openItem.Name = "_openItem";
+        _newItem.Name = "_newItem";
+        _saveItem.Name = "_saveItem";
+        _saveAsItem.Name = "_saveAsItem";
+        sepFile1.Name = "sepFile1";
+        _addEntryItem.Name = "_addEntryItem";
+        _loadWrdItem.Name = "_loadWrdItem";
+        _exportOriginalItem.Name = "_exportOriginalItem";
+        sepFile2.Name = "sepFile2";
+        _exitItem.Name = "_exitItem";
+        _searchItem.Name = "_searchItem";
+        _replaceItem.Name = "_replaceItem";
+        sepTranslation1.Name = "sepTranslation1";
+        _previousItem.Name = "_previousItem";
+        _nextItem.Name = "_nextItem";
+        _nextUntranslatedItem.Name = "_nextUntranslatedItem";
+        _markEmptyItem.Name = "_markEmptyItem";
+        _resetItem.Name = "_resetItem";
+        _fastReadItem.Name = "_fastReadItem";
+        sepTranslation2.Name = "sepTranslation2";
+        _scanMemoryItem.Name = "_scanMemoryItem";
+        _suggestItem.Name = "_suggestItem";
+        _fillMemoryItem.Name = "_fillMemoryItem";
+        _verticalItem.Name = "_verticalItem";
+        _previewItem.Name = "_previewItem";
+        sepTools1.Name = "sepTools1";
+        _assetRootItem.Name = "_assetRootItem";
+        _importSpritesItem.Name = "_importSpritesItem";
+        _variablesItem.Name = "_variablesItem";
+        _reloadVariablesItem.Name = "_reloadVariablesItem";
+        _exportVoicedItem.Name = "_exportVoicedItem";
+        sepTools2.Name = "sepTools2";
+        _voiceItem.Name = "_voiceItem";
+        _speakItem.Name = "_speakItem";
+        _copyImageItem.Name = "_copyImageItem";
+        _saveImageItem.Name = "_saveImageItem";
+        _helpItem.Name = "_helpItem";
+        _copyVariableTokenItem.Name = "_copyVariableTokenItem";
+        _copyVariableValueItem.Name = "_copyVariableValueItem";
+        sepVariables1.Name = "sepVariables1";
+        _insertLowerItem.Name = "_insertLowerItem";
+        _insertUpperItem.Name = "_insertUpperItem";
+        _variableMenu.Name = "_variableMenu";
 
-		private System.Windows.Forms.ContextMenuStrip ListBoxRightClickCMS;
-		public System.Windows.Forms.RichTextBox Textbox;
-		private System.Windows.Forms.ComboBox CB_Game;
-		private System.Windows.Forms.CheckBox CheckboxTranslationMode;
-		private System.Windows.Forms.Label LabelUnsupportedWarning;
-		private System.Windows.Forms.ComboBox CB_TB;
-		private System.Windows.Forms.Label LabelTextboxStyle;
-		private System.Windows.Forms.Button ButtonReloadText;
-		private System.Windows.Forms.ListBox ListBoxMenuElements;
-		private System.Windows.Forms.ListBox ListBoxMenuIndex;
-		private System.Windows.Forms.Button ButtonNextLanguage;
-		private System.Windows.Forms.Button ButtonBackLanguage;
-		private System.Windows.Forms.Button ButtonNextText;
-		private System.Windows.Forms.Button ButtonBackText;
-		private System.Windows.Forms.Label LabelVoiceline;
-		private System.Windows.Forms.Label LabelCurrentAnimation;
-		private System.Windows.Forms.Label LabelCurrentTranslation;
-		private System.Windows.Forms.Label LabelOriginFile;
-		private System.Windows.Forms.Label LabelCharacterName;
-		private System.Windows.Forms.Label LabelLineNumber;
-		private System.Windows.Forms.CheckBox CheckboxPauseAutoplay;
-		private System.Windows.Forms.CheckBox CheckboxStartAutoplay;
-		private System.Windows.Forms.CheckBox CheckboxDisplayOriginalText;
-		private System.Windows.Forms.TextBox TextboxCurrentLanguage;
-		private System.Windows.Forms.Label LabelFontSize;
-		private System.Windows.Forms.NumericUpDown NumericUpDownFontSize;
-		private ToolTip ListBoxToolTip;
-		private MenuStrip MainMenuStrip;
-		private ToolStripMenuItem fileToolStripMenuItem;
-		private ToolStripMenuItem settingsToolStripMenuItem;
-		private ToolStripMenuItem aboutToolStripMenuItem;
-		private ToolStripMenuItem openFileToolStripMenuItem;
-		private ToolStripMenuItem saveFileToolStripMenuItem;
-		private ToolStripMenuItem translationModeToolStripMenuItem;
-		private ToolStripMenuItem replaceVariablesToolStripMenuItem;
-		private ToolStripMenuItem displayCharacterToolStripMenuItem;
-		private ToolStripMenuItem autoTranslationToolStripMenuItem;
-		private ToolStripMenuItem editToolStripMenuItem;
-		private ToolStripMenuItem fastReadToolStripMenuItem;
-		private ToolStripMenuItem resetToolStripMenuItem;
-		private ToolStripMenuItem useAlternateVarsToolStripMenuItem;
-		private ToolStripMenuItem reloadVariablesToolStripMenuItem;
-		private ToolStripMenuItem experimentalToolStripMenuItem;
-		private ToolStripMenuItem sizeadjustedHeightToolStripMenuItem;
-		private ToolStripMenuItem enableTTSVoicelinesToolStripMenuItem;
-		private ToolStripMenuItem saveScreenshotToolStripMenuItem;
-		private ToolStripMenuItem copyScreenshotToolStripMenuItem;
-		private ToolStripMenuItem toolsToolStripMenuItem;
-		private ToolStripMenuItem openGraphicsWinToolStripMenuItem;
-		private ToolStripMenuItem reopenVerticalViewToolStripMenuItem;
-		private ToolStripMenuItem setupSpritesFromFolderToolStripMenuItem;
-		private ToolStripMenuItem setupVoicelinesFromFolderToolStripMenuItem;
-		private ToolStripMenuItem dumpVoicelinesToolStripMenuItem;
-		private ToolStripMenuItem maximizeWindowToolStripMenuItem;
-		private ToolStripMenuItem tODOToolStripMenuItem;
-	}
+        // Menus and command identities
+        _fileMenu.Text = "File";
+        _fileMenu.DropDownItems.AddRange(new ToolStripItem[] { _openItem, _newItem, _saveItem, _saveAsItem, sepFile1, _addEntryItem, _loadWrdItem, _exportOriginalItem, sepFile2, _exitItem });
+        _openItem.Text = "Apri file…";
+        _openItem.Tag = "Open";
+        _openItem.AccessibleName = "Apri file…";
+        _openItem.ShortcutKeys = Keys.Control | Keys.O;
+        _newItem.Text = "Nuovo progetto…";
+        _newItem.Tag = "New";
+        _newItem.AccessibleName = "Nuovo progetto…";
+        _newItem.ShortcutKeys = Keys.Control | Keys.N;
+        _saveItem.Text = "Salva";
+        _saveItem.Tag = "Save";
+        _saveItem.AccessibleName = "Salva";
+        _saveItem.ShortcutKeys = Keys.Control | Keys.S;
+        _saveAsItem.Text = "Salva con nome / converti…";
+        _saveAsItem.Tag = "SaveAs";
+        _saveAsItem.AccessibleName = "Salva con nome / converti…";
+        _saveAsItem.ShortcutKeys = Keys.Control | Keys.Shift | Keys.S;
+        _addEntryItem.Text = "Aggiungi dialogo…";
+        _addEntryItem.Tag = "AddEntry";
+        _addEntryItem.AccessibleName = "Aggiungi dialogo…";
+        _loadWrdItem.Text = "Carica WRD associato allo STX…";
+        _loadWrdItem.Tag = "LoadWrd";
+        _loadWrdItem.AccessibleName = "Carica WRD associato allo STX…";
+        _exportOriginalItem.Text = "Esporta testo originale…";
+        _exportOriginalItem.Tag = "ExportOriginal";
+        _exportOriginalItem.AccessibleName = "Esporta testo originale…";
+        _exitItem.Text = "Esci";
+        _exitItem.Tag = "Exit";
+        _exitItem.AccessibleName = "Esci";
+        _translationMenu.Text = "Traduzione";
+        _translationMenu.DropDownItems.AddRange(new ToolStripItem[] { _searchItem, _replaceItem, sepTranslation1, _previousItem, _nextItem, _nextUntranslatedItem, _markEmptyItem, _resetItem, _fastReadItem, sepTranslation2, _scanMemoryItem, _suggestItem, _fillMemoryItem });
+        _translationMenu.DropDownItems.Add(_reuseOnOpenItem);
+        _reuseOnOpenItem.Name = "_reuseOnOpenItem";
+        _reuseOnOpenItem.Text = "Riusa traduzioni automaticamente in apertura";
+        _reuseOnOpenItem.CheckOnClick = true;
+        _reuseOnOpenItem.Checked = true;
+        _searchItem.Text = "Cerca";
+        _searchItem.Tag = "FocusSearch";
+        _searchItem.AccessibleName = "Cerca";
+        _searchItem.ShortcutKeys = Keys.Control | Keys.F;
+        _replaceItem.Text = "Sostituisci…";
+        _replaceItem.Tag = "Replace";
+        _replaceItem.AccessibleName = "Sostituisci…";
+        _replaceItem.ShortcutKeys = Keys.Control | Keys.H;
+        _previousItem.Text = "Precedente";
+        _previousItem.Tag = "Previous";
+        _previousItem.AccessibleName = "Precedente";
+        _previousItem.ShortcutKeys = Keys.Control | Keys.Up;
+        _nextItem.Text = "Successivo";
+        _nextItem.Tag = "Next";
+        _nextItem.AccessibleName = "Successivo";
+        _nextItem.ShortcutKeys = Keys.Control | Keys.Down;
+        _nextUntranslatedItem.Text = "Prossimo da tradurre";
+        _nextUntranslatedItem.Tag = "NextUntranslated";
+        _nextUntranslatedItem.AccessibleName = "Prossimo da tradurre";
+        _nextUntranslatedItem.ShortcutKeys = Keys.F8;
+        _markEmptyItem.Text = "Segna traduzione intenzionalmente vuota";
+        _markEmptyItem.Tag = "MarkEmpty";
+        _markEmptyItem.AccessibleName = "Segna traduzione intenzionalmente vuota";
+        _resetItem.Text = "Riparti dalla prima battuta";
+        _resetItem.Tag = "Reset";
+        _resetItem.AccessibleName = "Riparti dalla prima battuta";
+        _fastReadItem.Text = "Fast-read: vai all'ultima battuta";
+        _fastReadItem.Tag = "FastRead";
+        _fastReadItem.AccessibleName = "Fast-read: vai all'ultima battuta";
+        _scanMemoryItem.Text = "Indicizza memoria da cartella…";
+        _scanMemoryItem.Tag = "ScanMemory";
+        _scanMemoryItem.AccessibleName = "Indicizza memoria da cartella…";
+        _suggestItem.Text = "Suggerimenti per questa battuta…";
+        _suggestItem.Tag = "Suggest";
+        _suggestItem.AccessibleName = "Suggerimenti per questa battuta…";
+        _fillMemoryItem.Text = "Completa vuoti dalla memoria…";
+        _fillMemoryItem.Tag = "FillMemory";
+        _fillMemoryItem.AccessibleName = "Completa vuoti dalla memoria…";
+        _toolsMenu.Text = "Finestre e risorse";
+        _toolsMenu.DropDownItems.AddRange(new ToolStripItem[] { _verticalItem, _previewItem, sepTools1, _assetRootItem, _importSpritesItem, _variablesItem, _reloadVariablesItem, _exportVoicedItem, sepTools2, _voiceItem, _speakItem, _copyImageItem, _saveImageItem });
+        _verticalItem.Text = "Apri / riapri vista verticale";
+        _verticalItem.Tag = "ShowVertical";
+        _verticalItem.AccessibleName = "Apri / riapri vista verticale";
+        _verticalItem.ShortcutKeys = Keys.F6;
+        _previewItem.Text = "Apri / riapri anteprima grafica";
+        _previewItem.Tag = "ShowPreview";
+        _previewItem.AccessibleName = "Apri / riapri anteprima grafica";
+        _previewItem.ShortcutKeys = Keys.F7;
+        _assetRootItem.Text = "Scegli cartella risorse…";
+        _assetRootItem.Tag = "ChooseAssetRoot";
+        _assetRootItem.AccessibleName = "Scegli cartella risorse…";
+        _importSpritesItem.Text = "Importa sprite da cartella…";
+        _importSpritesItem.Tag = "ImportSprites";
+        _importSpritesItem.AccessibleName = "Importa sprite da cartella…";
+        _variablesItem.Text = "Carica VARS_BAK / VARS_AI…";
+        _variablesItem.Tag = "ChooseVariables";
+        _variablesItem.AccessibleName = "Carica VARS_BAK / VARS_AI…";
+        _reloadVariablesItem.Text = "Ricarica variabili";
+        _reloadVariablesItem.Tag = "ReloadVariables";
+        _reloadVariablesItem.AccessibleName = "Ricarica variabili";
+        _exportVoicedItem.Text = "Esporta battute con voce…";
+        _exportVoicedItem.Tag = "ExportVoiced";
+        _exportVoicedItem.AccessibleName = "Esporta battute con voce…";
+        _voiceItem.Text = "Riproduci voce";
+        _voiceItem.Tag = "PlayVoice";
+        _voiceItem.AccessibleName = "Riproduci voce";
+        _speakItem.Text = "Leggi testo (TTS)";
+        _speakItem.Tag = "Speak";
+        _speakItem.AccessibleName = "Leggi testo (TTS)";
+        _copyImageItem.Text = "Copia screenshot";
+        _copyImageItem.Tag = "CopyImage";
+        _copyImageItem.AccessibleName = "Copia screenshot";
+        _saveImageItem.Text = "Salva screenshot…";
+        _saveImageItem.Tag = "SaveImage";
+        _saveImageItem.AccessibleName = "Salva screenshot…";
+        _helpMenu.Text = "Guida";
+        _helpMenu.DropDownItems.AddRange(new ToolStripItem[] { _helpItem });
+        _helpItem.Text = "Flusso di lavoro";
+        _helpItem.Tag = "Help";
+        _helpItem.AccessibleName = "Flusso di lavoro";
+        _helpItem.ShortcutKeys = Keys.F1;
+        _mainMenu.Items.AddRange(new ToolStripItem[] { _fileMenu, _translationMenu, _toolsMenu, _helpMenu });
+        _mainMenu.Dock = DockStyle.Fill;
+        _mainMenu.BackColor = Color.FromArgb(244, 247, 250);
+        _mainMenu.Padding = new Padding(0, 2, 0, 2);
+        _mainMenu.AccessibleName = "Menu principale";
+        _mainMenu.TabIndex = 0;
+        _toolsMenu.DropDownItems.Add(new ToolStripSeparator());
+        _toolsMenu.DropDownItems.Add(_autoVoiceItem);
+        _toolsMenu.DropDownItems.Add(_autoTtsItem);
+        _autoVoiceItem.Text = "Voce WAV al cambio battuta";
+        _autoVoiceItem.CheckOnClick = true;
+        _autoVoiceItem.AccessibleName = "Voce WAV al cambio battuta";
+        _autoTtsItem.Text = "TTS al cambio battuta";
+        _autoTtsItem.CheckOnClick = true;
+        _autoTtsItem.AccessibleName = "TTS al cambio battuta";
+        _variableMenu.Items.AddRange(new ToolStripItem[] { _copyVariableTokenItem, _copyVariableValueItem, sepVariables1, _insertLowerItem, _insertUpperItem, _hideVariableItem, _variableInfoItem, _alternateVariableItem });
+        _copyVariableTokenItem.Text = "Copia token";
+        _copyVariableTokenItem.Tag = "CopyVariableToken";
+        _copyVariableTokenItem.AccessibleName = "Copia token";
+        _copyVariableValueItem.Text = "Copia valore";
+        _copyVariableValueItem.Tag = "CopyVariableValue";
+        _copyVariableValueItem.AccessibleName = "Copia valore";
+        _insertLowerItem.Text = "Inserisci variante minuscola (_MN)";
+        _insertLowerItem.Tag = "InsertLowerVariant";
+        _insertLowerItem.AccessibleName = "Inserisci variante minuscola (_MN)";
+        _insertUpperItem.Text = "Inserisci variante maiuscola (_MS)";
+        _insertUpperItem.Tag = "InsertUpperVariant";
+        _insertUpperItem.AccessibleName = "Inserisci variante maiuscola (_MS)";
+        _hideVariableItem.Name = "_hideVariableItem";
+        _hideVariableItem.Text = "Rimuovi dalla lista";
+        _hideVariableItem.Tag = "HideVariable";
+        _variableInfoItem.Name = "_variableInfoItem";
+        _variableInfoItem.Text = "Informazioni variabile…";
+        _variableInfoItem.Tag = "VariableInfo";
+        _alternateVariableItem.Name = "_alternateVariableItem";
+        _alternateVariableItem.Text = "Mostra valore alternativo…";
+        _alternateVariableItem.Tag = "AlternateVariable";
+
+        // Root layout
+        _rootLayout.Dock = DockStyle.Fill;
+        _rootLayout.ColumnCount = 1;
+        _rootLayout.RowCount = 6;
+        _rootLayout.Padding = new Padding(12, 4, 12, 0);
+        _rootLayout.Margin = Padding.Empty;
+        _rootLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        _rootLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        _rootLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        _rootLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        _rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34F));
+        _rootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        _rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 28F));
+        _rootLayout.Controls.Add(_mainMenu, 0, 0);
+        _rootLayout.Controls.Add(_navigation, 0, 1);
+        _rootLayout.Controls.Add(_searchBar, 0, 2);
+        _rootLayout.Controls.Add(_metadata, 0, 3);
+        _rootLayout.Controls.Add(_contentSplit, 0, 4);
+        _rootLayout.Controls.Add(_statusStrip, 0, 5);
+        _navigation.Dock = DockStyle.Fill;
+        _navigation.AutoSize = true;
+        _navigation.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _navigation.WrapContents = true;
+        _navigation.Margin = Padding.Empty;
+        _navigation.Padding = new Padding(0, 2, 0, 2);
+        _navigation.TabIndex = 1;
+        _searchBar.Dock = DockStyle.Fill;
+        _searchBar.AutoSize = true;
+        _searchBar.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _searchBar.WrapContents = true;
+        _searchBar.Margin = Padding.Empty;
+        _searchBar.Padding = new Padding(0, 2, 0, 2);
+        _searchBar.TabIndex = 2;
+        _textActions.Dock = DockStyle.Fill;
+        _textActions.AutoSize = true;
+        _textActions.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _textActions.WrapContents = true;
+        _textActions.Margin = Padding.Empty;
+        _textActions.Padding = new Padding(0, 2, 0, 2);
+        _textActions.TabIndex = 2;
+        _previewOptions.Dock = DockStyle.Fill;
+        _previewOptions.AutoSize = true;
+        _previewOptions.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _previewOptions.WrapContents = true;
+        _previewOptions.Margin = Padding.Empty;
+        _previewOptions.Padding = new Padding(0, 2, 0, 2);
+        _previewOptions.TabIndex = 4;
+        _variableActions.Dock = DockStyle.Fill;
+        _variableActions.AutoSize = true;
+        _variableActions.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _variableActions.WrapContents = true;
+        _variableActions.Margin = Padding.Empty;
+        _variableActions.Padding = new Padding(0, 2, 0, 2);
+        _variableActions.TabIndex = 4;
+        _navigation.AccessibleName = "Navigazione e finestre";
+        _searchBar.AccessibleName = "Ricerca e scorrimento automatico";
+        _navigation.Controls.Add(_openButton);
+        _navigation.Controls.Add(_saveButton);
+        _navigation.Controls.Add(_previousButton);
+        _navigation.Controls.Add(_nextButton);
+        _navigation.Controls.Add(_lineLabel);
+        _navigation.Controls.Add(_line);
+        _navigation.Controls.Add(_goButton);
+        _navigation.Controls.Add(_languageLabel);
+        _navigation.Controls.Add(_language);
+        _navigation.Controls.Add(_gameLabel);
+        _navigation.Controls.Add(_game);
+        _navigation.Controls.Add(_verticalButton);
+        _navigation.Controls.Add(_previewButton);
+        _navigation.Controls.Add(_refreshPreviewButton);
+        _searchBar.Controls.Add(_query);
+        _searchBar.Controls.Add(_findButton);
+        _searchBar.Controls.Add(_untranslated);
+        _searchBar.Controls.Add(_replaceButton);
+        _searchBar.Controls.Add(_playButton);
+        _searchBar.Controls.Add(_pauseButton);
+        _searchBar.Controls.Add(_stopButton);
+        _searchBar.Controls.Add(_interval);
+        _searchBar.Controls.Add(_secondsLabel);
+        _lineLabel.Text = "Battuta";
+        _lineLabel.AutoSize = true;
+        _lineLabel.Padding = new Padding(0, 6, 0, 0);
+        _lineLabel.Margin = new Padding(3, 2, 4, 2);
+        _lineLabel.ForeColor = Color.FromArgb(85, 102, 121);
+        _lineLabel.TabIndex = 4;
+        _languageLabel.Text = "Lingua";
+        _languageLabel.AutoSize = true;
+        _languageLabel.Padding = new Padding(0, 6, 0, 0);
+        _languageLabel.Margin = new Padding(3, 2, 4, 2);
+        _languageLabel.ForeColor = Color.FromArgb(85, 102, 121);
+        _languageLabel.TabIndex = 7;
+        _gameLabel.Text = "Gioco";
+        _gameLabel.AutoSize = true;
+        _gameLabel.Padding = new Padding(0, 6, 0, 0);
+        _gameLabel.Margin = new Padding(3, 2, 4, 2);
+        _gameLabel.ForeColor = Color.FromArgb(85, 102, 121);
+        _gameLabel.TabIndex = 9;
+        _secondsLabel.Text = "sec";
+        _secondsLabel.AutoSize = true;
+        _secondsLabel.Padding = new Padding(0, 6, 0, 0);
+        _secondsLabel.Margin = new Padding(3, 2, 4, 2);
+        _secondsLabel.ForeColor = Color.FromArgb(85, 102, 121);
+        _secondsLabel.TabIndex = 8;
+
+        // Command buttons
+        _openButton.Text = "Apri…";
+        _openButton.Tag = "Open";
+        _openButton.AutoSize = true;
+        _openButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _openButton.MinimumSize = new Size(62, 31);
+        _openButton.Padding = new Padding(6, 2, 6, 2);
+        _openButton.Margin = new Padding(0, 2, 6, 2);
+        _openButton.FlatStyle = FlatStyle.Flat;
+        _openButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _openButton.BackColor = Color.White;
+        _openButton.AccessibleName = "Apri…";
+        _openButton.TabIndex = 0;
+        _saveButton.Text = "Salva";
+        _saveButton.Tag = "Save";
+        _saveButton.AutoSize = true;
+        _saveButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _saveButton.MinimumSize = new Size(62, 31);
+        _saveButton.Padding = new Padding(6, 2, 6, 2);
+        _saveButton.Margin = new Padding(0, 2, 6, 2);
+        _saveButton.FlatStyle = FlatStyle.Flat;
+        _saveButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _saveButton.BackColor = Color.White;
+        _saveButton.AccessibleName = "Salva";
+        _saveButton.TabIndex = 1;
+        _previousButton.Text = "←";
+        _previousButton.Tag = "Previous";
+        _previousButton.AutoSize = true;
+        _previousButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _previousButton.MinimumSize = new Size(62, 31);
+        _previousButton.Padding = new Padding(6, 2, 6, 2);
+        _previousButton.Margin = new Padding(0, 2, 6, 2);
+        _previousButton.FlatStyle = FlatStyle.Flat;
+        _previousButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _previousButton.BackColor = Color.White;
+        _previousButton.AccessibleName = "←";
+        _previousButton.TabIndex = 2;
+        _nextButton.Text = "→";
+        _nextButton.Tag = "Next";
+        _nextButton.AutoSize = true;
+        _nextButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _nextButton.MinimumSize = new Size(62, 31);
+        _nextButton.Padding = new Padding(6, 2, 6, 2);
+        _nextButton.Margin = new Padding(0, 2, 6, 2);
+        _nextButton.FlatStyle = FlatStyle.Flat;
+        _nextButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _nextButton.BackColor = Color.White;
+        _nextButton.AccessibleName = "→";
+        _nextButton.TabIndex = 3;
+        _goButton.Text = "Vai";
+        _goButton.Tag = "GoToLine";
+        _goButton.AutoSize = true;
+        _goButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _goButton.MinimumSize = new Size(62, 31);
+        _goButton.Padding = new Padding(6, 2, 6, 2);
+        _goButton.Margin = new Padding(0, 2, 6, 2);
+        _goButton.FlatStyle = FlatStyle.Flat;
+        _goButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _goButton.BackColor = Color.White;
+        _goButton.AccessibleName = "Vai";
+        _goButton.TabIndex = 4;
+        _verticalButton.Text = "Dialoghi";
+        _verticalButton.Tag = "ShowVertical";
+        _verticalButton.AutoSize = true;
+        _verticalButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _verticalButton.MinimumSize = new Size(62, 31);
+        _verticalButton.Padding = new Padding(6, 2, 6, 2);
+        _verticalButton.Margin = new Padding(0, 2, 6, 2);
+        _verticalButton.FlatStyle = FlatStyle.Flat;
+        _verticalButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _verticalButton.BackColor = Color.White;
+        _verticalButton.AccessibleName = "Apri finestra Dialoghi";
+        _verticalButton.TabIndex = 5;
+        _previewButton.Text = "Anteprima";
+        _previewButton.Tag = "ShowPreview";
+        _previewButton.AutoSize = true;
+        _previewButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _previewButton.MinimumSize = new Size(62, 31);
+        _previewButton.Padding = new Padding(6, 2, 6, 2);
+        _previewButton.Margin = new Padding(0, 2, 6, 2);
+        _previewButton.FlatStyle = FlatStyle.Flat;
+        _previewButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _previewButton.BackColor = Color.White;
+        _previewButton.AccessibleName = "Apri Anteprima";
+        _previewButton.TabIndex = 6;
+        _findButton.Text = "Trova successivo";
+        _findButton.Tag = "FindNext";
+        _findButton.AutoSize = true;
+        _findButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _findButton.MinimumSize = new Size(62, 31);
+        _findButton.Padding = new Padding(6, 2, 6, 2);
+        _findButton.Margin = new Padding(0, 2, 6, 2);
+        _findButton.FlatStyle = FlatStyle.Flat;
+        _findButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _findButton.BackColor = Color.White;
+        _findButton.AccessibleName = "Trova successivo";
+        _findButton.TabIndex = 7;
+        _replaceButton.Text = "Sostituisci…";
+        _replaceButton.Tag = "Replace";
+        _replaceButton.AutoSize = true;
+        _replaceButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _replaceButton.MinimumSize = new Size(62, 31);
+        _replaceButton.Padding = new Padding(6, 2, 6, 2);
+        _replaceButton.Margin = new Padding(0, 2, 6, 2);
+        _replaceButton.FlatStyle = FlatStyle.Flat;
+        _replaceButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _replaceButton.BackColor = Color.White;
+        _replaceButton.AccessibleName = "Sostituisci…";
+        _replaceButton.TabIndex = 8;
+        _playButton.Text = "Riproduci / riprendi";
+        _playButton.Tag = "StartAutoplay";
+        _playButton.AutoSize = true;
+        _playButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _playButton.MinimumSize = new Size(62, 31);
+        _playButton.Padding = new Padding(6, 2, 6, 2);
+        _playButton.Margin = new Padding(0, 2, 6, 2);
+        _playButton.FlatStyle = FlatStyle.Flat;
+        _playButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _playButton.BackColor = Color.White;
+        _playButton.AccessibleName = "Riproduci / riprendi";
+        _playButton.TabIndex = 9;
+        _pauseButton.Text = "Pausa";
+        _pauseButton.Tag = "PauseAutoplay";
+        _pauseButton.AutoSize = true;
+        _pauseButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _pauseButton.MinimumSize = new Size(62, 31);
+        _pauseButton.Padding = new Padding(6, 2, 6, 2);
+        _pauseButton.Margin = new Padding(0, 2, 6, 2);
+        _pauseButton.FlatStyle = FlatStyle.Flat;
+        _pauseButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _pauseButton.BackColor = Color.White;
+        _pauseButton.AccessibleName = "Pausa";
+        _pauseButton.TabIndex = 10;
+        _stopButton.Text = "Stop";
+        _stopButton.Tag = "StopAutoplay";
+        _stopButton.AutoSize = true;
+        _stopButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _stopButton.MinimumSize = new Size(62, 31);
+        _stopButton.Padding = new Padding(6, 2, 6, 2);
+        _stopButton.Margin = new Padding(0, 2, 6, 2);
+        _stopButton.FlatStyle = FlatStyle.Flat;
+        _stopButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _stopButton.BackColor = Color.White;
+        _stopButton.AccessibleName = "Stop";
+        _stopButton.TabIndex = 11;
+        _copySourceButton.Text = "Copia originale →";
+        _copySourceButton.Tag = "CopySource";
+        _copySourceButton.AutoSize = true;
+        _copySourceButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _copySourceButton.MinimumSize = new Size(62, 31);
+        _copySourceButton.Padding = new Padding(6, 2, 6, 2);
+        _copySourceButton.Margin = new Padding(0, 2, 6, 2);
+        _copySourceButton.FlatStyle = FlatStyle.Flat;
+        _copySourceButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _copySourceButton.BackColor = Color.White;
+        _copySourceButton.AccessibleName = "Copia originale →";
+        _copySourceButton.TabIndex = 12;
+        _suggestButton.Text = "Suggerimenti…";
+        _suggestButton.Tag = "Suggest";
+        _suggestButton.AutoSize = true;
+        _suggestButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _suggestButton.MinimumSize = new Size(62, 31);
+        _suggestButton.Padding = new Padding(6, 2, 6, 2);
+        _suggestButton.Margin = new Padding(0, 2, 6, 2);
+        _suggestButton.FlatStyle = FlatStyle.Flat;
+        _suggestButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _suggestButton.BackColor = Color.White;
+        _suggestButton.AccessibleName = "Suggerimenti…";
+        _suggestButton.TabIndex = 13;
+        _refreshPreviewButton.Text = "↻";
+        _refreshPreviewButton.Tag = "UpdatePreview";
+        _refreshPreviewButton.AutoSize = true;
+        _refreshPreviewButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _refreshPreviewButton.MinimumSize = new Size(34, 31);
+        _refreshPreviewButton.Padding = new Padding(6, 2, 6, 2);
+        _refreshPreviewButton.Margin = new Padding(0, 2, 6, 2);
+        _refreshPreviewButton.FlatStyle = FlatStyle.Flat;
+        _refreshPreviewButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _refreshPreviewButton.BackColor = Color.White;
+        _refreshPreviewButton.AccessibleName = "Aggiorna anteprima";
+        _refreshPreviewButton.TabIndex = 14;
+        _insertVariableButton.Text = "Inserisci token";
+        _insertVariableButton.Tag = "InsertVariable";
+        _insertVariableButton.AutoSize = true;
+        _insertVariableButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _insertVariableButton.MinimumSize = new Size(62, 31);
+        _insertVariableButton.Padding = new Padding(6, 2, 6, 2);
+        _insertVariableButton.Margin = new Padding(0, 2, 6, 2);
+        _insertVariableButton.FlatStyle = FlatStyle.Flat;
+        _insertVariableButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _insertVariableButton.BackColor = Color.White;
+        _insertVariableButton.AccessibleName = "Inserisci token";
+        _insertVariableButton.TabIndex = 15;
+        _loadVariablesButton.Text = "Carica…";
+        _loadVariablesButton.Tag = "ChooseVariables";
+        _loadVariablesButton.AutoSize = true;
+        _loadVariablesButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _loadVariablesButton.MinimumSize = new Size(62, 31);
+        _loadVariablesButton.Padding = new Padding(6, 2, 6, 2);
+        _loadVariablesButton.Margin = new Padding(0, 2, 6, 2);
+        _loadVariablesButton.FlatStyle = FlatStyle.Flat;
+        _loadVariablesButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _loadVariablesButton.BackColor = Color.White;
+        _loadVariablesButton.AccessibleName = "Carica…";
+        _loadVariablesButton.TabIndex = 16;
+        _reloadVariablesButton.Text = "Ricarica";
+        _reloadVariablesButton.Tag = "ReloadVariables";
+        _reloadVariablesButton.AutoSize = true;
+        _reloadVariablesButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+        _reloadVariablesButton.MinimumSize = new Size(62, 31);
+        _reloadVariablesButton.Padding = new Padding(6, 2, 6, 2);
+        _reloadVariablesButton.Margin = new Padding(0, 2, 6, 2);
+        _reloadVariablesButton.FlatStyle = FlatStyle.Flat;
+        _reloadVariablesButton.FlatAppearance.BorderColor = Color.FromArgb(205, 215, 225);
+        _reloadVariablesButton.BackColor = Color.White;
+        _reloadVariablesButton.AccessibleName = "Ricarica";
+        _reloadVariablesButton.TabIndex = 17;
+        _query.Size = new Size(200, 25);
+        _query.PlaceholderText = "Cerca nei testi…";
+        _query.AccessibleName = "Cerca nei dialoghi";
+        _query.TabIndex = 0;
+        _query.Margin = new Padding(0, 5, 6, 5);
+        _variableQuery.Size = new Size(200, 25);
+        _variableQuery.PlaceholderText = "Cerca token o valore…";
+        _variableQuery.AccessibleName = "Cerca token o valore";
+        _variableQuery.TabIndex = 1;
+        _variableQuery.Margin = new Padding(0, 5, 6, 5);
+        _variableQuery.Dock = DockStyle.Fill;
+        _category.DropDownStyle = ComboBoxStyle.DropDownList;
+        _category.Size = new Size(220, 25);
+        _category.AccessibleName = "Categoria delle variabili";
+        _category.TabIndex = 2;
+        _category.Margin = new Padding(0, 5, 6, 5);
+        _language.DropDownStyle = ComboBoxStyle.DropDownList;
+        _language.Size = new Size(140, 25);
+        _language.AccessibleName = "Lingua della traduzione";
+        _language.TabIndex = 8;
+        _language.Margin = new Padding(0, 5, 6, 5);
+        _game.DropDownStyle = ComboBoxStyle.DropDownList;
+        _game.Size = new Size(85, 25);
+        _game.AccessibleName = "Gioco V3 o AI";
+        _game.TabIndex = 10;
+        _game.Margin = new Padding(0, 5, 6, 5);
+        _category.Dock = DockStyle.Fill;
+        _game.Items.AddRange(new object[] { "V3", "AI" });
+        _line.Size = new Size(75, 25);
+        _line.Minimum = 1;
+        _line.Maximum = 1;
+        _line.Value = 1;
+        _line.TabIndex = 5;
+        _line.AccessibleName = "Numero della battuta";
+        _line.Margin = new Padding(0, 5, 6, 5);
+        _interval.Size = new Size(65, 25);
+        _interval.Minimum = 1;
+        _interval.Maximum = 30;
+        _interval.Value = 3;
+        _interval.TabIndex = 7;
+        _interval.AccessibleName = "Intervallo autoplay in secondi";
+        _interval.Margin = new Padding(0, 5, 6, 5);
+        _untranslated.Text = "Solo da tradurre";
+        _untranslated.AutoSize = true;
+        _untranslated.Checked = false;
+        _untranslated.AccessibleName = "Solo da tradurre";
+        _untranslated.TabIndex = 2;
+        _untranslated.Margin = new Padding(0, 7, 12, 4);
+        _resolve.Text = "Risolvi variabili nell'anteprima";
+        _resolve.AutoSize = true;
+        _resolve.Checked = true;
+        _resolve.AccessibleName = "Risolvi variabili nell'anteprima";
+        _resolve.TabIndex = 0;
+        _resolve.Margin = new Padding(0, 7, 12, 4);
+        _alternate.Text = "Valori alternativi";
+        _alternate.AutoSize = true;
+        _alternate.Checked = false;
+        _alternate.AccessibleName = "Valori alternativi";
+        _alternate.TabIndex = 1;
+        _alternate.Margin = new Padding(0, 7, 12, 4);
+        _previewOriginal.Text = "Anteprima originale";
+        _previewOriginal.AutoSize = true;
+        _previewOriginal.Checked = false;
+        _previewOriginal.AccessibleName = "Anteprima originale";
+        _previewOriginal.TabIndex = 2;
+        _previewOriginal.Margin = new Padding(0, 7, 12, 4);
+        _metadata.Text = "Apri un file per iniziare a tradurre.";
+        _metadata.Dock = DockStyle.Fill;
+        _metadata.AutoEllipsis = true;
+        _metadata.TextAlign = ContentAlignment.MiddleLeft;
+        _metadata.ForeColor = Color.FromArgb(85, 102, 121);
+        _metadata.AccessibleName = "Apri un file per iniziare a tradurre.";
+        _metadata.TabIndex = 3;
+        _metadata.Margin = new Padding(0, 3, 0, 3);
+        _checks.Text = "";
+        _checks.Dock = DockStyle.Fill;
+        _checks.AutoEllipsis = true;
+        _checks.TextAlign = ContentAlignment.MiddleLeft;
+        _checks.ForeColor = Color.FromArgb(85, 102, 121);
+        _checks.AccessibleName = "Avvisi sui segnaposto";
+        _checks.TabIndex = 3;
+        _checks.Margin = new Padding(0, 3, 0, 3);
+        _variableNote.Text = "Nessun dizionario caricato.";
+        _variableNote.Dock = DockStyle.Fill;
+        _variableNote.AutoEllipsis = true;
+        _variableNote.TextAlign = ContentAlignment.MiddleLeft;
+        _variableNote.ForeColor = Color.FromArgb(85, 102, 121);
+        _variableNote.AccessibleName = "Nessun dizionario caricato.";
+        _variableNote.TabIndex = 5;
+        _variableNote.Margin = new Padding(0, 3, 0, 3);
+        _variableTitle.Text = "VARIABILI ESTERNE · VARS_BAK / VARS_AI";
+        _variableTitle.Dock = DockStyle.Fill;
+        _variableTitle.AutoEllipsis = true;
+        _variableTitle.TextAlign = ContentAlignment.MiddleLeft;
+        _variableTitle.ForeColor = Color.FromArgb(85, 102, 121);
+        _variableTitle.AccessibleName = "VARIABILI ESTERNE · VARS_BAK / VARS_AI";
+        _variableTitle.TabIndex = 0;
+        _variableTitle.Margin = new Padding(0, 3, 0, 3);
+        _variableHint.Text = "Doppio clic: inserisci · tasto destro: copia / varianti";
+        _variableHint.Dock = DockStyle.Fill;
+        _variableHint.AutoEllipsis = true;
+        _variableHint.TextAlign = ContentAlignment.MiddleLeft;
+        _variableHint.ForeColor = Color.FromArgb(85, 102, 121);
+        _variableHint.AccessibleName = "Doppio clic: inserisci · tasto destro: copia / varianti";
+        _variableHint.TabIndex = 6;
+        _variableHint.Margin = new Padding(0, 3, 0, 3);
+        _sourceTitle.Text = "ORIGINALE · sola lettura";
+        _sourceTitle.Dock = DockStyle.Fill;
+        _sourceTitle.AutoEllipsis = true;
+        _sourceTitle.TextAlign = ContentAlignment.MiddleLeft;
+        _sourceTitle.ForeColor = Color.FromArgb(85, 102, 121);
+        _sourceTitle.AccessibleName = "ORIGINALE · sola lettura";
+        _sourceTitle.TabIndex = 0;
+        _sourceTitle.Margin = new Padding(0, 3, 0, 3);
+        _translationTitle.Text = "TRADUZIONE";
+        _translationTitle.Dock = DockStyle.Fill;
+        _translationTitle.AutoEllipsis = true;
+        _translationTitle.TextAlign = ContentAlignment.MiddleLeft;
+        _translationTitle.ForeColor = Color.FromArgb(85, 102, 121);
+        _translationTitle.AccessibleName = "TRADUZIONE · testo e token salvati senza sostituzioni";
+        _translationTitle.TabIndex = 0;
+        _translationTitle.Margin = new Padding(0, 3, 0, 3);
+        _checks.ForeColor = Color.FromArgb(139, 79, 19);
+        _variableNote.TextAlign = ContentAlignment.TopLeft;
+
+        // Resizable source/translation work area and variable dictionary
+        _contentSplit.Dock = DockStyle.Fill;
+        _contentSplit.Size = new Size(1172, 540);
+        _contentSplit.SplitterDistance = 790;
+        _contentSplit.Panel1MinSize = 400;
+        _contentSplit.Panel2MinSize = 260;
+        _contentSplit.Margin = Padding.Empty;
+        _contentSplit.SplitterWidth = 8;
+        _contentSplit.TabIndex = 4;
+        _contentSplit.AccessibleName = "Editor e dizionario variabili";
+        _contentSplit.Panel1.Controls.Add(_editorLayout);
+        _contentSplit.Panel2.Controls.Add(_variableLayout);
+        _editorLayout.Dock = DockStyle.Fill;
+        _editorLayout.ColumnCount = 1;
+        _editorLayout.RowCount = 4;
+        _editorLayout.Margin = Padding.Empty;
+        _editorLayout.Padding = new Padding(0, 0, 8, 0);
+        _editorLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        _editorLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        _editorLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        _editorLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 48F));
+        _editorLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        _editorLayout.Controls.Add(_textSplit, 0, 0);
+        _editorLayout.Controls.Add(_textActions, 0, 1);
+        _editorLayout.Controls.Add(_checks, 0, 2);
+        _editorLayout.Controls.Add(_previewOptions, 0, 3);
+        _textSplit.Dock = DockStyle.Fill;
+        _textSplit.Orientation = Orientation.Horizontal;
+        _textSplit.Size = new Size(782, 400);
+        _textSplit.SplitterDistance = 140;
+        _textSplit.Panel1MinSize = 70;
+        _textSplit.Panel2MinSize = 100;
+        _textSplit.SplitterWidth = 7;
+        _textSplit.TabIndex = 0;
+        _textSplit.AccessibleName = "Originale e traduzione ridimensionabili";
+        _textSplit.Margin = Padding.Empty;
+        _textSplit.Panel1.Controls.Add(_sourceLayout);
+        _textSplit.Panel2.Controls.Add(_translationLayout);
+        _sourceLayout.Dock = DockStyle.Fill;
+        _sourceLayout.ColumnCount = 1;
+        _sourceLayout.RowCount = 2;
+        _sourceLayout.Margin = Padding.Empty;
+        _sourceLayout.TabIndex = 0;
+        _sourceLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        _sourceLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+        _sourceLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        _sourceLayout.Controls.Add(_sourceTitle, 0, 0);
+        _sourceLayout.Controls.Add(_source, 0, 1);
+        _translationLayout.Dock = DockStyle.Fill;
+        _translationLayout.ColumnCount = 1;
+        _translationLayout.RowCount = 2;
+        _translationLayout.Margin = Padding.Empty;
+        _translationLayout.TabIndex = 1;
+        _translationLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        _translationLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 26F));
+        _translationLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        _translationLayout.Controls.Add(_translationTitle, 0, 0);
+        _translationLayout.Controls.Add(_translation, 0, 1);
+        _source.Dock = DockStyle.Fill;
+        _source.Font = new Font("Segoe UI", 12F);
+        _source.ReadOnly = true;
+        _source.BackColor = Color.FromArgb(244, 247, 250);
+        _source.ForeColor = Color.FromArgb(29, 43, 57);
+        _source.DetectUrls = false;
+        _source.HideSelection = false;
+        _source.WordWrap = true;
+        _source.BorderStyle = BorderStyle.FixedSingle;
+        _source.Margin = Padding.Empty;
+        _source.AccessibleName = "Testo originale, sola lettura";
+        _source.TabIndex = 1;
+        _translation.Dock = DockStyle.Fill;
+        _translation.Font = new Font("Segoe UI", 12F);
+        _translation.ReadOnly = false;
+        _translation.BackColor = Color.White;
+        _translation.ForeColor = Color.FromArgb(29, 43, 57);
+        _translation.DetectUrls = false;
+        _translation.HideSelection = false;
+        _translation.WordWrap = true;
+        _translation.BorderStyle = BorderStyle.FixedSingle;
+        _translation.Margin = Padding.Empty;
+        _translation.AccessibleName = "Textbox della traduzione";
+        _translation.TabIndex = 1;
+        _textActions.Controls.Add(_copySourceButton);
+        _textActions.Controls.Add(_suggestButton);
+        _previewOptions.Controls.Add(_resolve);
+        _previewOptions.Controls.Add(_alternate);
+        _previewOptions.Controls.Add(_previewOriginal);
+        _variableLayout.Dock = DockStyle.Fill;
+        _variableLayout.ColumnCount = 1;
+        _variableLayout.RowCount = 7;
+        _variableLayout.Padding = new Padding(6, 0, 0, 0);
+        _variableLayout.Margin = Padding.Empty;
+        _variableLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        _variableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 30F));
+        _variableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));
+        _variableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 36F));
+        _variableLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        _variableLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        _variableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 58F));
+        _variableLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 38F));
+        _variableLayout.Controls.Add(_variableTitle, 0, 0);
+        _variableLayout.Controls.Add(_variableQuery, 0, 1);
+        _variableLayout.Controls.Add(_category, 0, 2);
+        _variableLayout.Controls.Add(_variables, 0, 3);
+        _variableLayout.Controls.Add(_variableActions, 0, 4);
+        _variableLayout.Controls.Add(_variableNote, 0, 5);
+        _variableLayout.Controls.Add(_variableHint, 0, 6);
+        _variables.Dock = DockStyle.Fill;
+        _variables.IntegralHeight = false;
+        _variables.HorizontalScrollbar = true;
+        _variables.ContextMenuStrip = _variableMenu;
+        _variables.AccessibleName = "Variabili esterne: token e significato";
+        _variables.TabIndex = 3;
+        _variables.Margin = Padding.Empty;
+        _variableActions.Controls.Add(_insertVariableButton);
+        _variableActions.Controls.Add(_loadVariablesButton);
+        _variableActions.Controls.Add(_reloadVariablesButton);
+
+        // Status and form
+        _statusStrip.Dock = DockStyle.Fill;
+        _statusStrip.SizingGrip = false;
+        _statusStrip.BackColor = Color.FromArgb(244, 247, 250);
+        _statusStrip.TabIndex = 5;
+        _statusStrip.AccessibleName = "Stato e avanzamento traduzione";
+        _statusStrip.Items.AddRange(new ToolStripItem[] { _status, _validationStatus, _progress, _viewToggleButton });
+        _statusStrip.ShowItemToolTips = true;
+        _validationStatus.Name = "_validationStatus";
+        _validationStatus.ForeColor = Color.FromArgb(139, 79, 19);
+        _validationStatus.AccessibleName = "Avvisi sui segnaposto";
+        _viewToggleButton.Name = "_viewToggleButton";
+        _viewToggleButton.Text = "⏬ Vista estesa";
+        _viewToggleButton.Tag = "ToggleView";
+        _viewToggleButton.DisplayStyle = ToolStripItemDisplayStyle.Text;
+        _viewToggleButton.ToolTipText = "Apri la vista estesa verso il basso";
+        _viewToggleButton.AccessibleName = "Apri vista estesa";
+        _status.Spring = true;
+        _status.TextAlign = ContentAlignment.MiddleLeft;
+        _status.AccessibleName = "Stato delle operazioni";
+        _progress.AccessibleName = "Avanzamento traduzione";
+        AutoScaleDimensions = new SizeF(96F, 96F);
+        AutoScaleMode = AutoScaleMode.Dpi;
+        BackColor = Color.FromArgb(244, 247, 250);
+        ForeColor = Color.FromArgb(29, 43, 57);
+        Font = new Font("Segoe UI", 10F);
+        ClientSize = new Size(1204, 721);
+        MinimumSize = new Size(960, 600);
+        Name = "Operations";
+        Text = "V3 Text · v25 — Traduzione";
+        StartPosition = FormStartPosition.CenterScreen;
+        MainMenuStrip = _mainMenu;
+        Controls.Add(_rootLayout);
+        AccessibleName = "Editor principale di traduzione V3 Text";
+        _variableMenu.ResumeLayout(false);
+        _variableMenu.PerformLayout();
+        _statusStrip.ResumeLayout(false);
+        _statusStrip.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)_interval).EndInit();
+        ((System.ComponentModel.ISupportInitialize)_line).EndInit();
+        _variableActions.ResumeLayout(false);
+        _variableActions.PerformLayout();
+        _variableLayout.ResumeLayout(false);
+        _variableLayout.PerformLayout();
+        _previewOptions.ResumeLayout(false);
+        _previewOptions.PerformLayout();
+        _textActions.ResumeLayout(false);
+        _textActions.PerformLayout();
+        _translationLayout.ResumeLayout(false);
+        _translationLayout.PerformLayout();
+        _sourceLayout.ResumeLayout(false);
+        _sourceLayout.PerformLayout();
+        _textSplit.Panel1.ResumeLayout(false);
+        _textSplit.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)_textSplit).EndInit();
+        _textSplit.ResumeLayout(false);
+        _editorLayout.ResumeLayout(false);
+        _editorLayout.PerformLayout();
+        _contentSplit.Panel1.ResumeLayout(false);
+        _contentSplit.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)_contentSplit).EndInit();
+        _contentSplit.ResumeLayout(false);
+        _searchBar.ResumeLayout(false);
+        _searchBar.PerformLayout();
+        _navigation.ResumeLayout(false);
+        _navigation.PerformLayout();
+        _rootLayout.ResumeLayout(false);
+        _rootLayout.PerformLayout();
+        _mainMenu.ResumeLayout(false);
+        _mainMenu.PerformLayout();
+        ResumeLayout(false);
+    }
 }
+
+#nullable restore

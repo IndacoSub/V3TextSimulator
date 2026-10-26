@@ -1,5 +1,8 @@
 
 *.7z
+**/bin/
+**/obj/
+TestResults/
 *.application
 *.bak
 *.cache
