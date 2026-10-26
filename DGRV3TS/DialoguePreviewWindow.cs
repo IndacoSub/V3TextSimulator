@@ -42,13 +42,16 @@ internal sealed class DialoguePreviewWindow : Form
     private bool useOriginalLanguage;
     private MediaAssets assets = new(AppContext.BaseDirectory);
     private string text = "", speaker = "", expression = "", voice = "", origin = "", original = "";
-    private string? loadedDefaultFont;
+    private PreviewFileVersion? loadedDefaultFont;
+    private string? activeFontFile;
+    private PreviewFileVersion? activeFontVersion;
     private string loadedGame = "";
     private object? speech;
     private object? defaultSpeechVoice;
     private bool binding;
 
     public event Action<string>? GameChanged;
+    public event Action<string>? AssetRootChanged;
 
     public DialoguePreviewWindow()
     {
@@ -167,16 +170,18 @@ internal sealed class DialoguePreviewWindow : Form
         Safe(() =>
         {
             var selected = (backgrounds.SelectedItem as BackgroundItem)?.Path;
+            var hadSelection = backgrounds.SelectedIndex >= 0;
+            var available = assets.Backgrounds(Game);
+            var restored = PreviewResources.BackgroundAfterReload(available, selected, hadSelection);
             binding = true;
             try
             {
                 backgrounds.Items.Clear();
                 backgrounds.Items.Add(new BackgroundItem(null));
-                foreach (var path in assets.Backgrounds(Game)) backgrounds.Items.Add(new BackgroundItem(path));
+                foreach (var path in available) backgrounds.Items.Add(new BackgroundItem(path));
                 backgrounds.SelectedIndex = 0;
                 for (var i = 1; i < backgrounds.Items.Count; i++)
-                    if (backgrounds.Items[i] is BackgroundItem item && item.Path == selected) backgrounds.SelectedIndex = i;
-                if (backgrounds.SelectedIndex == 0 && backgrounds.Items.Count > 1) backgrounds.SelectedIndex = 1;
+                    if (backgrounds.Items[i] is BackgroundItem item && item.Path == restored) backgrounds.SelectedIndex = i;
             }
             finally { binding = false; }
             var currentPath = (backgrounds.SelectedItem as BackgroundItem)?.Path;
@@ -184,11 +189,14 @@ internal sealed class DialoguePreviewWindow : Form
                 size.Value = (decimal)PreviewLayout.Text(Game, (backgrounds.SelectedItem as BackgroundItem)?.ToString()).DefaultFontSize;
             loadedGame = Game;
             var defaultFont = assets.DefaultFont();
-            if (defaultFont is not null && loadedDefaultFont != defaultFont)
+            var fontVersion = defaultFont is null ? (PreviewFileVersion?)null : PreviewFileVersion.Read(defaultFont);
+            if (defaultFont is not null && loadedDefaultFont?.Path != fontVersion?.Path)
             {
                 LoadCustomFont(defaultFont);
-                loadedDefaultFont = defaultFont;
             }
+            else if (activeFontFile is not null && File.Exists(activeFontFile)
+                && activeFontVersion != PreviewFileVersion.Read(activeFontFile)) LoadCustomFont(activeFontFile);
+            loadedDefaultFont = fontVersion;
             Render();
         });
     }
@@ -275,7 +283,7 @@ internal sealed class DialoguePreviewWindow : Form
 
     public void CopyImage()
     {
-        Safe(() => { Render(); if (picture.Image is not null) Clipboard.SetImage(picture.Image); });
+        Safe(() => { if (Render() && picture.Image is not null) Clipboard.SetImage(picture.Image); });
     }
 
     public void SaveImage()
@@ -284,8 +292,8 @@ internal sealed class DialoguePreviewWindow : Form
         {
             using var dialog = new SaveFileDialog { Filter = "Immagine PNG (*.png)|*.png", FileName = "dialogo.png", OverwritePrompt = true };
             if (dialog.ShowDialog(this) != DialogResult.OK) return;
-            Render();
-            picture.Image?.Save(dialog.FileName, ImageFormat.Png);
+            if (!Render() || picture.Image is null) return;
+            picture.Image.Save(dialog.FileName, ImageFormat.Png);
             status.Text = "Immagine salvata.";
         });
     }
@@ -302,7 +310,11 @@ internal sealed class DialoguePreviewWindow : Form
     private void ChooseRoot()
     {
         using var dialog = new FolderBrowserDialog { Description = "Cartella che contiene Graphics e Sound", UseDescriptionForTitle = true, SelectedPath = assets.Root };
-        if (dialog.ShowDialog(this) == DialogResult.OK) SetAssetRoot(dialog.SelectedPath);
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            SetAssetRoot(dialog.SelectedPath);
+            AssetRootChanged?.Invoke(assets.Root);
+        }
     }
 
     private void ChooseFont()
@@ -332,11 +344,14 @@ internal sealed class DialoguePreviewWindow : Form
         var collection = new PrivateFontCollection();
         try
         {
+            var version = PreviewFileVersion.Read(path);
             collection.AddFontFile(path);
             if (collection.Families.Length == 0) throw new InvalidDataException("Il file non contiene un font utilizzabile.");
             ClearFamily();
             customFont = collection;
             family = collection.Families[0];
+            activeFontFile = Path.GetFullPath(path);
+            activeFontVersion = version;
             var weight = PreviewFonts.WeightFromName(path) ?? PreviewFonts.WeightFromName(family.Name);
             if (weight.HasValue)
             {
@@ -356,6 +371,8 @@ internal sealed class DialoguePreviewWindow : Form
         ownsFamily = false;
         customFont?.Dispose();
         customFont = null;
+        activeFontFile = null;
+        activeFontVersion = null;
         family = FontFamily.GenericSansSerif;
         selectedStyle = FontStyle.Regular;
     }
@@ -404,10 +421,10 @@ internal sealed class DialoguePreviewWindow : Form
         renderTimer.Start();
     }
 
-    private void Render()
+    private bool Render()
     {
-        if (IsDisposed) return;
-        Safe(() =>
+        if (IsDisposed) return false;
+        return Safe(() =>
         {
             var image = new Bitmap(1280, 720, PixelFormat.Format32bppArgb);
             try
@@ -555,11 +572,11 @@ internal sealed class DialoguePreviewWindow : Form
         }
     }
 
-    private void Safe(Action action)
+    private bool Safe(Action action)
     {
-        try { action(); }
+        try { action(); return true; }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException or ExternalException or InvalidOperationException or NotSupportedException or System.Reflection.TargetInvocationException)
-        { status.Text = "Anteprima: " + error.Message; }
+        { status.Text = "Anteprima: " + error.Message; return false; }
     }
 
     private sealed record BackgroundItem(string? Path)

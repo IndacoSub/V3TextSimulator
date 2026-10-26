@@ -237,6 +237,8 @@ my-assets/
 
 Select **`my-assets`**, the parent containing `Graphics` and `Sound`. The alternative background directory `Graphics/Backgrounds/Danganronpa` is supported too. Background PNGs can be selected from the preview's dropdown.
 
+Choosing the asset folder in the preview also updates the main editor's asset folder, so sprite imports and automatic dictionary discovery use the same location.
+
 For backgrounds, **1280×720** is the natural canvas size. Other dimensions are drawn into that canvas, so use the correct proportions to avoid distortion. Sprite images should ideally be no wider than 1024 pixels. Keep their original transparency and canvas; the preview can frame them without changing the files.
 
 ### Character files
@@ -263,9 +265,9 @@ You can place `FOT-HummingStd-L.otf`, `FOT-HummingStd-M.otf` and `FOT-HummingStd
 
 Use **Font** to select another installed Windows font and size, or **TTF/OTF** for another custom file. A root-level `font.otf` or `font.ttf` still overrides automatic discovery; OTF takes precedence when both are present. Without a matching custom or installed Humming font, Calibri is used when available. The status line shows the actual family and point size, so check it if the text looks different from your reference. An unavailable weight leaves the current font in place and reports the missing face.
 
-Choose a font with the accented characters and punctuation your translation requires. If you modify a font file externally, select it again through the font-file control. Exact font loading and rasterization must be checked on Windows.
+Choose a font with the accented characters and punctuation your translation requires. Reload checks whether the active external font file changed and rereads it when needed; you can also select it again through the font-file control. Exact font loading and rasterization must be checked on Windows.
 
-Use Reload after adding or replacing images, then check the selected background and dialogue. The image can be displayed at a smaller scale while its exported size remains 1280×720.
+Use Reload after adding or replacing images, then check the selected background and dialogue. A basic-background selection stays selected even when background PNGs are available. The image can be displayed at a smaller scale while its exported size remains 1280×720. If rendering fails, PNG/clipboard export stops and reports the error rather than exporting the previous frame.
 
 ## 10. Control dialogue metadata and expressions
 

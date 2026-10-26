@@ -27,6 +27,8 @@ try
 {
     Test("v25 sprite coordinates and DR/AI text profiles", PreviewLayoutTests.Run);
     Test("V3 canonical font size, real weight names and optional external font discovery", () => PreviewFontTests.Run(folder));
+    Test("Preview reload preserves basic background and detects changed font files", () => PreviewResourceTests.Run(folder));
+    Test("Active-language batch edits survive language switches and JSON/PO saves", () => ActiveLanguageEditTests.Run(folder));
     Test("Readable sprite framing, transparent margins and protected dialogue area", ReadableSpriteTests.Run);
     Test("Sprite lookup, placeholders, portrait fallback and Monotaro aliases", () => SpriteAssetTests.Run(folder));
     Test("v25 signal tails, AutoTL preview and spoken text", PreviewTextTests.Run);

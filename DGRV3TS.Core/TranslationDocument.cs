@@ -41,7 +41,8 @@ public sealed partial class TranslationDocument
         if (entry.Translation == value && entry.HasTranslation) return;
         entry.Translation = value;
         entry.HasTranslation = true;
-        SyncLanguages();
+        // The entries hold the active language. Save and SelectLanguage synchronize
+        // its backing rows once, rather than rescanning every row on each keystroke.
         IsDirty = true;
     }
 

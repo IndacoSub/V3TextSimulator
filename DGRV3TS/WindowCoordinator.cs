@@ -34,6 +34,13 @@ internal sealed partial class Operations
             _preview = new DialoguePreviewWindow();
             _preview.FormClosed += (_, _) => _preview = null;
             _preview.GameChanged += game => _game.SelectedIndex = game == "AI" ? 1 : 0;
+            _preview.AssetRootChanged += root =>
+            {
+                StopAutoplay();
+                _assetRoot = root;
+                FindVariables(!_catalogIsExplicit);
+                UpdatePreview();
+            };
             _preview.SetAssetRoot(_assetRoot);
             _preview.SetGame(_game.SelectedIndex == 0 ? "DR" : "AI");
             _preview.Show(this);
