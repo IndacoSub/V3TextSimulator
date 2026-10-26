@@ -300,6 +300,8 @@ You can omit voice metadata when making a screenshot. If you only want backgroun
 
 For real extracted scenes, the matching WRD can supply speaker, expression and voice automatically. Loading WRD updates metadata and marks the document modified. Use the WRD belonging to that STX; numeric LOC IDs determine the associations.
 
+An STX can contain strings that the WRD never references. Those strings remain editable, but their character, expression and voice stay unknown. The editor does not copy the preceding dialogue's metadata onto them or assume that the first WRD parameter is a character name.
+
 The program does not provide arbitrary sprite X/Y dragging. Character scale, clipping and placement follow the restored V3 rules. If a screenshot differs from the intended scene, check metadata and the source sprite's crop before adjusting your assets.
 
 ## 11. Format text and check line breaks

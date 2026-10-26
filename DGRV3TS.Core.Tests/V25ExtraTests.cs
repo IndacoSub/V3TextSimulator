@@ -44,11 +44,11 @@ public static class V25ExtraTests
             writer.Flush();return stream.ToArray();
         }
         var wrdPath=Path.Combine(root,"sample.wrd");
-        var valid=Wrd(Commands(Op(0x22,0,0,1),Op(0x19,2,100),Op(0x46,7),Op(0x0e,0,0,0,3,0),Op(0x46,9)));
+        var valid=Wrd(Commands(Op(0x22,0,0,1,0,0),Op(0x19,2,100),Op(0x46,7),Op(0x0e,0,0,0,3,0),Op(0x46,9)));
         File.WriteAllBytes(wrdPath,valid);
         var metadata=WrdMetadata.Load(wrdPath);
         Equal(("C015_Akama","anim001","vic_Akama_01_001"),metadata.ForLine(7));
-        Equal(("C015_Akama","anim001",""),metadata.ForLine(8));
+        Equal(("","",""),metadata.ForLine(8));
         Equal(("C015_Akama","anim002",""),metadata.ForLine(9));
         Equal(("","",""),metadata.ForLine(6));
         File.WriteAllBytes(wrdPath,Wrd(Op(0xff)));Reject<NotSupportedException>(()=>WrdMetadata.Load(wrdPath));

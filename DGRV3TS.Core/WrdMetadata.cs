@@ -18,13 +18,15 @@ public sealed class WrdMetadata
         if (data.Length < 32) throw new InvalidDataException("Intestazione WRD incompleta.");
         var parameterCount = BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(4, 2));
         uint Pointer(int offset) => BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(offset, 4));
-        var opcodeEnd = Pointer(16);
         var parameterStart = Pointer(24);
-        if (opcodeEnd < 32 || opcodeEnd > data.Length) throw new InvalidDataException("Limite opcode WRD non valido.");
+        var opcodeEnd = (uint)data.Length;
         foreach (var offset in new[] { 12, 16, 20, 24, 28 })
         {
             var pointer = Pointer(offset);
             if (pointer != 0 && (pointer < 32 || pointer > data.Length)) throw new InvalidDataException("Puntatore WRD fuori dai limiti.");
+            // Sublabel offsets can precede the label-offset table. Every table is
+            // outside the command stream, even when its bytes resemble opcodes.
+            if (pointer != 0) opcodeEnd = Math.Min(opcodeEnd, pointer);
         }
         if (parameterCount > 0 && (parameterStart < opcodeEnd || parameterStart >= data.Length))
             throw new InvalidDataException("Tabella parametri WRD non valida.");
@@ -53,7 +55,7 @@ public sealed class WrdMetadata
         }
 
         var result = new WrdMetadata();
-        var speaker = 0;
+        int? speaker = null;
         int? voice = null;
         var animations = new Dictionary<int, string>();
         for (var position = 32; position < opcodeEnd;)
@@ -80,16 +82,17 @@ public sealed class WrdMetadata
                     break;
                 case 0x1d: // CHN: active speaker.
                     speaker = Operand(0);
-                    Parameter(speaker);
+                    Parameter(speaker.Value);
                     break;
-                case 0x22: // CHR: flags, character, initial animation.
+                case 0x22: // CHR: five operands; character and animation are operands 1 and 2.
                     speaker = Operand(2);
-                    Parameter(speaker);
-                    animations[speaker] = Parameter(Operand(4));
+                    Parameter(speaker.Value);
+                    animations[speaker.Value] = Parameter(Operand(4));
                     break;
                 case 0x46: // LOC: string ID.
                     var id = Operand(0);
-                    result.lines[id] = new Snapshot(Parameter(speaker), animations.GetValueOrDefault(speaker, ""),
+                    result.lines[id] = new Snapshot(speaker.HasValue ? Parameter(speaker.Value) : "",
+                        speaker.HasValue ? animations.GetValueOrDefault(speaker.Value, "") : "",
                         voice.HasValue ? Parameter(voice.Value) : "");
                     voice = null;
                     break;
@@ -99,21 +102,11 @@ public sealed class WrdMetadata
         return result;
     }
 
-    /// <summary>Speaker/expression follow the last LOC at or before this ID; voice requires an exact ID.</summary>
+    /// <summary>Only an actual LOC supplies metadata; unreferenced STX IDs remain unknown.</summary>
     public (string Speaker, string Expression, string Voice) ForLine(int lineId)
     {
-        var low = 0;
-        var high = lines.Count - 1;
-        var selected = -1;
-        while (low <= high)
-        {
-            var middle = low + (high - low) / 2;
-            if (lines.Keys[middle] <= lineId) { selected = middle; low = middle + 1; }
-            else high = middle - 1;
-        }
-        if (selected < 0) return ("", "", "");
-        var snapshot = lines.Values[selected];
-        return (snapshot.Speaker, snapshot.Expression, lines.Keys[selected] == lineId ? snapshot.Voice : "");
+        return lines.TryGetValue(lineId, out var snapshot)
+            ? (snapshot.Speaker, snapshot.Expression, snapshot.Voice) : ("", "", "");
     }
 
     private static int OperandSize(byte opcode) => opcode switch
@@ -143,7 +136,8 @@ public sealed class WrdMetadata
         0x1d => 2,
         0x1e or 0x1f => 6,
         0x20 => 0,
-        0x21 or 0x22 => 6,
+        0x21 => 6,
+        0x22 => 10,
         0x23 => 8,
         0x24 => 4,
         0x25 => 10,

@@ -104,6 +104,8 @@ Saving writes a temporary file first and keeps the previous version as `<filenam
 
 Opening an STX also loads an adjacent WRD with the same basename when present. A WRD can be selected manually from the menu. Metadata is associated by numeric LOC IDs, with bounds and supported-opcode checks, and supplies speaker, expression and voice information to the summaries, graphics preview and PO conversion. Importing metadata marks the project as modified; save JSON to retain it with the translation work.
 
+Only IDs actually referenced by a WRD LOC receive metadata. An unreferenced STX string stays unknown rather than inheriting a nearby character or expression, and no character is assumed before the script selects one. The command reader handles five-operand CHR instructions and stops before the first metadata table, including sublabel offsets.
+
 ## External variables: VARS_BAK and VARS_AI
 
 **Dictionaries and variables are optional.** You can open, translate, save and create screenshots with ordinary text. A dictionary is useful when a script already contains tokens or your team wants reusable terminology and templates.
