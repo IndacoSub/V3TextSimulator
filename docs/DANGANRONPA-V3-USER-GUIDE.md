@@ -257,9 +257,13 @@ The sprite-folder import command recognizes supported extracted `stand_*.png` na
 
 ### Fonts
 
-Use **Font** to select an installed Windows font and size. Use **TTF/OTF** to load a custom font file for the preview. A root-level `font.otf` or `font.ttf` can provide the default custom font; OTF takes precedence when both are present.
+The V3 reference is **FOT-HummingStd at size 22**, measured in points. Its Light (L), Medium (M) and Bold (B) variants are separate faces. Medium is the default preference; use the Humming weight dropdown to select another available face. Selecting Bold uses the B file/family rather than relying on a simulated bold style.
 
-Without a custom font, the preview uses Calibri when available. Sizes are in points. Choose a font with the accented characters and punctuation your translation requires. If you modify a font file externally, select it again through the font-file control.
+You can place `FOT-HummingStd-L.otf`, `FOT-HummingStd-M.otf` and `FOT-HummingStd-B.otf` in the asset root or its `Fonts` directory. Alternatively, load one through **TTF/OTF**; the weight dropdown can then find the other faces beside it. Matching installed Windows families are also supported. The program does not include these font files.
+
+Use **Font** to select another installed Windows font and size, or **TTF/OTF** for another custom file. A root-level `font.otf` or `font.ttf` still overrides automatic discovery; OTF takes precedence when both are present. Without a matching custom or installed Humming font, Calibri is used when available. The status line shows the actual family and point size, so check it if the text looks different from your reference. An unavailable weight leaves the current font in place and reports the missing face.
+
+Choose a font with the accented characters and punctuation your translation requires. If you modify a font file externally, select it again through the font-file control. Exact font loading and rasterization must be checked on Windows.
 
 Use Reload after adding or replacing images, then check the selected background and dialogue. The image can be displayed at a smaller scale while its exported size remains 1280×720.
 

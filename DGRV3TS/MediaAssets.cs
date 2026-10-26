@@ -34,7 +34,7 @@ internal sealed class MediaAssets
                 string.Equals(Path.GetFileName(path), name, StringComparison.OrdinalIgnoreCase));
     }
 
-    public string? DefaultFont() => Existing(Path.Combine(Root, "font.otf")) ?? Existing(Path.Combine(Root, "font.ttf"));
+    public string? DefaultFont() => PreviewFonts.DefaultFile(Root);
 
     public static int ImportSprites(string source, string assetRoot)
     {

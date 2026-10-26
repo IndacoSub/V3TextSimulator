@@ -30,7 +30,7 @@ internal static class PreviewLayoutTests
         Throws<ArgumentOutOfRangeException>(() => PreviewLayout.Sprite("C000_Saiha", "anim000", 0, 10));
         Throws<ArgumentOutOfRangeException>(() => PreviewLayout.Sprite("C000_Saiha", "anim000", 10, -1));
 
-        Equal(new PreviewTextProfile(260, 575, 41, 29, false, false), PreviewLayout.Text("DR", "ToWitter"));
+        Equal(new PreviewTextProfile(260, 575, 41, 22, false, false), PreviewLayout.Text("DR", "ToWitter"));
         Equal(new PreviewTextProfile(355, 560, 41, 28, false, false), PreviewLayout.Text("AI", "AIBlank"));
         Equal(new PreviewTextProfile(335, 280, 41, 25, false, false), PreviewLayout.Text("AI", "AITutorial"));
         Equal(new PreviewTextProfile(830, 175, 11, 10, true, true), PreviewLayout.Text("AI", "ToWitter"));

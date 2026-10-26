@@ -17,7 +17,11 @@ internal sealed class DialoguePreviewWindow : Form
     private readonly PreviewImageBox picture = new() { Dock = DockStyle.Fill, Margin = Padding.Empty, BackColor = CanvasColor };
     private readonly ComboBox games = new() { Width = 66, DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly ComboBox backgrounds = new() { Width = 190, DropDownStyle = ComboBoxStyle.DropDownList };
-    private readonly NumericUpDown size = new() { Minimum = 1, Maximum = 100, Value = 29, Width = 58 };
+    private readonly NumericUpDown size = new() { Minimum = 1, Maximum = 100, Value = (decimal)PreviewFonts.V3Size, Width = 58 };
+    private readonly ComboBox hummingWeight = new() { Width = 135, DropDownStyle = ComboBoxStyle.DropDownList, AccessibleName = "Peso FOT-HummingStd" };
+    private string? hummingDirectory;
+    private bool bindingFont;
+    private int activeHummingIndex = (int)HummingWeight.Medium;
     private readonly CheckBox spriteVisible = new() { Text = "Personaggio", Checked = true, AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
     private readonly CheckBox colorTags = new() { Text = "Tag CLT", Checked = true, AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
     private readonly CheckBox adaptiveHeight = new() { Text = "Interlinea adattiva", AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
@@ -61,10 +65,12 @@ internal sealed class DialoguePreviewWindow : Form
         var controls = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = true, AutoScroll = true };
         games.Items.AddRange(new object[] { "DR", "AI" });
         games.SelectedIndex = 0;
+        hummingWeight.Items.AddRange(new object[] { "Humming · Leggero", "Humming · Medio", "Humming · Grassetto" });
+        hummingWeight.SelectedIndex = (int)HummingWeight.Medium;
         controls.Controls.AddRange(new Control[]
         {
             games, backgrounds, Button("Risorse…", ChooseRoot), Button("Ricarica", ReloadAssets), spriteVisible,
-            colorTags, adaptiveHeight, wordWrap, autoFrame, Button("Font…", ChooseFont), Button("TTF/OTF…", LoadFontFile), size,
+            colorTags, adaptiveHeight, wordWrap, autoFrame, Button("Font…", ChooseFont), Button("TTF/OTF…", LoadFontFile), hummingWeight, size,
             Button("Voce WAV", PlayVoice), language, Button("Leggi testo", SpeakText), Button("Stop audio", StopAudio),
             Button("Copia immagine", CopyImage), Button("Salva PNG…", SaveImage)
         });
@@ -85,6 +91,33 @@ internal sealed class DialoguePreviewWindow : Form
         adaptiveHeight.CheckedChanged += (_, _) => QueueRender();
         wordWrap.CheckedChanged += (_, _) => QueueRender();
         autoFrame.CheckedChanged += (_, _) => QueueRender();
+        hummingWeight.SelectedIndexChanged += (_, _) =>
+        {
+            if (bindingFont || hummingWeight.SelectedIndex < 0) return;
+            Safe(() =>
+            {
+                try
+                {
+                    var requested = (HummingWeight)hummingWeight.SelectedIndex;
+                    var path = hummingDirectory is null ? null : PreviewFonts.FindFile(hummingDirectory, requested);
+                    path ??= PreviewFonts.FindFile(assets.Root, requested);
+                    if (path is not null) LoadCustomFont(path);
+                    else if (!TryInstalledHumming(requested))
+                    {
+                        status.Text = "Variante FOT-HummingStd non disponibile: carica il relativo file TTF/OTF.";
+                        return;
+                    }
+                    activeHummingIndex = (int)requested;
+                    QueueRender();
+                }
+                finally
+                {
+                    bindingFont = true;
+                    try { hummingWeight.SelectedIndex = activeHummingIndex; }
+                    finally { bindingFont = false; }
+                }
+            });
+        };
         renderTimer.Tick += (_, _) => { renderTimer.Stop(); Render(); };
         SetDefaultFamily();
         ReloadAssets();
@@ -304,6 +337,15 @@ internal sealed class DialoguePreviewWindow : Form
             ClearFamily();
             customFont = collection;
             family = collection.Families[0];
+            var weight = PreviewFonts.WeightFromName(path) ?? PreviewFonts.WeightFromName(family.Name);
+            if (weight.HasValue)
+            {
+                hummingDirectory = Path.GetDirectoryName(Path.GetFullPath(path));
+                activeHummingIndex = (int)weight.Value;
+                bindingFont = true;
+                try { hummingWeight.SelectedIndex = (int)weight.Value; }
+                finally { bindingFont = false; }
+            }
         }
         catch { collection.Dispose(); throw; }
     }
@@ -320,8 +362,33 @@ internal sealed class DialoguePreviewWindow : Form
 
     private void SetDefaultFamily()
     {
+        foreach (var weight in new[] { HummingWeight.Medium, HummingWeight.Light, HummingWeight.Bold })
+            if (TryInstalledHumming(weight))
+            {
+                activeHummingIndex = (int)weight;
+                bindingFont = true;
+                try { hummingWeight.SelectedIndex = activeHummingIndex; }
+                finally { bindingFont = false; }
+                return;
+            }
         try { family = new FontFamily("Calibri"); ownsFamily = true; }
         catch (ArgumentException) { family = FontFamily.GenericSansSerif; ownsFamily = false; }
+    }
+
+    private bool TryInstalledHumming(HummingWeight weight)
+    {
+        foreach (var name in PreviewFonts.InstalledNames(weight))
+        {
+            FontFamily candidate;
+            try { candidate = new FontFamily(name); }
+            catch (ArgumentException) { continue; }
+            ClearFamily();
+            family = candidate;
+            ownsFamily = true;
+            selectedStyle = FontStyle.Regular;
+            return true;
+        }
+        return false;
     }
 
     private Font NewFont(float points)
@@ -403,7 +470,8 @@ internal sealed class DialoguePreviewWindow : Form
                 old?.Dispose();
                 status.Text = (backgroundPath is null ? "Anteprima di base · nessuno sfondo caricato" : Path.GetFileName(backgroundPath)) +
                     " · " + (string.IsNullOrWhiteSpace(speaker) ? "nessun personaggio" : speaker) +
-                    (string.IsNullOrWhiteSpace(expression) ? "" : " / " + expression);
+                    (string.IsNullOrWhiteSpace(expression) ? "" : " / " + expression) +
+                    $" · {family.Name} · {size.Value} pt";
             }
             catch { image.Dispose(); throw; }
         });

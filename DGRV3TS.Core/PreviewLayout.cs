@@ -64,7 +64,7 @@ public static class PreviewLayout
     {
         ArgumentNullException.ThrowIfNull(game);
         if (!game.Equals("AI", StringComparison.OrdinalIgnoreCase))
-            return new PreviewTextProfile(260, 575, 41, 29, false, false);
+            return new PreviewTextProfile(260, 575, 41, PreviewFonts.V3Size, false, false);
         if (string.Equals(backgroundName, "ToWitter", StringComparison.OrdinalIgnoreCase))
             return new PreviewTextProfile(830, 175, 11, 10, true, true);
         if (string.Equals(backgroundName, "AITutorial", StringComparison.OrdinalIgnoreCase)
