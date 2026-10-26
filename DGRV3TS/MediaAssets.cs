@@ -1,4 +1,6 @@
 using System.Drawing.Imaging;
+using DGRV3TS.Core;
+using System.Runtime.InteropServices;
 
 namespace DGRV3TS;
 
@@ -16,18 +18,8 @@ internal sealed class MediaAssets
             .Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
-    public string? Sprite(string game, string speaker, string expression)
-    {
-        if (string.IsNullOrWhiteSpace(speaker)) return null;
-        var sprites = Path.Combine(Root, "Graphics", "Sprites");
-        if (!SafeName(speaker) || (!string.IsNullOrEmpty(expression) && !SafeName(expression))) return null;
-        var character = Path.Combine(sprites, game, speaker);
-        if (speaker is "chara_Blank" or "chara_Hatena")
-            return Existing(Path.Combine(sprites, speaker, "image.png"));
-        var animated = string.IsNullOrWhiteSpace(expression) ? null : Existing(Path.Combine(character, expression + ".png"));
-        return animated ?? Existing(Path.Combine(character, "default.png"))
-            ?? Existing(Path.Combine(sprites, "chara_Hatena", "image.png"));
-    }
+    public string? Sprite(string game, string speaker, string expression) =>
+        SpriteAssetLocator.Find(Root, game, speaker, expression);
 
     public string? Voice(string game, string voice)
     {
@@ -95,6 +87,25 @@ internal sealed class MediaAssets
         using var graphics = Graphics.FromImage(result);
         graphics.DrawImageUnscaled(decoded, 0, 0);
         return result;
+    }
+
+    public static SpriteRegion VisibleBounds(Bitmap bitmap)
+    {
+        var left = bitmap.Width; var top = bitmap.Height; var right = -1; var bottom = -1;
+        var data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+        try
+        {
+            var row = new byte[bitmap.Width * 4];
+            for (var y = 0; y < bitmap.Height; y++)
+            {
+                Marshal.Copy(IntPtr.Add(data.Scan0, y * data.Stride), row, 0, row.Length);
+                for (var x = 0; x < bitmap.Width; x++)
+                    if (row[x * 4 + 3] != 0)
+                    { left = Math.Min(left, x); top = Math.Min(top, y); right = Math.Max(right, x); bottom = y; }
+            }
+        }
+        finally { bitmap.UnlockBits(data); }
+        return right < 0 ? default : new SpriteRegion(left, top, right - left + 1, bottom - top + 1);
     }
 
     private static bool SafeName(string name) => name != "." && name != ".." &&

@@ -22,6 +22,8 @@ internal sealed class DialoguePreviewWindow : Form
     private readonly CheckBox colorTags = new() { Text = "Tag CLT", Checked = true, AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
     private readonly CheckBox adaptiveHeight = new() { Text = "Interlinea adattiva", AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
     private readonly CheckBox wordWrap = new() { Text = "A capo automatico", AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
+    private readonly CheckBox autoFrame = new() { Text = "Inquadratura automatica", Checked = true, AutoSize = true, Padding = new Padding(0, 5, 0, 0) };
+    private readonly Dictionary<string, (long Modified, long Length, SpriteRegion Bounds)> spriteBounds = new(StringComparer.OrdinalIgnoreCase);
     private readonly Label status = new() { Dock = DockStyle.Fill, AutoEllipsis = true, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.DimGray };
     private readonly TextBox language = new() { Text = "it-IT", Width = 64 };
     private SoundPlayer? activePlayer;
@@ -62,7 +64,7 @@ internal sealed class DialoguePreviewWindow : Form
         controls.Controls.AddRange(new Control[]
         {
             games, backgrounds, Button("Risorse…", ChooseRoot), Button("Ricarica", ReloadAssets), spriteVisible,
-            colorTags, adaptiveHeight, wordWrap, Button("Font…", ChooseFont), Button("TTF/OTF…", LoadFontFile), size,
+            colorTags, adaptiveHeight, wordWrap, autoFrame, Button("Font…", ChooseFont), Button("TTF/OTF…", LoadFontFile), size,
             Button("Voce WAV", PlayVoice), language, Button("Leggi testo", SpeakText), Button("Stop audio", StopAudio),
             Button("Copia immagine", CopyImage), Button("Salva PNG…", SaveImage)
         });
@@ -82,6 +84,7 @@ internal sealed class DialoguePreviewWindow : Form
         colorTags.CheckedChanged += (_, _) => QueueRender();
         adaptiveHeight.CheckedChanged += (_, _) => QueueRender();
         wordWrap.CheckedChanged += (_, _) => QueueRender();
+        autoFrame.CheckedChanged += (_, _) => QueueRender();
         renderTimer.Tick += (_, _) => { renderTimer.Stop(); Render(); };
         SetDefaultFamily();
         ReloadAssets();
@@ -127,6 +130,7 @@ internal sealed class DialoguePreviewWindow : Form
 
     public void ReloadAssets()
     {
+        spriteBounds.Clear();
         Safe(() =>
         {
             var selected = (backgrounds.SelectedItem as BackgroundItem)?.Path;
@@ -354,6 +358,35 @@ internal sealed class DialoguePreviewWindow : Form
                 var backgroundName = Path.GetFileNameWithoutExtension(backgroundPath) ?? "";
                 var profile = PreviewLayout.Text(Game, backgroundName);
                 var bounds = new RectangleF(profile.X, profile.Y, 1280 - profile.X, 720 - profile.Y);
+                // Draw artwork before the dialogue. Even manual/legacy framing cannot paint over glyphs.
+                if (spriteVisible.Checked)
+                {
+                    var path = assets.Sprite(Game, speaker, expression);
+                    if (path is not null)
+                    {
+                        using var sprite = MediaAssets.LoadImage(path);
+                        if (autoFrame.Checked && Game == "DR")
+                        {
+                            var info = new FileInfo(path);
+                            if (!spriteBounds.TryGetValue(path, out var cached) || cached.Modified != info.LastWriteTimeUtc.Ticks || cached.Length != info.Length)
+                                spriteBounds[path] = cached = (info.LastWriteTimeUtc.Ticks, info.Length, MediaAssets.VisibleBounds(sprite));
+                            if (cached.Bounds.Width > 0 && cached.Bounds.Height > 0)
+                            {
+                                var portrait = Path.GetFileName(path).Equals("default.png", StringComparison.OrdinalIgnoreCase)
+                                    || speaker is "chara_Blank" or "chara_Hatena";
+                                var frame = PreviewLayout.ReadableSprite(cached.Bounds, portrait, profile.X);
+                                var target = frame.Destination; var source = frame.Source;
+                                graphics.DrawImage(sprite, new Rectangle(target.X, target.Y, target.Width, target.Height),
+                                    source.X, source.Y, source.Width, source.Height, GraphicsUnit.Pixel);
+                            }
+                        }
+                        else
+                        {
+                            var placement = PreviewLayout.Sprite(speaker, expression, sprite.Width, sprite.Height);
+                            graphics.DrawImage(sprite, new Rectangle(placement.X, placement.Y, placement.Width, placement.Height));
+                        }
+                    }
+                }
                 if (backgroundPath is null)
                 {
                     using var box = new SolidBrush(Color.FromArgb(225, 14, 21, 32));
@@ -365,17 +398,6 @@ internal sealed class DialoguePreviewWindow : Form
                 var content = PreviewTextRules.Prepare(text, Game, backgroundName);
                 DrawText(graphics, content.Text, bounds, profile.DarkText ? Color.Black : Color.White,
                     profile.NewlineHeight, content.AutoTranslated);
-                // v25 composes text first and overlays the sprite in game coordinates last.
-                if (spriteVisible.Checked)
-                {
-                    var path = assets.Sprite(Game, speaker, expression);
-                    if (path is not null)
-                    {
-                        using var sprite = MediaAssets.LoadImage(path);
-                        var placement = PreviewLayout.Sprite(speaker, expression, sprite.Width, sprite.Height);
-                        graphics.DrawImage(sprite, new Rectangle(placement.X, placement.Y, placement.Width, placement.Height));
-                    }
-                }
                 var old = picture.Image;
                 picture.Image = image;
                 old?.Dispose();

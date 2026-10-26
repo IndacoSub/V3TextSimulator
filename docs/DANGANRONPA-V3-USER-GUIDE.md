@@ -237,13 +237,21 @@ my-assets/
 
 Select **`my-assets`**, the parent containing `Graphics` and `Sound`. The alternative background directory `Graphics/Backgrounds/Danganronpa` is supported too. Background PNGs can be selected from the preview's dropdown.
 
-For backgrounds, **1280×720** is the natural canvas size. Other dimensions are drawn into that canvas, so use the correct proportions to avoid distortion. Sprite images should ideally be no wider than 1024 pixels. Preserve the intended transparent edges and original crop when preparing sprites, because placement follows V3-specific rules.
+For backgrounds, **1280×720** is the natural canvas size. Other dimensions are drawn into that canvas, so use the correct proportions to avoid distortion. Sprite images should ideally be no wider than 1024 pixels. Keep their original transparency and canvas; the preview can frame them without changing the files.
 
 ### Character files
 
 A dialogue's speaker selects its sprite folder. Its expression selects a PNG such as `anim001.png`. If that file is missing, the preview tries `default.png`, then the supported unknown-character placeholder if available.
 
-A `default.png` is useful for dialogues without matching animation metadata. The placement rules distinguish default portraits, ordinary animated sprites and special characters, so do not resize every source sprite into the same box to compensate.
+The `chara_Blank` and `chara_Hatena` icons use `image.png`. Both layouts are supported: `Graphics/Sprites/chara_Hatena/image.png` and `Graphics/Sprites/DR/chara_Hatena/image.png`, with the corresponding paths for `chara_Blank`. The shared location takes precedence when both exist. If a sprite archive contains character directories directly at its root, extract those directories into `Graphics/Sprites/DR`; select the asset root containing `Graphics` in the application.
+
+A `default.png` is useful for dialogues without matching animation metadata. Automatic framing recognizes that fallback as an existing portrait and preserves its complete visible artwork.
+
+**Automatic Framing** is on by default. It ignores transparent margins for placement, shows tall full-body sprites as busts and fits them to a portrait area left of the dialogue. This prevents a wide pose from covering text and gives images with different padding a consistent position. Icons and existing portraits remain complete. Framing affects only the preview and exported screenshot; the source PNG is never cropped or rewritten.
+
+Disable Automatic Framing when you want the historical v25 scale and coordinates. That mode uses the complete PNG canvas, including transparent padding, so keep the original files intact. Text remains in the foreground in both modes. Use original alpha channels rather than flattening sprites against a background.
+
+For Monotaro, both `C021_Mtaro` and `C021_Monot` are accepted: older rendering metadata and the sprite importer used different names. The loader checks the named folder first and can use the equivalent folder when needed. Both identifiers use the same mascot placement; the dialogue's stored metadata is unchanged.
 
 The sprite-folder import command recognizes supported extracted `stand_*.png` naming and character-folder conventions. It copies recognized images into the asset layout and preserves existing destination files. For a small custom setup, placing the desired PNGs directly is often simpler.
 
@@ -302,7 +310,7 @@ For real extracted scenes, the matching WRD can supply speaker, expression and v
 
 An STX can contain strings that the WRD never references. Those strings remain editable, but their character, expression and voice stay unknown. The editor does not copy the preceding dialogue's metadata onto them or assume that the first WRD parameter is a character name.
 
-The program does not provide arbitrary sprite X/Y dragging. Character scale, clipping and placement follow the restored V3 rules. If a screenshot differs from the intended scene, check metadata and the source sprite's crop before adjusting your assets.
+The program does not provide arbitrary sprite X/Y dragging. Use Automatic Framing for a readable portrait beside the dialogue, or disable it for historical V3 coordinates. Check metadata and the selected mode before modifying source assets to compensate for placement.
 
 ## 11. Format text and check line breaks
 
@@ -456,7 +464,7 @@ Changing the preview window size does not increase export resolution. The image 
 | The preview still shows the source after I translated it. | Disable Preview Original and check the selected dialogue/language. |
 | No background appears. | Select the parent containing `Graphics`, choose a background from the dropdown and Reload after adding files. |
 | No character appears, or the wrong expression is shown. | Check the character checkbox, speaker/expression metadata, folder name and matching PNG; a missing expression can fall back to `default.png`. |
-| The sprite looks cropped or too large. | Check the original PNG crop and whether the metadata describes a portrait or expression. V3 placement uses different rules for different sprite types. |
+| The sprite looks cropped or too large. | Automatic Framing intentionally shows tall full-body artwork as a bust beside the text. Disable it for historical coordinates, or supply a prepared `default.png` portrait. Keep source PNGs intact while comparing modes. |
 | A token is visible instead of a word. | Either leave it as intentional raw text, or load its optional dictionary and enable preview resolution. Check spelling and whole-token boundaries. |
 | A MAKE stays visible. | Check that its template is defined, spelling matches, parentheses balance and no cycle is involved. |
 | The text is pink. | It has an AutoTL marker; review the reused translation and your team's marker-cleanup policy. |

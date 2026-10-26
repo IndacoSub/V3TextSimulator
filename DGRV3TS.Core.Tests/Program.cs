@@ -26,6 +26,8 @@ void Test(string name, Action body)
 try
 {
     Test("v25 sprite coordinates and DR/AI text profiles", PreviewLayoutTests.Run);
+    Test("Readable sprite framing, transparent margins and protected dialogue area", ReadableSpriteTests.Run);
+    Test("Sprite lookup, placeholders, portrait fallback and Monotaro aliases", () => SpriteAssetTests.Run(folder));
     Test("v25 signal tails, AutoTL preview and spoken text", PreviewTextTests.Run);
     Test("v25 character and narrator voice preferences", VoiceProfileTests.Run);
     Test("XLSX blank language columns and sparse worksheet preservation", () => XlsxLanguageTests.Run(folder));

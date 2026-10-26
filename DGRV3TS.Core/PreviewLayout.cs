@@ -2,6 +2,8 @@ namespace DGRV3TS.Core;
 
 /// <summary>A destination rectangle in the v25 preview's unscaled 1280×720 coordinate space.</summary>
 public readonly record struct SpritePlacement(int X, int Y, int Width, int Height);
+public readonly record struct SpriteRegion(int X, int Y, int Width, int Height);
+public readonly record struct SpriteFrame(SpriteRegion Source, SpritePlacement Destination);
 
 /// <summary>Game-specific text defaults from the original v25 preview.</summary>
 public readonly record struct PreviewTextProfile(
@@ -13,6 +15,21 @@ public readonly record struct PreviewTextProfile(
 /// </summary>
 public static class PreviewLayout
 {
+    /// <summary>Frames visible artwork in a left portrait area, clear of the dialogue text.</summary>
+    public static SpriteFrame ReadableSprite(SpriteRegion visible, bool portrait = false, int textLeft = 260, int canvasHeight = 720)
+    {
+        if (visible.X < 0 || visible.Y < 0 || visible.Width <= 0 || visible.Height <= 0)
+            throw new ArgumentOutOfRangeException(nameof(visible));
+        if (textLeft <= 52 || canvasHeight <= 24) throw new ArgumentOutOfRangeException(nameof(textLeft));
+        var source = visible;
+        // Full-body artwork becomes a bust; already cropped portraits keep their complete artwork.
+        if (!portrait && visible.Height > visible.Width * 1.6)
+            source = visible with { Height = Math.Min(visible.Height, (int)Math.Ceiling(visible.Width * 1.4)) };
+        var availableWidth = textLeft - 52;
+        var (width, height) = Fit(source.Width, source.Height, availableWidth, Math.Min(280, canvasHeight - 24));
+        return new SpriteFrame(source, new SpritePlacement(12 + (availableWidth - width) / 2, canvasHeight - height, width, height));
+    }
+
     public static SpritePlacement Sprite(string speaker, string expression, int width, int height, int canvasHeight = 720)
     {
         ArgumentNullException.ThrowIfNull(speaker);
@@ -33,7 +50,7 @@ public static class PreviewLayout
             || speaker is "chara_Blank" or "chara_Hatena" or "non" or "None" or "" or "C010_Haruk")
             return new SpritePlacement(0, canvasHeight - height, width, height);
 
-        if (speaker is "C020_Monok" or "C021_Mtaro" or "C022_Msuke" or "C023_Mfunn" or "C024_Mdam_" or "C025_Mkid_")
+        if (speaker is "C020_Monok" or "C021_Mtaro" or "C021_Monot" or "C022_Msuke" or "C023_Mfunn" or "C024_Mdam_" or "C025_Mkid_")
         {
             var mascot = Fit(width, height, 440, 440);
             return new SpritePlacement(-120, canvasHeight - mascot.Height / 2 - 100, mascot.Width, mascot.Height);
