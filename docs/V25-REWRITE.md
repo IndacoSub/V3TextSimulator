@@ -19,7 +19,7 @@ Partial classes distribute the responsibilities of the same window across separa
 | `HalfBoxTester.cs`, `DisplayImage.cs`, `TextRender.cs`, `FontManager.cs`, `SoundManager.cs` | `DialoguePreviewWindow.cs` and `MediaAssets.cs`: graphical preview, assets, fonts, WAV, TTS and screenshots |
 | `VerticalView.cs` and `Subforms/VerticalSummary` | `VerticalView.cs`: separate full-file summary with cards drawn for the visible area |
 
-`Ui.cs` provides shared visual elements. `EditorDialogs.cs` contains modal text-entry, replacement and suggestion dialogs. Core codecs and models remain independent of Windows Forms so they can also be tested on Linux.
+`Ui.cs` provides shared visual elements. `EditorDialogs.cs` contains modal text-entry, replacement and suggestion dialogs. `PreviewImageBox.cs` displays the composed image at the bottom of the preview window, preserving its aspect ratio while the controls and status stay above it. Core codecs and models remain independent of Windows Forms so they can also be tested on Linux.
 
 The vertical summary remains **a secondary window**. The other secondary window is the landscape graphical preview. Translations can be saved independently of either window.
 

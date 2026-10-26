@@ -14,7 +14,7 @@ namespace DGRV3TS;
 internal sealed class DialoguePreviewWindow : Form
 {
     private static readonly Color CanvasColor = Color.FromArgb(27, 35, 49);
-    private readonly PictureBox picture = new() { Dock = DockStyle.Fill, SizeMode = PictureBoxSizeMode.Zoom, BackColor = CanvasColor };
+    private readonly PreviewImageBox picture = new() { Dock = DockStyle.Fill, Margin = Padding.Empty, BackColor = CanvasColor };
     private readonly ComboBox games = new() { Width = 66, DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly ComboBox backgrounds = new() { Width = 190, DropDownStyle = ComboBoxStyle.DropDownList };
     private readonly NumericUpDown size = new() { Minimum = 1, Maximum = 100, Value = 29, Width = 58 };
@@ -52,10 +52,10 @@ internal sealed class DialoguePreviewWindow : Form
         StartPosition = FormStartPosition.CenterParent;
         AutoScaleMode = AutoScaleMode.Dpi;
         Font = new Font("Segoe UI", 9);
-        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3, Padding = new Padding(8) };
+        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3, Padding = new Padding(8, 8, 8, 0) };
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 78));
-        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         var controls = new FlowLayoutPanel { Dock = DockStyle.Fill, WrapContents = true, AutoScroll = true };
         games.Items.AddRange(new object[] { "DR", "AI" });
         games.SelectedIndex = 0;
@@ -67,8 +67,8 @@ internal sealed class DialoguePreviewWindow : Form
             Button("Copia immagine", CopyImage), Button("Salva PNG…", SaveImage)
         });
         layout.Controls.Add(controls, 0, 0);
-        layout.Controls.Add(picture, 0, 1);
-        layout.Controls.Add(status, 0, 2);
+        layout.Controls.Add(status, 0, 1);
+        layout.Controls.Add(picture, 0, 2);
         Controls.Add(layout);
         games.SelectedIndexChanged += (_, _) => { GameChanged?.Invoke(Game); ReloadAssets(); };
         backgrounds.SelectedIndexChanged += (_, _) =>

@@ -2,6 +2,8 @@
 
 Danganronpa V3 Text Simulator and translation editor. The program previews Danganronpa V3 conversations and helps translate and review the game's text. Translation is its primary purpose; graphics and audio are optional aids.
 
+**Start with the [complete Danganronpa V3 user guide](docs/DANGANRONPA-V3-USER-GUIDE.md)** for translation, proofreading, screenshot creation, asset setup and troubleshooting. **PO is the recommended translation format. VO is deprecated for new work**, while remaining useful for legacy files and translation reuse. **Variables are optional**: ordinary text works without a dictionary.
+
 **AI: The Somnium Files support remains a work in progress.** The project was originally based on the Fire Emblem If / Fates Text Simulator ("FEFTS" or "FEITS") by [SciresM](https://github.com/SciresM): [SciresM/FEITS](https://github.com/SciresM/FEITS).
 
 This rewrite is based exclusively on **`v25`, commit `6601709c85e48cc17376fd700f40f58a47f02e4c`**. At least 100% feature parity with that version is a requirement, not a claim that every feature has already been verified. See the [feature-parity checklist](docs/FEATURE-PARITY.md) for coverage, remaining gaps and validation status. In particular, Windows UI, audio and exact preview rendering still need Windows validation.
@@ -25,6 +27,8 @@ The vertical summary opens when a document is loaded. It can be closed and reope
 Simple view hides the original pane, variable Insert/Load/Reload buttons, Copy Original, Suggestions and the search/autoplay toolbar (query, Find Next, untranslated filter, Replace, Play/Resume, Pause, Stop and seconds). The variable list, its filter and categories remain visible; double-click and its context menu remain available. Hidden commands are still accessible through menus or extended view. `Ctrl+F` opens extended view before focusing text search. Placeholder warnings remain available in the status bar; clicking the warning count expands their details.
 
 The main window's **Dialogues** and **Preview** buttons reopen the respective secondary windows. The preview opens smaller and can be resized down to 480×300; its zoom does not change the 1280×720 rendering/screenshot canvas.
+
+The preview image is the bottommost content of its window, with controls and status above it. It keeps its proportions and aligns to the bottom when resized; any unused vertical space appears above the image.
 
 Some Windows UI labels are currently in Italian; the commands below describe their function.
 
@@ -82,12 +86,12 @@ Opening PO, VO or XLSX automatically searches the document's folder and subfolde
 
 ## Documents and saving
 
-**JSON is the complete working-project format.** It preserves separate originals, all translation languages, intentionally empty completion states and the imported source template so metadata and structures can survive re-export. Save As proposes JSON.
+**PO is recommended for regular V3 translation and exchange. JSON is an optional complete project snapshot.** JSON preserves separate originals, all translation languages, intentionally empty completion states and the imported source template so metadata and structures can survive re-export. Save As currently proposes JSON; explicitly select Gettext PO for a PO working file.
 
 | Format | Support and current limits |
 | --- | --- |
 | PO | `msgid`, `msgstr`, comments, multiline strings, escapes and v25 contexts: `ID \| origin \| speaker \| expression \| voice`. Plurals, declared non-UTF-8 charsets and unknown escapes are rejected explicitly. Exports one translation language. |
-| VO | Legacy metadata, comments, the final record without a trailing blank line, multiple languages and reversible escapes. Legacy `"(blank)"` means empty; that exact literal cannot be exported unambiguously. |
+| VO — deprecated for new work | Still useful for legacy metadata, comments, multiple languages and translation-memory donors. The final record and reversible escapes are retained. Legacy `"(blank)"` means empty; that exact literal cannot be exported unambiguously. Prefer PO for new single-language work. |
 | TXT | One dialogue per line, with optional enclosing `{` / `}`. Newlines inside a dialogue are exported as `\n`. |
 | STX | Single-table UTF-16LE files, nonsequential IDs, empty source strings and preserved headers. Pointers and string terminators are validated; multiple tables are rejected. |
 | XLSX | First worksheet: headers in row 1, A = ID/OFFSET, B = original, C onward = translations. Languages defined only in headers remain selectable even if every translation is blank; older JSON projects recover these columns from their embedded workbook. Other worksheets and imported workbook parts are preserved. Changed translation formula cells cannot be overwritten. Legacy `.xls` is not supported. |
@@ -101,6 +105,8 @@ Saving writes a temporary file first and keeps the previous version as `<filenam
 Opening an STX also loads an adjacent WRD with the same basename when present. A WRD can be selected manually from the menu. Metadata is associated by numeric LOC IDs, with bounds and supported-opcode checks, and supplies speaker, expression and voice information to the summaries, graphics preview and PO conversion. Importing metadata marks the project as modified; save JSON to retain it with the translation work.
 
 ## External variables: VARS_BAK and VARS_AI
+
+**Dictionaries and variables are optional.** You can open, translate, save and create screenshots with ordinary text. A dictionary is useful when a script already contains tokens or your team wants reusable terminology and templates.
 
 The V3/AI selector uses `VARS_BAK` / `vars_bak.txt` and `vars_ai.txt`, respectively. Automatic lookup checks the document directory first, followed by the asset directory, executable directory and working directory. A dictionary can also be selected explicitly or reloaded after an external edit.
 
@@ -153,6 +159,7 @@ Sprite import retains the v25 character mapping and does not overwrite existing 
 - `DGRV3TS`: `Operations.cs` owns the main window's state and lifecycle; `Operations.Designer.cs` defines its layout; `Init.cs` connects events and initialization; `Misc.cs` handles navigation and editor state. File, variable and translation commands and secondary windows have separate files.
 - `DGRV3TS.Core`: documents, file formats, translation memory, variables, WRD metadata and text checks.
 - `DGRV3TS.Core.Tests`: regression runner that also works on Linux.
+- [Danganronpa V3 user guide](docs/DANGANRONPA-V3-USER-GUIDE.md): detailed workflows for translators, reviewers and screenshot creators, with optional variables and nested MAKE examples.
 - [Feature parity](docs/FEATURE-PARITY.md): comparison with v25 and remaining validation requirements.
 - [Actual bug fixes](docs/BUG-FIXES.md): defects with triggers and evidence, distinguished from restored features and defects introduced during the rewrite.
 - [Rewrite map](docs/V25-REWRITE.md): correspondence with original v25 files and source ZIP contents.
